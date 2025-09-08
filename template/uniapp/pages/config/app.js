@@ -1,5 +1,5 @@
 module.exports = {
-	//默认域名,域名格式例如:chat.crmeb.net
+	//默认域名,域名格式例如:chat.cassie.net
 	defaultDomainName: '',
 	//默认请求方式为https或者http
 	defaultRequestType: 'http',

@@ -257,7 +257,7 @@
             </div>
             <p style="padding-top:20px;">小贴士：</p>
             <p>1.此代码不会影响您网站页面的显示，请您放心使用。</p>
-            <p>2.如果您有技术上的疑问，可咨询您的网站管理员、托管公司、CRMEB。</p>
+            <p>2.如果您有技术上的疑问，可咨询您的网站管理员、托管公司、cassie。</p>
         </div>
 
         <Modal v-model="canfrime" title="提示" @on-ok="confirme" @on-cancel="cancel">

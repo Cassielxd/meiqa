@@ -45,7 +45,7 @@
       <!--            </Modal>-->
     </div>
     <div class="foot-box">
-      Copyright © 2020 西安众邦网络科技有限公司 | {{version}} 客服系统
+      Copyright © 2025 cassie | {{version}} 客服系统
     </div>
   </div>
 </template>

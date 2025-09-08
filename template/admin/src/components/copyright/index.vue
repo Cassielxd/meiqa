@@ -15,20 +15,20 @@ export default {
         {
           title: '官网',
           key: '官网',
-          href: 'https://www.crmeb.com'
+          href: ''
         },
         {
           title: '社区',
           key: '社区',
-          href: 'http://bbs.crmeb.net'
+          href: ''
         },
         {
           title: '文档',
           key: '文档',
-          href: 'https://help.crmeb.net'
+          href: ''
         }
       ],
-      copyright: 'Copyright © 2021 西安众邦网络科技有限公司'
+      copyright: 'Copyright cassie'
     }
   },
   mounted () {

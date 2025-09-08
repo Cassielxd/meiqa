@@ -118,7 +118,7 @@
         <div class="notice">
           <div v-if="notice" class="rich" v-html="notice"></div>
           <div class="copy">
-            <a href="http://www.crmeb.com/" target="_blank">CRMEB提供技术支持</a>
+            <a href="http://www.cassie.com/" target="_blank">cassie提供技术支持</a>
           </div>
         </div>
       </div>
