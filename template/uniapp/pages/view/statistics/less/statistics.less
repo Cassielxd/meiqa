@@ -1,0 +1,141 @@
+.header {
+	height: 201rpx;
+	background: @primaryBgColor;
+	.title_name {
+		text-align: center;
+		padding: 20rpx;
+		font-size: 16px;
+		font-weight: 600;
+		color: #fff;
+	}
+}
+.statistics {
+	background: #1890FC;
+	padding: 43rpx 30rpx;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	box-sizing: border-box;
+}
+.statistics_list {
+	position: relative;
+	z-index: 10;
+	display: flex;
+	justify-content: space-between;
+	width: 690rpx;
+	box-sizing: border-box;
+	margin: auto;
+	text-align: center;
+	padding: 43rpx 30rpx;
+	background: #fff;
+	border-radius: 12px;
+	&_item {
+		&_value {
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 8rpx;
+		}
+		&_label {
+			color: #999999;
+			font-size: 12px;
+		}
+	}
+}
+.content {
+	padding-top: 36.2rpx;
+	&_charts {
+		width: 690rpx;
+		// padding: 34rpx 26rpx;
+
+		box-sizing: border-box;
+		margin: auto;
+		background: #fff;
+		// border-radius: 12px;
+		// overflow: hidden;
+		&_title {
+			display: flex;
+			justify-content: space-between;
+			padding: 34rpx 26rpx;
+			padding-bottom: 0;
+			&_select {
+				flex: 1;
+				display: flex;
+				align-items: center;
+				&_scroll {
+					.scroll_content {
+						display: flex;
+						// width: 100%;
+						justify-content: space-around;
+						&_item {
+							// margin-right: 52rpx;
+							&_label {
+								font-size: 15px;
+								white-space: nowrap;
+								color: #999999;
+								text-align: center;
+								margin-bottom: 6rpx;
+							}
+							.selectEd {
+								color: @primaryColor;
+								font-weight: bold;
+							}
+							.tip {
+								width: 40rpx;
+								height: 4rpx;
+								background: #3875ea;
+								opacity: 1;
+								margin: auto;
+							}
+						}
+					}
+				}
+			}
+			.content_charts_title_date {
+				// width: 110rpx;
+				// height: 110rpx;
+				background: #ffffff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-left: 1px solid #ccc;
+				padding-left: 30rpx;
+				// white-space: nowrap;
+				// position: relative;
+				.positionPicker {
+					// position: absolute;
+					// top: 0;
+					// left: 0;
+					// opacity: 0;
+				}
+			}
+		}
+
+		&_value {
+			.charts-box {
+				position: relative;
+				.title {
+					position: absolute;
+					top: 70rpx;
+					left: 30rpx;
+					font-size: 11px;
+					color: #cccccc;
+					z-index: 999;
+				}
+			}
+		}
+	}
+}
+.content_charts_title_date:before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1px;
+	height: 100%;
+	background: #000000;
+	opacity: 0.08;
+}
+.primaryColor {
+	color: @primaryColor;
+}

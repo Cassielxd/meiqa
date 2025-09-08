@@ -1,0 +1,83 @@
+@font-face {
+	font-family: 'pingfang';
+	src: url('~@/static/font/pingfang.ttf');
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'pingfang';
+	width: 100%;
+	height: 100%;
+}
+ul,
+li {
+	list-style: none;
+}
+a {
+	text-decoration: none;
+}
+img {
+	display: block;
+}
+
+
+
+.cutLine {
+	height: 10px;
+	width: 100%;
+	background: #ededed;
+}
+.primary_button {
+	background: rgba(215, 55, 72, 1) !important;
+	opacity: 1;
+	color: #fff;
+}
+.title_identification {
+	width: 3px;
+	height: 17px;
+	background: rgba(215, 55, 72, 1);
+	opacity: 1;
+	border-radius: 3px;
+	display: inline-block;
+}
+// 父元素拥有相对定位属性时,该样式会将元素置于父元素的底部
+
+.tip_bottom {
+	position: absolute;
+	bottom: 5px;
+	font-size: 11px;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.6);
+	opacity: 1;
+	width: 100%;
+	text-align: center;
+	z-index: 100;
+}
+.parmary_color { 
+	color: #d73748;
+	font-weight: 600;
+}
+
+/* #ifdef APP-PLUS */ 
+.header {
+	padding-top: 64rpx !important;
+}
+
+/* #endif */
+
+.container {
+	width: 100%;
+	height: 100%;
+	background: #f6f6f6;
+}
+
+.fixed_model {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}

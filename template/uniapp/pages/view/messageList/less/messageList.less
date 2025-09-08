@@ -1,0 +1,305 @@
+.header {
+	background: @primaryBgColor;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 15rpx;
+	position: relative;
+	height: 116rpx;
+	&_customer {
+		display: flex;
+		align-items: center;
+		&_avar {
+			margin-right: 10rpx;
+			border-radius: 50%;
+			overflow: hidden;
+			width: 80rpx;
+			height: 80rpx;
+			image {
+				width: 100%;
+				height: 100%;
+			}
+		}
+		&_status {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 14px;
+			display: flex;
+			align-items: center;
+			&_name {
+				margin-right: 10rpx;
+			}
+			&_item {
+				&_value {
+					display: flex;
+					align-items: center;
+					.tip_primary {
+						display: inline-block;
+						width: 12rpx;
+						height: 12rpx;
+						background: linear-gradient(143deg, #27f2cb 0%, #14e3b4 100%);
+						border-radius: 50%;
+						margin-right: 6rpx;
+					}
+					.tip_danger {
+						background: #f74c31 !important;
+					}
+					.tip_type {
+						font-size: 20rpx;
+						white-space: nowrap;
+					}
+				}
+			}
+		}
+	}
+
+	&_handle {
+		display: flex;
+		color: rgba(255, 255, 255, 0.8);
+		align-items: center;
+		.font {
+			// display: inline-block;
+			// width: 38rpx;
+			// height: 38rpx;
+			// background: rgba(255, 255, 255, 0.22);
+			text-align: center;
+			line-height: 38rpx;
+			margin-right: 8rpx;
+			font-size: 16px;
+			// border-radius: 50%;
+		}
+		.loginOut {
+			font-size: 14px;
+		}
+	}
+
+	&_checkout_status {
+		position: absolute;
+		width: 214rpx;
+		height: 173rpx;
+		background: #434343;
+		top: 140rpx;
+		left: 43rpx;
+		z-index: 90;
+		border-radius: 10px;
+		&_sanjiao {
+			background: #434343;
+			position: absolute;
+			top: -15rpx;
+			left: 30rpx;
+			width: 30rpx;
+			height: 30rpx;
+			transform: rotate(45deg);
+		}
+
+		&_select {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			height: 100%;
+
+			&_item {
+				flex: 1;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				color: #fff;
+				padding: 0 30rpx;
+				border-bottom: 1px solid #fff;
+				&_tip {
+					width: 12rpx;
+					height: 12rpx;
+					border-radius: 50%;
+					background: linear-gradient(180deg, #bcbcbc 0%, #919191 100%);
+				}
+				.tip_select {
+					background: linear-gradient(143deg, #27f2cb 0%, #14e3b4 100%);
+				}
+				.tip_select_outline {
+					background: #f74c31;
+				}
+				&_status {
+					flex: 1;
+					padding-left: 15rpx;
+					font-size: 14px;
+				}
+				&_icon {
+					color: #b9b9b9;
+				}
+			}
+			&_line {
+				height: 1px;
+				width: 100%;
+				background: #f0f1f2;
+			}
+		}
+	}
+}
+
+// 内容部分样式
+.content {
+	&_search {
+		padding: 20rpx 30rpx;
+		border-bottom: 1px solid #eceff8;
+		background: #fff;
+		display: flex;
+		align-items: center;
+		&_box {
+			flex: 1;
+			// margin-right: 20rpx;
+			display: flex;
+			padding: 14rpx 22rpx;
+			background: #f5f6f9;
+			border-radius: 39rpx;
+			.icon {
+				margin-right: 12rpx;
+				color: #c4c4c4;
+			}
+			.input {
+				width: 100%;
+				align-items: center;
+				input {
+					font-size: 14px;
+				}
+			}
+		}
+
+		.reload {
+		}
+	}
+
+	// 聊天内容
+	&_userMessgae {
+		padding: 0 30rpx;
+		background: #fff;
+		&_item {
+			position: relative;
+			display: flex;
+			padding: 28rpx 0;
+			border-bottom: 1px solid #f6f6f6;
+			transition: transform 0.3s;
+			&_avar {
+				border-radius: 50%;
+				// overflow: hidden;
+				width: 96rpx;
+				height: 96rpx;
+				margin-right: 22rpx;
+				// border: 1px solid rgba(0, 0, 0, 0.1);
+				// background: @primaryBgColor;
+				position: relative;
+				image {
+					width: 100%;
+				}
+
+				.online_status {
+					position: absolute;
+					right: 0rpx;
+					bottom: 0rpx;
+					z-index: 10;
+					display: inline-block;
+					width: 15rpx;
+					height: 15rpx;
+					background: #ccc;
+					border-radius: 50%;
+				}
+				.off {
+					background: linear-gradient(143deg, #27f2cb 0%, #14e3b4 100%);
+				}
+			}
+
+			&_value {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				overflow: hidden;
+				padding-top: 8rpx;
+				&_user {
+					display: flex;
+					align-items: center;
+					&_nickName {
+						font-size: 14px;
+						color: rgba(0, 0, 0, 0.7);
+						font-weight: 600;
+						margin-right: 16rpx;
+					}
+					&_form {
+						font-size: 26rpx;
+
+						padding: 0 10rpx;
+					}
+					.wchat {
+						background: rgba(56, 117, 234, 0.14);
+						color: rgba(56, 117, 234, 1);
+					}
+					.h5 {
+						background: rgba(255, 162, 0, 0.18);
+						color: #d08800;
+					}
+					.gozhonghao {
+						background: rgba(0, 186, 100, 0.14);
+						color: #00a219;
+					}
+					.pc {
+						color: #820adb;
+						background: rgba(133, 64, 227, 0.14);
+					}
+				}
+
+				// 用户消息
+				&_message {
+					color: rgba(159, 159, 159, 1);
+					font-size: 24rpx;
+					width: 100%;
+					.overText;
+				}
+			}
+
+			// 聊天时间
+			&_createTime {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				padding-top: 8rpx;
+				&_value {
+					color: rgba(159, 159, 159, 1);
+					font-size: 22rpx;
+				}
+				&_count {
+					align-self: flex-end;
+					display: inline-block;
+					width: 38rpx;
+					height: 38rpx;
+					line-height: 38rpx;
+					text-align: center;
+					background: rgba(247, 76, 49, 1);
+					color: #fff;
+					border-radius: 50%;
+					font-size: 24rpx;
+				}
+			}
+			&_del {
+				position: absolute;
+				top: 0;
+				right: -30rpx;
+				bottom: 0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100rpx;
+				background-color: rgba(255, 0, 0, 1);
+				font-size: 28rpx;
+				color: rgba(255, 255, 255, 1);
+				transform: translateX(100%);
+			}
+			&.on {
+				transform: translateX(-100rpx);
+			}
+		}
+	}
+}
+.no_message {
+	text-align: center;
+	padding: 60rpx 0;
+	font-size: 14px;
+	color: #ccc;
+}

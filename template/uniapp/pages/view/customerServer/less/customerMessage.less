@@ -1,0 +1,159 @@
+.selected {
+	color: @primaryColor !important;
+	font-weight: bold;
+}
+.content_header {
+	height: 150rpx;
+	display: flex;
+	align-items: center;
+	padding: 0 30rpx;
+	background: #fff;
+	&_avar {
+		width: 110rpx;
+		height: 110rpx;
+		margin-right: 22rpx;
+		image {
+			width: 100%;
+		}
+	}
+	&_userName {
+		font-weight: 600;
+		font-size: 16px;
+		margin-right: 16rpx;
+	}
+	&_tag {
+		span {
+			display: inline-block;
+			font-size: 10px;
+			color: @primaryColor;
+			background: rgba(56, 117, 234, 0.14);
+			padding: 3rpx 10rpx;
+		}
+	}
+}
+
+.content_message {
+	margin-top: 14rpx;
+	&_item {
+		display: flex;
+		// height: 100rpx;
+		align-items: center;
+		background: #fff;
+		padding: 40rpx 30rpx;
+		font-size: 14px;
+		border-bottom: 1px solid #f0f2f7;
+		&_label {
+			flex: 0.25;
+		}
+		&_value {
+			flex: 0.75;
+			font-weight: 600;
+			input {
+				font-size: 14px;
+			}
+			.tag_list {
+				flex: 1;
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				grid-row-gap: 20rpx;
+				justify-items: self-start;
+
+				span {
+					font-size: 11px;
+					font-weight: 500;
+					color: @primaryColor;
+					display: inline-block;
+					padding: 4rpx 14rpx;
+					border-radius: 16px;
+					border: 1px solid @primaryColor;
+				}
+			}
+		}
+		.flex {
+			display: flex;
+			align-items: center;
+		}
+	}
+	.marginTop16 {
+		margin-top: 16rpx;
+	}
+}
+.iconfont {
+	font-weight: 900;
+	color: #c4c4c4;
+	font-size: 20px !important;
+}
+.to_link {
+	.iconfont {
+		font-weight: 400;
+		color: #000;
+		font-size: 16px !important;
+	}
+}
+.userTag_container {
+	padding: 30rpx 40rpx;
+	background: #fff;
+	border-radius: 12px;
+	width: 690rpx;
+	box-sizing: border-box;
+	&_title {
+		display: flex;
+		justify-content: flex-end;
+		position: relative;
+		&_message {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+	}
+
+	&_list {
+		&_item {
+			margin-top: 78rpx;
+			&_label {
+				color: #282828;
+				font-weight: bold;
+				margin-bottom: 26rpx;
+			}
+
+			&_value {
+				display: grid;
+				grid-template-columns: repeat(3, 178rpx);
+				grid-row-gap: 26rpx;
+				grid-column-gap: 26rpx;
+				span {
+					font-size: 14px;
+					display: inline-block;
+					background: #f0f0f0;
+					text-align: center;
+					padding: 12rpx 0;
+					border-radius: 12rpx;
+				}
+				.select {
+					background: @primaryColor;
+					color: #fff;
+				}
+			}
+		}
+		.mg0 {
+			margin-top: 40rpx;
+		}
+	}
+
+	&_handle {
+		width: 610rpx;
+		height: 76rpx;
+		background: @primaryColor;
+		opacity: 1;
+		border-radius: 43px;
+		margin: auto;
+		margin-top: 84rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-weight: 600;
+		font-size: 14px;
+	}
+}

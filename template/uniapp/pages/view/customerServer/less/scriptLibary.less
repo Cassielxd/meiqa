@@ -1,0 +1,59 @@
+.scriptLibary {
+	background: #fff;
+	border-radius: 12rpx 12rpx 0px 0px;
+	&_header {
+		display: flex;
+		justify-content: flex-end;
+		padding: 40rpx 30rpx;
+		position: relative;
+		> div {
+			display: flex;
+		}
+
+		&_title {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			> div:nth-child(1) {
+				margin-right: 100rpx;
+			}
+		}
+
+		&_icon {
+			> div:nth-child(1) {
+				margin-right: 20rpx;
+			}
+			.iconfont {
+				font-size: 22px;
+				color: #c8cad0;
+			}
+		}
+	}
+
+	&_search {
+		padding-bottom: 44rpx;
+		border-bottom: 1px solid #F0F3FA;
+		> div {
+			display: flex;
+			background: #f5f6f9;
+			width: 690rpx;
+			height: 68rpx;
+			margin: auto;
+			display: flex;
+			align-items: center;
+			padding: 0 20rpx;
+			box-sizing: border-box;
+			border-radius: 39px;
+			> input {
+				flex: 1;
+				font-size: 14px;
+				margin-left: 8rpx;
+			}
+			.iconfont {
+				font-size: 22px;
+				color: #C4C4C4;
+			}
+		}
+	}
+}

@@ -1,0 +1,358 @@
+.header {
+	height: 116rpx;
+	background: linear-gradient(90deg, #3875ea 0%, #1890fc 100%);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 30rpx;
+
+	color: #fff;
+	> view {
+		flex: 1;
+		text-align: center;
+	}
+	.header_left {
+		text-align: left;
+	}
+
+	&_center {
+		// position: absolute;
+		// top: 50%;
+		// left: 50%;
+		// transform: translate(-50%, -50%);
+		font-weight: 600;
+		font-size: 16px;
+		white-space: nowrap;
+	}
+	.header_right {
+		text-align: right;
+	}
+}
+
+// 聊天对话框
+.content {
+	padding: 36rpx 30rpx;
+	&_list {
+		display: flex;
+		margin-bottom: 36rpx;
+		color: #282828;
+		font-weight: 600;
+		&_avar {
+			width: 90rpx;
+			height: 90rpx;
+			margin-right: 22rpx;
+			border-radius: 50%;
+			// border: 1px solid rgba(0, 0, 0, 0.1);
+			overflow: hidden;
+			image {
+				width: 100%;
+			}
+		}
+
+		&_message {
+			max-width: 420rpx;
+			padding: 15rpx 28rpx;
+			background: #fff;
+			border-radius: 7px;
+			display: flex;
+			align-items: center;
+			&_value{
+				word-break:break-all;
+				word-wrap:break-word;
+			}
+			&_product {
+				.content_list_message_orderId {
+					padding-bottom: 15rpx;
+					border-bottom: 1px solid #eceff8;
+				}
+
+				.content_list_message_detils {
+					padding-top: 20rpx;
+					display: flex;
+					&_image {
+						width: 204rpx;
+						height: 204rpx;
+						border-radius: 6px;
+						overflow: hidden;
+						background: #eee;
+						image {
+							width: 100%;
+							height: 100%;
+						}
+					}
+
+					&_value {
+						flex: 1;
+						padding-left: 16rpx;
+						display: flex;
+						flex-direction: column;
+						justify-content: space-between;
+						
+						&_shopPrice {
+							color: #f74c31;
+							margin-top: 10rpx;
+						}
+						.content_list_message_detils_value_shopMessag {
+						}
+
+						.content_list_message_detils_value_shopMessag_item {
+							display: flex;
+						}
+					}
+				}
+			}
+
+			&_image {
+				max-width: 400rpx;
+				image {
+					max-width: 100%;
+				}
+			}
+		}
+	}
+	.right_box {
+		flex-direction: row-reverse;
+		.content_list_message {
+			margin-right: 20rpx;
+			background: #cde0ff;
+		}
+
+		.content_list_avar {
+			margin-right: 0rpx !important;
+		}
+	}
+}
+
+.footer {
+	background: #f3f4f5;
+	padding-bottom: 20rpx;
+	&_input {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 24rpx 30rpx;
+		border-top: 1px solid #dddddd;
+		&_icon {
+			// align-self: flex-start;
+		}
+		.iconfont {
+			font-size: 24px;
+		}
+		.mr18 {
+			margin-right: 18rpx;
+		}
+		&_content {
+			flex: 1;
+			position: relative;
+			display: flex;
+			align-items: center;
+			background: #fff;
+			padding: 8rpx;
+			border-radius: 32px;
+			overflow: hidden; // 隐藏超出部分的textarea
+			.font {
+				padding: 8rpx 16rpx;
+			}
+			textarea {
+				height: 20px;
+				display: block;
+				// position: absolute;
+				// top: 0rpx;
+				// left: 0rpx;
+				z-index: 10;
+				resize: none;
+				outline: none;
+				background: none;
+				color: rgba(0, 0, 0, 1);
+				font-weight: bold;
+				border: none;
+				width: 80%;
+				font-size: 14px;
+			}
+			p {
+				width: 100%;
+				display: block;
+				min-height: 20rpx;
+				opacity: 0;
+			}
+			.iconfont {
+				color: #e0e0e0;
+			}
+			.canSend {
+				color: @primaryColor;
+			}
+		}
+		.footer_input_icon {
+			display: flex;
+			align-items: center;
+			.iconfont {
+				font-size: 60rpx;
+			}
+			.sendMessage {
+				display: inline-block;
+				background: @primaryColor;
+				color: #fff;
+				font-size: 14px;
+				padding: 12rpx 25rpx;
+				border-radius: 8rpx;
+			}
+		}
+	}
+
+	&_option {
+		background: #fff;
+		height: 440rpx;
+		transition: 0.3s;
+		.option {
+			padding: 46rpx 65rpx;
+			box-sizing: border-box;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			grid-gap: 68rpx;
+			> view {
+				text-align: center;
+				image {
+					width: 90%;
+				}
+				> view {
+					color: #282828;
+					font-size: 14px;
+					font-weight: bold;
+				}
+			}
+		}
+
+		.emoji {
+			height: 100%;
+
+			.emoji-item {
+				display: inline-block;
+				width: 12.5%;
+				text-align: center;
+				margin: 20rpx 0;
+				// display: flex;
+				// align-items: center;
+				// justify-content: center;
+				.em {
+					width: 56rpx;
+					height: 56rpx;
+					box-sizing: border-box;
+				}
+			}
+		}
+	}
+}
+
+.translateY0 {
+	// transform: translateY(0);
+	top: 0;
+}
+
+.speechArtSelectEd {
+	color: @primaryColor;
+}
+
+.image_content {
+	max-width: 90%;
+	margin: auto;
+	position: relative;
+	image {
+		max-width: 100%;
+		margin: auto;
+	}
+	span {
+		position: absolute;
+		right: -30rpx;
+		top: -30rpx;
+		z-index: 100;
+		font-size: 60rpx;
+		opacity: 0.9;
+	}
+}
+
+.chat_result {
+	display: flex;
+	align-items: center;
+	padding: 0 10rpx;
+}
+
+.chat_result_ing {
+	width: 40rpx;
+	height: 40rpx;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	animation: changeleft 1s linear infinite;
+	border-radius: 50%;
+}
+
+.chat_result_faile {
+	width: 40rpx;
+	height: 40rpx;
+	background: #FF0000;
+	border-radius: 50%;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@keyframes changeleft {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	50% {
+		transform: rotate(-180deg);
+	}
+
+	100% {
+		transform: rotate(-360deg);
+	}
+}
+
+.scriptLibary_header {
+    display: flex;
+    padding: 44rpx 32rpx;
+    position: relative;
+    justify-content: flex-end;
+}
+.scriptLibary_header_title[data-v-afab33f6] {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+.speechArtSelectEd[data-v-afab33f6] {
+    color: #3875EA;
+}
+.scriptLibary_header_icon {
+    display: flex;
+}
+.tit {
+    padding: 0 40rpx;
+}
+.search {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    background: #f5f6f9;
+    margin: 0 5%;
+    border-radius: 30rpx;
+    padding: 10rpx 0;
+    color: #9f9f9f;
+}
+.icon_search {
+	position: absolute;
+	top: auto;
+	left: 33%;
+}
+.uni-input-placeholder {
+	color: #9f9f9f !important;
+}
+.icon_edit {
+	margin-right: 10rpx;
+}
