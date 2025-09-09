@@ -6,10 +6,10 @@
           <div class="avatar"><img v-lazy="activeUserInfo.avatar" alt=""></div>
           <div class="name line1">
             <span v-if="editUserNameModel == false" @click="editUserNameModel= true">{{activeUserInfo.remark_nickname?activeUserInfo.remark_nickname: activeUserInfo.nickname}}</span>
-            <Input v-if="editUserNameModel" v-model="activeUserInfo.nickname" placeholder="请输入昵称" @on-blur="editUserData('editUserNameModel')"></Input>
+            <Input v-if="editUserNameModel" v-model="activeUserInfo.nickname" placeholder="Enter nickname" @on-blur="editUserData('editUserNameModel')"></Input>
           </div>
           <div class="label">
-            <template v-if="webType == 2">
+           <!--  <template v-if="webType == 2">
               <span class="label routine">小程序</span>
             </template>
             <template v-if="webType == 3">
@@ -17,17 +17,17 @@
             </template>
             <template v-if="webType == 1">
               <span class="label wechat">公众号</span>
-            </template>
-            <template v-if="webType == 0">
-              <span class="label pc">PC端</span>
+            </template> -->
+            <template >
+              <span class="label pc">default</span>
             </template>
           </div>
         </div>
         <div class="user-info">
           <div class="item">
-            <span>电话</span>
-            <span @click="editUserPhoneModel=true" v-if="!editUserPhoneModel">{{activeUserInfo.phone || '暂无'}}</span>
-            <Input v-else v-model="activeUserInfo.phone" @on-blur="editUserData('editUserPhoneModel')" placeholder="暂无手机号" size="small"></Input>
+            <span>Phone</span>
+            <span @click="editUserPhoneModel=true" v-if="!editUserPhoneModel">{{activeUserInfo.phone || 'No phone number'}}</span>
+            <Input v-else v-model="activeUserInfo.phone" @on-blur="editUserData('editUserPhoneModel')" placeholder="No phone number" size="small"></Input>
           </div>
 
           <!-- <div class="item">
@@ -39,7 +39,7 @@
           </div> -->
 
           <div class="label-list" @click="isUserGroup = true">
-            <span>分组</span>
+            <span>Group</span>
             <div class="con">
               <div class="label-item" v-if="activeUserInfo.group_id">{{userGroupList.find(item => item.id == copyGroupId).group_name}}</div>
             </div>
@@ -49,7 +49,7 @@
           </div>
 
           <div class="label-list" @click.stop="isUserLabel = true">
-            <span>标签</span>
+            <span>Label</span>
             <div class="con">
               <div class="label-item" v-for="item in activeUserInfo.label">{{item.label}}</div>
             </div>
@@ -59,7 +59,7 @@
           </div>
 
           <div class="label-list" @click.stop="isEditRemark = true;remarkValue = activeUserInfo.remarks;">
-            <span>备注</span>
+            <span>Remark</span>
             <div class="con">
               <div class="">{{activeUserInfo.remarks}}</div>
             </div>
@@ -95,38 +95,38 @@
           </div>
         </div> -->
       </div>
-      <empty v-else status="2" msg="暂无用户信息"></empty>
+      <empty v-else status="2" msg="No user information"></empty>
 
     </template>
 
     <!-- 发货弹窗 -->
-    <Modal v-model="isDelivery" title="订单发送货" :footer-hide="true">
+    <Modal v-model="isDelivery" title="Order shipping" :footer-hide="true">
       <delivery v-if="isDelivery" @close="deliveryClose" @ok="deliveryOk" :orderId="orderId"></delivery>
     </Modal>
     <!-- 订单备注 -->
-    <Modal v-model="isRemarks" title="请修改内容" :footer-hide="true" :mask="true" width="520" :closable="false" class="none-radius">
+    <Modal v-model="isRemarks" title="Please modify the content" :footer-hide="true" :mask="true" width="520" :closable="false" class="none-radius">
       <remarks :remarkId="remarkId" v-if="isRemarks" @close="deliveryClose" @remarkSuccess="remarkSuccess"></remarks>
     </Modal>
     <!-- 用户标签 -->
     <Modal v-model="isUserLabel" :footer-hide="true" width="320" class="label-box" :closable="false" :mask="true">
       <p class="label-head" slot="header">
-        <span>选择用户标签</span>
+        <span>Select user label</span>
       </p>
       <userLabel v-if="isUserLabel" @close="deliveryClose" :uid="uid" @editLabel="editLabel"></userLabel>
     </Modal>
     <!-- 分组 -->
     <Modal v-model="isUserGroup" :footer-hide="true" width="320" class="label-box" :closable="false" :mask="true">
       <p class="label-head" slot="header">
-        <span>选择用户分组</span>
+        <span>Select user group</span>
       </p>
       <user-group v-if="isUserGroup" @close="usergroupClose" :userGroup="userGroupList" :activeUserInfo="activeUserInfo" @selectGroup="selectGroup" @handleSelectGroup="handleSelectGroup"></user-group>
     </Modal>
 
-    <Modal v-model="isEditRemark" title="请输入用户备注" width="320" class="none-radius">
-      <Input v-model="remarkValue" placeholder="请输入备注"></Input>
+    <Modal v-model="isEditRemark" title="Please enter user remark" width="320" class="none-radius">
+      <Input v-model="remarkValue" placeholder="Please enter user remark"></Input>
       <div slot="footer">
-        <Button @click="isEditRemark=false">取消</Button>
-        <Button type="primary" @click="handlyEditRemark">确定</Button>
+        <Button @click="isEditRemark=false">Cancel</Button>
+        <Button type="primary" @click="handlyEditRemark">Confirm</Button>
       </div>
     </Modal>
   </div>

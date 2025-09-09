@@ -31,7 +31,7 @@
                                 <div class="productMessage_container_content_title">{{productMessage.store_name}}</div>
                                 <div class="productMessage_container_content_priceOrHandle">
                                     <div>￥{{productMessage.price}}</div>
-                                    <div @click="sendProduct">发送客服</div>
+                                    <div @click="sendProduct"> Send customer</div>
                                 </div>
                             </div>
                         </div>
@@ -129,13 +129,13 @@
                         <div class="pc_customerServer_container_footer_handle">
 
                             <div class="pc_customerServer_container_footer_handle_send" @click="sendText">
-                                <span>发送</span>
+                                <span>Send</span>
                             </div>
 
                         </div>
                         <div class="pc_customerServer_container_footer_copyright" @click="tolink"
                              v-if="upperData.noCanClose != '1' && upperData.windowStyle != `center`">
-                            <span>CRMChat开源客服系统</span>
+                            <span>CRMChat</span>
                         </div>
                         <!-- 相关操作结束 -->
 
@@ -148,7 +148,7 @@
                     <div class="advertisement">
                         <div v-html="advertisement"></div>
                         <div class="copyright" @click="tolink">
-                            <span>CRMChat开源客服系统</span>
+                            <span>CRMChat</span>
                         </div>
                     </div>
                 </div>

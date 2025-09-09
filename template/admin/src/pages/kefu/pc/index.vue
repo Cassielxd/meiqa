@@ -37,10 +37,10 @@
                           <div class="img-box"><img :src="item.other.image" alt=""></div>
                           <div class="order-info">
                             <div class="name line1">{{item.other.store_name}}</div>
-                            <div class="sku">库存：{{item.other.stock}} 销量：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
+                            <div class="sku">Inventory：{{item.other.stock}} Sales：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
                             <div class="price-box">
                               <div class="num">¥ {{item.other.price}}</div>
-                              <!-- <a herf="javascript:;" class="more" @click.stop="lookGoods(item)">查看商品 ></a> -->
+                              <!-- <a herf="javascript:;" class="more" @click.stop="lookGoods(item)">View goods ></a> -->
                             </div>
                           </div>
 
@@ -52,10 +52,10 @@
                           <div class="img-box"><img :src="item.orderInfo.cartInfo[0].productInfo.image" alt=""></div>
                           <div class="order-info">
                             <div class="name line1">{{item.orderInfo.order_id}}</div>
-                            <div class="sku">商品数量：{{item.orderInfo.total_num}}</div>
+                            <div class="sku">Number of goods：{{item.orderInfo.total_num}}</div>
                             <div class="price-box">
                               <div class="num">¥ {{item.orderInfo.pay_price}}</div>
-                              <a href="javascript:;" class="more" @click.stop="lookOrder(item)">查看订单 ></a>
+                              <a href="javascript:;" class="more" @click.stop="lookOrder(item)">View order ></a>
                             </div>
                           </div>
 
@@ -85,7 +85,7 @@
               <div class="right-wrapper">
                 <div class="icon-item" @click.stop="isTransfer = !isTransfer">
                   <span class="iconfont iconzhuanjie"></span>
-                  <span>转接</span>
+                  <span>Transfer</span>
                 </div>
                 <div class="transfer-box" v-if="isTransfer">
                   <transfer ref="transfer" @transferSuccess="transferSuccess" @close="msgClose" @transferPeople="transferPeople" :userUid="userActive.to_user_id"></transfer>
@@ -100,10 +100,10 @@
               </div>
             </div>
             <div class="textarea-box" style="position:relative;">
-              <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="请输入文字内容" @on-enter="sendText" style="font-size:14px" /> -->
+              <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="Please enter text content" @on-enter="sendText" style="font-size:14px" /> -->
               <div ref="editable" class="editable" contenteditable="true" @keydown.enter="sendText" @paste="handlePaste" @input="handleInput"></div>
               <div class="send-btn">
-                <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">发送</Button>
+                <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">send</Button>
               </div>
             </div>
           </div>
@@ -111,7 +111,7 @@
         <div class="right_menu">
           <rightMenu :isTourist="tourist" :uid="userActive.to_user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
           <div class="crmchat_link" @click="tolink">
-            <span>CRMChat开源客服系统</span>
+            <span>CRMChat open source customer service system</span>
           </div>
         </div>
       </div>
@@ -297,10 +297,10 @@ export default {
         e = e || window.event;
         // 兼容IE8和Firefox 4之前的版本
         if(e) {
-          e.returnValue = '您确定要离开吗？';
+          e.returnValue = 'Are you sure you want to leave?';
         }
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
-        return '您确定要离开吗?';
+        return 'Are you sure you want to leave?';
       } else {
         window.onbeforeunload = null
       }
@@ -479,7 +479,8 @@ export default {
       this.oldHeight = 0
       this.isScroll = true
       if(data) {
-        window.document.title = data.nickname ? `正在和${data.nickname}对话中 - ${this.kefuInfo.site_name}` : '正在和游客对话中 - ' + this.kefuInfo.site_name
+        // 翻译中文为英文
+        window.document.title = data.nickname ? `Talking with ${data.nickname} - ${this.kefuInfo.site_name}` : 'Talking with visitor - ' + this.kefuInfo.site_name
 
         this.bus.pageWs.then((ws) => {
           ws.send({
@@ -527,7 +528,7 @@ export default {
     sendText() {
     let chatCon = this.$refs.editable.innerText.replace(/[\r\n]/g, '');
     if (!chatCon) {
-        return this.$Message.error('请输入内容');
+        return this.$Message.error('Please enter content');
     }
     this.sendMsg(chatCon, 1);
     this.$refs.editable.innerText = '';
@@ -663,7 +664,7 @@ export default {
     transferPeople(data) {
       this.transferId = data.id
       this.isTransfer = false
-      this.$Message.success('转接成功')
+      this.$Message.success('Transfer successful')
       Socket.then(ws => {
         ws.send({
           type: 'to_chat',
@@ -677,7 +678,7 @@ export default {
     },
 
     tolink() {
-      window.open('http://github.crmeb.net/u/CRMChat');
+      window.open('http://github.cassie.net/u/CRMChat');
     }
 
 

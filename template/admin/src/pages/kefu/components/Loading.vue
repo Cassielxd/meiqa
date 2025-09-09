@@ -8,10 +8,10 @@
       <div
         class="iconfontYI icon-jiazai loading acea-row row-center-wrapper"
       ></div>
-      正在加载中
+      Loading...
     </template>
     <template v-else>
-      上拉加载更多
+      Pull up to load more
     </template>
   </div>
 </template>

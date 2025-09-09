@@ -1,12 +1,12 @@
 <template>
   <div class="chatList">
     <div class="search_box">
-      <Input prefix="ios-search" placeholder="搜索用户名称" @on-enter="bindSearch" @on-change="inputChange">
+      <Input prefix="ios-search" placeholder="Search user name" @on-enter="bindSearch" @on-change="inputChange">
       <Icon slot="prepend" type="ios-search" />
       <Poptip v-model="visible" slot="append" placement="right-start" width="350" @on-popper-show="onPopperShow">
           <Icon type="ios-funnel-outline" />
           <Tabs v-model="tabOn" slot="content">
-              <TabPane label="标签筛选" name="1">
+              <TabPane label="Tag filter" name="1">
                   <div class="item-group">
                       <div v-for="item in labelList" :key="item.id" class="item">
                         <div class="item-title">{{ item.name }}</div>
@@ -16,11 +16,11 @@
                     </div>
                   </div>
                   <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">取消</Button>
-                      <Button type="primary" @click="onFilter">确定</Button>
+                      <Button type="primary" ghost @click="visible = false">Cancel</Button>
+                      <Button type="primary" @click="onFilter">Confirm</Button>
                   </div>
               </TabPane>
-              <TabPane label="分组筛选" name="2">
+              <TabPane label="Group filter" name="2">
                   <div class="item-group">
                       <div class="item">
                         <div class="cell-group">
@@ -29,8 +29,8 @@
                     </div>
                   </div>
                   <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">取消</Button>
-                      <Button type="primary" @click="onFilter">确定</Button>
+                      <Button type="primary" ghost @click="visible = false">Cancel</Button>
+                      <Button type="primary" @click="onFilter">Confirm</Button>
                   </div>
               </TabPane>
           </Tabs>
@@ -50,25 +50,16 @@
           </div>
           <div class="user-info">
             <div class="hd">
-              <span class="name line1">{{item.nickname}}</span>
-              <template v-if="item.type == 2">
-                <span class="label">小程序</span>
-              </template>
-              <template v-if="item.type == 3">
-                <span class="label H5">H5</span>
-              </template>
-              <template v-if="item.type == 1">
-                <span class="label wechat">公众号</span>
-              </template>
-              <template v-if="item.type == 0">
-                <span class="label pc">PC端</span>
+              
+              <template >
+                <span class="label pc">default</span>
               </template>
             </div>
             <div class="bd line1">
               <template v-if="item.message_type <=2">{{item.message}}</template>
-              <template v-if="item.message_type ==3">[图片]</template>
-              <template v-if="item.message_type ==5">[商品]</template>
-              <template v-if="item.message_type ==6">[订单]</template>
+              <template v-if="item.message_type ==3">[ Image]</template>
+              <template v-if="item.message_type ==5">[ Product]</template>
+              <template v-if="item.message_type ==6">[ Order]</template>
             </div>
           </div>
           <div class="right-box">
@@ -81,7 +72,7 @@
           </div>
         </div>
       </vue-scroll>
-      <empty v-else msg="暂无用户列表" status="1"></empty>
+      <empty v-else msg="No user list" status="1"></empty>
     </div>
 
   </div>
@@ -171,11 +162,11 @@ export default {
       hdTab: [
         {
           key: 1,
-          title: '会话列表'
+          title: 'Conversation list'
         },
         {
           key: 0,
-          title: '用户列表'
+          title: 'User list'
         }
 
       ],

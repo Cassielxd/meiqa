@@ -1,12 +1,12 @@
 <template>
     <div>
         <Form ref="formValidate" :model="formValidate" :rules="ruleInline" inline>
-            <FormItem label="备注：" prop="con" class="form-item" label-position="right" :label-width="100">
-                <Input v-model="formValidate.con" placeholder="请输入备注" style="width: 100%"  maxlength="200" type="textarea" :rows="5" show-word-limit></Input>
+            <FormItem label="Remark：" prop="con" class="form-item" label-position="right" :label-width="100">
+                <Input v-model="formValidate.con" placeholder="Enter remark" style="width: 100%"  maxlength="200" type="textarea" :rows="5" show-word-limit></Input>
             </FormItem>
             <div class="mask-footer">
-                <Button type="primary" @click="handleSubmit('formValidate')">提交</Button>
-                <Button @click="close">取消</Button>
+                <Button type="primary" @click="handleSubmit('formValidate')">Submit</Button>
+                <Button @click="close">Cancel</Button>
             </div>
         </Form>
     </div>
@@ -29,7 +29,7 @@
                 },
                 ruleInline:{
                     con: [
-                        { required: true, message: '请输入备注信息', trigger: 'change' }
+                        { required: true, message: 'Enter remark information', trigger: 'change' }
                     ],
                 },
                 formValidate:{

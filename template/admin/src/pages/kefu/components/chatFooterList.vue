@@ -20,7 +20,7 @@ export default {
           type: 'chat',
           img: require('@/assets/images/kefu-bottom/chat_default.png'),
           selectImg: require('@/assets/images/kefu-bottom/chat.png'),
-          title: '聊天',
+          title: 'Chat',
           path: 'customerService'
         },
         {
@@ -28,7 +28,7 @@ export default {
           type: 'user',
           img: require('@/assets/images/kefu-bottom/user_default.png'),
           selectImg: require('@/assets/images/kefu-bottom/user.png'),
-          title: '客户',
+          title: 'Customer',
           path: 'customerServiceUser'
         },
         {
@@ -36,7 +36,7 @@ export default {
           type: 'static',
           img: require('@/assets/images/kefu-bottom/static_default.png'),
           selectImg: require('@/assets/images/kefu-bottom/static.png'),
-          title: '统计',
+          title: 'Statistics',
           path: 'customerServerStatistics'
         },
         {
@@ -44,7 +44,7 @@ export default {
           type: 'my',
           img: require('@/assets/images/kefu-bottom/my_default.png'),
           selectImg: require('@/assets/images/kefu-bottom/my.png'),
-          title: '我的',
+          title: 'My',
           path: 'my'
         }
       ]

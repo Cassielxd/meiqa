@@ -5,7 +5,7 @@
         <a href="javascript:;" class="tab-item" :class="{on:item.key == tabCur}" v-for="(item,index) in tabList" :key="index" @click="bindTab(item)">{{item.title}}</a>
       </div>
       <div class="search-box">
-        <Input placeholder="搜索快捷回复" style="width: 100%" v-model="searchTxt" @on-enter="bindSearch">
+        <Input placeholder="Search quick reply" style="width: 100%" v-model="searchTxt" @on-enter="bindSearch">
         <Icon type="ios-search" slot="suffix" />
         </Input>
       </div>
@@ -15,7 +15,7 @@
       <div class="left-box">
         <vue-scroll :ops="ops">
           <div class="left-item" v-if="tabCur">
-            <p>分组</p>
+            <p>Group</p>
             <span class="iconfont iconaddto" @click="openAddSort"></span>
           </div>
           <div class="left-item" v-for="(item,index) in sortList" :key="index" :class="{on:cateId == item.id}" @click="selectSort(item)">
@@ -25,8 +25,8 @@
 
               <div class="edit-wrapper" v-show="item.isEdit">
 
-                <div class="edit-item" @click="editSort(item)">编辑</div>
-                <div class="edit-item" @click="delSort(item,'删除分类',index)">删除</div>
+                <div class="edit-item" @click="editSort(item)">Edit</div>
+                <div class="edit-item" @click="delSort(item,'Delete category',index)">Delete</div>
               </div>
               <div class="edit-bg" v-show="item.isEdit" @click.stop="item.isEdit = false"></div>
             </template>
@@ -38,10 +38,10 @@
         <Scroll :on-reach-bottom="handleReachBottom" class="right-scroll" height="360">
           <div class="msg-item add-box" v-if="tabCur" style="margin-top: 0">
             <div class="box2">
-              <Input class="input-box" v-model="addMsg.title" placeholder="输入标题（选填）" style="width: 100%" @on-focus="bindFocus" />
+              <Input class="input-box" v-model="addMsg.title" placeholder="Enter title (optional)" style="width: 100%" @on-focus="bindFocus" />
               <div class="conBox" :class="{active:addMsg.isEdit}">
                 <div class="content">
-                  <Input v-model="addMsg.message" type="textarea" :rows="4" placeholder="请输入内容" />
+                  <Input v-model="addMsg.message" type="textarea" :rows="4" placeholder="Enter content" />
                 </div>
                 <div class="bom">
                   <div class="select">
@@ -51,8 +51,8 @@
                     </Select>
                   </div>
                   <div class="btns-box">
-                    <Button @click.stop="addMsg.isEdit = false">取消</Button>
-                    <Button type="primary" @click.stop="bindAdd">保存</Button>
+                    <Button @click.stop="addMsg.isEdit = false">Cancel</Button>
+                    <Button type="primary" @click.stop="bindAdd">Save</Button>
                   </div>
                 </div>
               </div>
@@ -67,13 +67,13 @@
               </div>
               <div class="edit-box" v-if="tabCur">
                 <span class="iconfont iconbianji" @click.stop="editMsg(item)"></span>
-                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'删除话术',index)"></span>
+                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'Delete reply',index)"></span>
               </div>
             </div>
             <div class="box2" v-else>
-              <Input class="input-box" v-model="item.title" placeholder="输入标题（选填）" style="width: 100%" />
+              <Input class="input-box" v-model="item.title" placeholder="Enter title (optional)" style="width: 100%" />
               <div class="content">
-                <Input v-model="item.message" type="textarea" :rows="4" placeholder="请输入内容" />
+                <Input v-model="item.message" type="textarea" :rows="4" placeholder="Enter content" />
               </div>
               <div class="bom">
                 <div class="select">
@@ -84,8 +84,8 @@
                   </Select>
                 </div>
                 <div class="btns-box">
-                  <Button @click.stop="item.isEdit = false">取消</Button>
-                  <Button type="primary" @click.stop="updataMsg(item)">保存</Button>
+                  <Button @click.stop="item.isEdit = false">Cancel</Button>
+                  <Button type="primary" @click.stop="updataMsg(item)">Save</Button>
                 </div>
               </div>
             </div>
@@ -96,15 +96,15 @@
     </div>
     <Modal v-model="isAddSort" :title="maskTitle" width="304" :mask="false" class="class-box" :footer-hide="true">
       <div class="item">
-        <span>分组名称：</span>
-        <Input v-model="classTitle" placeholder="分组名称" />
+        <span>Group name：</span>
+        <Input v-model="classTitle" placeholder="Group name" />
       </div>
       <div class="item">
-        <span>分组排序：</span>
-        <Input v-model="classSort" placeholder="输入排序" />
+        <span>Group sort：</span>
+        <Input v-model="classSort" placeholder="Enter sort" />
       </div>
       <div class="btn">
-        <Button type="primary" style="background: #1890FF;width: 100%;" @click="addServiceCate">确定</Button>
+        <Button type="primary" style="background: #1890FF;width: 100%;" @click="addServiceCate">Confirm</Button>
       </div>
     </Modal>
   </div>
@@ -149,11 +149,11 @@ export default {
       tabCur: 1,
       tabList: [
         {
-          title: '个人库',
+          title: 'Personal library',
           key: 1
         },
         {
-          title: '公共库',
+          title: 'Public library',
           key: 0
         },
       ],

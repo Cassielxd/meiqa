@@ -10,13 +10,13 @@
         <div class="status-box">
           <div class="status" :class="online ? 'on':'off'" @click.stop="setOnline">
             <span class="dot"></span>
-            {{online ? '在线': '离线'}}
+            {{online ? 'Online': 'Offline'}}
           </div>
 
           <div class="online-down" v-show="isOnline">
-            <div class="item" @click.stop="changeOnline(1)"><span class="iconfont iconduihao" v-if="online == 1"></span><i class="green"></i>在线</div>
-            <div class="item" @click.stop="changeOnline(0)"><span class="iconfont iconduihao" v-if="online == 0"></span><i></i>离线</div>
-            <div class="item" @click.stop="changeOnline(3)"><span class="iconfont iconduihao" v-if="online == 3"></span><i class="orange"></i>退出登录</div>
+            <div class="item" @click.stop="changeOnline(1)"><span class="iconfont iconduihao" v-if="online == 1"></span><i class="green"></i>Online</div>
+            <div class="item" @click.stop="changeOnline(0)"><span class="iconfont iconduihao" v-if="online == 0"></span><i></i>Offline</div>
+            <div class="item" @click.stop="changeOnline(3)"><span class="iconfont iconduihao" v-if="online == 3"></span><i class="orange"></i>Logout</div>
           </div>
         </div>
 

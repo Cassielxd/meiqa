@@ -1,7 +1,7 @@
 <template>
   <div class="customerOutLine_server" :class="{ 'max_style': !isMobile }">
     <div class="customerOutLine_server_header">
-      <span>商城客服已离线</span>
+      <span> Customer service is offline</span>
       <div class="pc_customerServer_container_header_handle" @click="closeIframe">
         <span class="iconfont">&#xe6c6;</span>
       </div>
@@ -12,13 +12,13 @@
         <span class="iconfont">&#xe6d4;</span>
       </div>
       <div class="title">
-        <span>提交成功</span>
+        <span>Submit successfully</span>
       </div>
       <div class="message">
-        <span>您的信息已提交成功，我们会尽快与您取得联系！</span>
+        <span>Your information has been submitted successfully, we will contact you soon!</span>
       </div>
       <div class="button" @click="closeIframe">
-        <span>好的</span>
+        <span>OK</span>
       </div>
     </div>
 

@@ -7,8 +7,8 @@
       </div>
     </div>
     <div class="footer">
-      <Button type="primary" class="btns" ghost @click="cancel">取消</Button>
-      <Button type="primary" class="btns" @click="subBtn">确定</Button>
+      <Button type="primary" class="btns" ghost @click="cancel">Cancel</Button>
+      <Button type="primary" class="btns" @click="subBtn">Confirm</Button>
     </div>
   </div>
 </template>

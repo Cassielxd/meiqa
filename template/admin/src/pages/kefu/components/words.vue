@@ -12,12 +12,12 @@
                         </div>
                     </div>
                     <div class="input-box">
-                        <Input v-model="wordsData.searchTxt" placeholder="搜索快捷回复" :search="true" @on-search="bindSearch"  />
+                        <Input v-model="wordsData.searchTxt" placeholder="Search quick reply" :search="true" @on-search="bindSearch"  />
                     </div>
                 </div>
                 <div class="scroll-box">
                     <div class="scroll-left">
-                        <div class="left-item add_cate" @click.stop="openCate(0)" v-if="wordsTabCur"> <span class="iconfont iconjiahao"></span> 分组</div>
+                        <div class="left-item add_cate" @click.stop="openCate(0)" v-if="wordsTabCur"> <span class="iconfont iconjiahao"></span> Group</div>
                         <div class="left-item" :class="{active:wordsData.cateId == item.id}" v-for="item in wordsData.cate" @click.stop="changeCate(item)">{{item.name}}</div>
                     </div>
                     <div class="right-box">
@@ -27,8 +27,8 @@
 
                             <div class="slot-load" slot="load-deactive"></div>
                             <div class="slot-load" slot="load-beforeDeactive"></div>
-                            <div class="slot-load" slot="load-active">下滑加载更多</div>
-                            <div class="msg-item add-mg" v-show="wordsTabCur" @click.stop="addMsg"><span class="iconfont icontianjia11"></span>添加话术</div>
+                            <div class="slot-load" slot="load-active">Pull down to load more</div>
+                            <div class="msg-item add-mg" v-show="wordsTabCur" @click.stop="addMsg"><span class="iconfont icontianjia11"></span>Add话术</div>
                             <div class="msg-item" v-for="(item,index) in wordsList" :key="index" @click.stop="selectWords(item)">
                                 <span class="title">{{item.title}}</span>{{item.message}}
                             </div>
@@ -47,16 +47,16 @@
                 class="words-box"
         >
             <div class="mask-title">
-                {{cateData.status?'编辑分组':'新增分组'}}
+                {{cateData.status?'Edit group':'Add group'}}
                 <span class="iconfont iconcha" @click.stop="closeCate"></span>
             </div>
             <div class="input-box">
-                <Input class="noinput" v-model="cateData.name" placeholder="请输入分组名称" />
+                <Input class="noinput" v-model="cateData.name" placeholder="Enter group name" />
             </div>
             <div class="input-box">
-                <Input class="noinput" v-model="cateData.sort" placeholder="请输入分组排序" />
+                <Input class="noinput" v-model="cateData.sort" placeholder="Enter group sort" />
             </div>
-            <Button @click.stop="cateConfirm" class="subBtn" type="primary" :disabled="cateStatus">确定</Button>
+            <Button @click.stop="cateConfirm" class="subBtn" type="primary" :disabled="cateStatus">Confirm</Button>
         </Modal>
         <!-- 添加话术  -->
         <Modal
@@ -72,7 +72,7 @@
                 <span class="iconfont iconcha" @click.stop="closeMsgBox"></span>
             </div>
             <div class="input-box">
-                <Input class="noinput" v-model="msgData.title" placeholder="请输入标题名称 (选填)" />
+                <Input class="noinput" v-model="msgData.title" placeholder="Enter title name (optional)" />
             </div>
             <div class="input-box text-area">
                 <Input class="noinput" :rows="4" type="textarea" v-model="msgData.message" placeholder="请输入您的话术" />

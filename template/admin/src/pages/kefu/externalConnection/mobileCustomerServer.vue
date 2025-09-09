@@ -22,7 +22,7 @@
           <div class="productMessage_container_content_title">{{productMessage.store_name}}</div>
           <div class="productMessage_container_content_priceOrHandle">
             <div>￥{{productMessage.price}}</div>
-            <div @click="sendProduct">发送客服</div>
+            <div @click="sendProduct"> Send customer</div>
           </div>
         </div>
 
@@ -84,7 +84,7 @@
     <div class="footer_customerServer_container">
       <div class="mobel_customerServer_container_footer">
         <div class="crmchat_link" @click="tolink">
-          <span>CRMChat开源客服系统</span>
+          <span>CRMChat open source customer service system</span>
         </div>
         <div class="mobel_customerServer_container_footer_uploag_image">
           <span class="iconfont">&#xe6ca;</span>
@@ -92,7 +92,7 @@
         </div>
         <div class="mobel_customerServer_container_footer_input">
           <div class="mobel_customerServer_container_footer_input_con">
-            <textarea @keyup.enter="sendText" @focus="textareaInput" class="font" @input="textareaChange($event)" v-model='userMessage' placeholder="请输入内容"></textarea>
+            <textarea @keyup.enter="sendText" @focus="textareaInput" class="font" @input="textareaChange($event)" v-model='userMessage' placeholder="Enter content"></textarea>
             <p class="font" v-html='pCont'></p>
           </div>
           <!-- <div class="mobel_customerServer_container_footer_input_send" @click="sendText">
@@ -106,7 +106,7 @@
         </div>
         <!-- 发送消息 -->
         <div class="sendMessage" :class="{'sendMessage-primary': userMessage}">
-          <div @click="sendText">发送</div>
+          <div @click="sendText">Send</div>
         </div>
       </div>
       <!-- 表情及图片容器 -->

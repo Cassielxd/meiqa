@@ -3,7 +3,7 @@
         <div class="head">
             <div class="search-box">
                 <div class="caption">
-                    <div>自动回复开关:</div>
+                    <div>Auto reply switch:</div>
                     <div class="switch">
                         <i-switch v-model="authReply" @on-change="changeSwitch" ></i-switch>
                     </div>
@@ -17,18 +17,18 @@
                 <Scroll :on-reach-bottom="handleReachBottom" class="right-scroll" height="360">
                     <div class="msg-item add-box" v-if="tabCur" style="margin-top: 0">
                         <div class="box2">
-                            <Input class="input-box" v-model="addMsg.keyword" placeholder="输入关键字,多个关键字用逗号隔开" style="width: 100%" @on-focus="bindFocus" />
+                            <Input class="input-box" v-model="addMsg.keyword" placeholder="Enter keywords, multiple keywords separated by commas" style="width: 100%" @on-focus="bindFocus" />
                             <div class="conBox" :class="{active:addMsg.isEdit}">
                                 <div class="content">
-                                    <Input v-model="addMsg.content" type="textarea" :rows="4" placeholder="请输入内容" />
+                                    <Input v-model="addMsg.content" type="textarea" :rows="4" placeholder="Enter content" />
                                 </div>
                                 <div class="bom">
                                     <div class="select">
-                                        <Input v-model="addMsg.sort" type="number" placeholder="请输入排序" />
+                                        <Input v-model="addMsg.sort" type="number" placeholder="Enter sort" />
                                     </div>
                                     <div class="btns-box">
-                                        <Button @click.stop="addMsg.isEdit = false">取消</Button>
-                                        <Button type="primary" @click.stop="bindAdd">保存</Button>
+                                        <Button @click.stop="addMsg.isEdit = false">Cancel</Button>
+                                        <Button type="primary" @click.stop="bindAdd">Save</Button>
                                     </div>
                                 </div>
                             </div>
@@ -43,21 +43,21 @@
                             </div>
                             <div class="edit-box" v-if="tabCur">
                                 <span class="iconfont iconbianji" @click.stop="editMsg(item)"></span>
-                                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'删除话术',index)"></span>
+                                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'Delete reply',index)"></span>
                             </div>
                         </div>
                         <div class="box2" v-else>
-                            <Input class="input-box" v-model="item.keyword" placeholder="输入关键字,多个关键字用逗号隔开" style="width: 100%" />
+                            <Input class="input-box" v-model="item.keyword" placeholder="Enter keywords, multiple keywords separated by commas" style="width: 100%" />
                             <div class="content">
-                                <Input v-model="item.content" type="textarea" :rows="4" placeholder="请输入内容" />
+                                <Input v-model="item.content" type="textarea" :rows="4" placeholder="Enter content" />
                             </div>
                             <div class="bom">
                                 <div class="select">
-                                    <Input v-model="item.sort" type="number" placeholder="请输入排序" />
+                                    <Input v-model="item.sort" type="number" placeholder="Enter sort" />
                                 </div>
                                 <div class="btns-box">
-                                    <Button @click.stop="item.isEdit = false">取消</Button>
-                                    <Button type="primary" @click.stop="updataMsg(item)">保存</Button>
+                                    <Button @click.stop="item.isEdit = false">Cancel</Button>
+                                    <Button type="primary" @click.stop="updataMsg(item)">Save</Button>
                                 </div>
                             </div>
                         </div>
@@ -162,7 +162,7 @@
             },
             changeSwitch(status){
                 updateAuthReply(status ? 1:0).then(res=>{
-                    this.$Message.success('设置成功')
+                    this.$Message.success('Setting successful')
                 }).catch(res=>{
                     this.$Message.error(res.msg)
                 })
@@ -208,7 +208,7 @@
                     content: item.content,
                     sort: item.sort
                 }).then(res => {
-                    this.$Message.success('修改成功')
+                    this.$Message.success('Modification successful')
                     item.isEdit = false
                 }).catch(error => {
                     this.$Message.error(error.msg)

@@ -3,7 +3,7 @@
         <div class="goods_detail_wrapper" style="height: 640px;">
             <HappyScroll size="5" resize hide-horizontal>
                 <div style="width: 375px">
-                    <div class="title-box">商品详情</div>
+                    <div class="title-box"> Goods details</div>
                     <div class="swiper-box">
                         <Carousel autoplay v-model="value2" loop arrow="never">
                             <CarouselItem v-for="(item,index) in goodsInfo.slider_image" :key="index">
@@ -18,13 +18,13 @@
                         </div>
                         <div class="name">{{goodsInfo.store_name}}</div>
                         <div class="msg">
-                            <div class="item">原价:￥{{goodsInfo.ot_price}}</div>
-                            <div class="item">销量:{{goodsInfo.sales}}</div>
-                            <div class="item">库存:{{goodsInfo.stock}}</div>
+                            <div class="item">Original price:￥{{goodsInfo.ot_price}}</div>
+                            <div class="item">Sales:{{goodsInfo.sales}}</div>
+                            <div class="item">Inventory:{{goodsInfo.stock}}</div>
                         </div>
                     </div>
                     <div class="con-box">
-                        <div class="title-box">商品介绍</div>
+                        <div class="title-box">Goods introduction</div>
                         <div class="content" v-html="goodsInfo.description"></div>
                     </div>
                 </div>

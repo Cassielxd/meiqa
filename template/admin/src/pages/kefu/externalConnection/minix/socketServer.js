@@ -240,7 +240,7 @@ export default {
             this.pushMessageToList(res.data.welcome);
           }
           this.goPageBottom(); // 滑动到页面底部
-          document.title = res.data.to_user_nickname ? `正在和${res.data.to_user_nickname}对话中 - ${this.chatServerData.site_name}` : '正在和游客对话中 - ' + this.chatServerData.site_name;
+          document.title = res.data.to_user_nickname ? `Talking to ${res.data.to_user_nickname} - ${this.chatServerData.site_name}` : 'Talking to guest - ' + this.chatServerData.site_name;
           this.connentServer(); // 建立socket 链接
 
       }).catch(rej => {
@@ -343,7 +343,7 @@ export default {
           })
           ws.send({ type: 'to_chat', data: { id: data.toUid } });
           this.toChat = true;
-          document.title =  `正在和${data.nickname}对话中 - ${this.chatServerData.site_name}`
+          document.title =  `Talking to ${data.nickname} - ${this.chatServerData.site_name}`
 
           parent.postMessage({ type: 'onMessageTransfer', data: data }, "*");
         })
@@ -392,7 +392,7 @@ export default {
         this.$message({
           type: "warning",
           message:
-            "上传的文件必须为图片且无法复制本地图片且无法同时复制多张图片",
+            "The uploaded file must be an image and cannot copy local images and cannot copy multiple images at the same time",
         });
         return;
       }
@@ -439,7 +439,7 @@ export default {
         this.sendMsg(sendMessage, 1);
         this.$refs['inputDiv'] ? this.$refs['inputDiv'].innerText = '' : this.userMessage = '';
       } else {
-        this.$Message.error('请先输入信息，在进行发送');
+        this.$Message.error('Please enter information first, then send');
         this.$refs['inputDiv'] ? this.$refs['inputDiv'].innerText = '' : this.userMessage = '';
       }
 
@@ -449,7 +449,7 @@ export default {
     // type: 1 普通文本 2 图片
     sendMsg(msn, type, id) {
       if(!this.chatStatus){
-        return this.$Message.error('正在连接中');
+        return this.$Message.error('Connecting...');
       }
       let guid = getGuid();
       let chat = this.chatOptinos(guid, msn, type);
@@ -599,7 +599,7 @@ export default {
       }
     },
     tolink() {
-      window.open('http://github.crmeb.net/u/CRMChat');
+      window.open('http://github.cassie.net/u/CRMChat');
     }
   }
 }

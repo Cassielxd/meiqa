@@ -1,39 +1,39 @@
 <template>
   <div class="customerOutLine_server" :class="{ 'max_style': !isMobile }">
     <div class="customerOutLine_server_header">
-      <span>商城客服已离线</span>
+      <span> Customer service is offline</span>
       <div class="pc_customerServer_container_header_handle" @click="closeIframe">
         <span class="iconfont">&#xe6c6;</span>
       </div>
     </div>
     <div class="customerOutLine_server_content">
       <div class="customerOutLine_server_content_message" v-html="feedback">
-        <div>您好，现在客服不在线，请留言。如果没有留下您的联系方式，客服将无法和您联系！</div>
+        <div>Hello, the customer service is offline, please leave a message. If you do not leave your contact information, the customer service will not be able to contact you!</div>
         <div class="customerOutLine_server_content_message_phone">
           <div>
-            我们的工作时间：09:00～22:00
+            Our working hours: 09:00～22:00
           </div>
           <div>
-            售前客服电话：400-8888-794
+            Pre-sales customer service phone: 400-8888-794
           </div>
         </div>
       </div>
 
       <div class="customerOutLine_server_content_form">
         <div>
-          <input v-model="feedData.rela_name" type="text" placeholder="请输入您的姓名">
+          <input v-model="feedData.rela_name" type="text" placeholder="Enter your name">
         </div>
         <div>
-          <input v-model="feedData.phone" type="number" placeholder="请输入您的联系电话">
+          <input v-model="feedData.phone" type="number" placeholder="Enter your phone number">
         </div>
         <div>
-          <textarea v-model="feedData.content" name="" id="" cols="30" rows="10" placeholder="请填写留言内容"></textarea>
+          <textarea v-model="feedData.content" name="" id="" cols="30" rows="10" placeholder="Enter your message content"></textarea>
         </div>
       </div>
 
       <div class="customerOutLine_server_content_handle">
         <div @click="postFeedMessage">
-          <span>提交留言</span>
+          <span>Submit留言</span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@ export default {
     postFeedMessage() {
       serviceFeedbackPost(this.feedData).then(res => {
         if(res.status == 200) {
-          this.$Message.success('提交成功');
+          this.$Message.success('Submit successfully');
           this.$router.push({
             name: 'finishSubmitOutLine',
             query: this.$route.query
