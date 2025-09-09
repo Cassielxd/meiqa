@@ -25,7 +25,7 @@
 ```sql
 CREATE TABLE `eb_tenants` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '租户ID',
-  `tenant_code` varchar(32) NOT NULL COMMENT '租户编码(唯一)',
+  `tenant_code` varchar(16) NOT NULL COMMENT '租户编码(全局唯一)',
   `tenant_name` varchar(100) NOT NULL COMMENT '租户名称',
   `company_name` varchar(200) DEFAULT '' COMMENT '公司名称',
   `contact_name` varchar(50) DEFAULT '' COMMENT '联系人姓名',
@@ -41,9 +41,9 @@ CREATE TABLE `eb_tenants` (
   `create_time` int(10) DEFAULT 0 COMMENT '创建时间',
   `update_time` int(10) DEFAULT 0 COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `tenant_code` (`tenant_code`),
-  KEY `status` (`status`),
-  KEY `expire_time` (`expire_time`)
+  UNIQUE KEY `uk_tenant_code` (`tenant_code`) COMMENT '租户编码唯一索引',
+  KEY `idx_status` (`status`),
+  KEY `idx_expire_time` (`expire_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='租户信息表';
 ```
 
@@ -73,58 +73,70 @@ CREATE TABLE `eb_tenant_admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='租户管理员表';
 ```
 
-### 1.2 现有表结构改造
+### 1.2 租户编码设计说明
 
-需要为以下核心表添加 `tenant_id` 字段：
+**关键设计原则**：
+- `tenant_code`：16位varchar，全局唯一，业务逻辑主键
+- `id`：自增整数，仅作为物理主键，不参与业务逻辑
+- **唯一索引**：`tenant_code`设置唯一索引，确保系统级别的租户隔离安全
+
+**性能优势**：
+- 16位长度平衡了唯一性和性能
+- 唯一索引提供O(log n)查询性能
+- 减少内存占用和网络传输开销
+
+### 1.3 现有表结构改造
+
+需要为以下核心表添加 `tenant_code` 字段（租户表的id仅作为物理主键，业务逻辑中使用tenant_code进行租户隔离）：
 
 #### 主要业务表改造清单
 ```sql
 -- 客服表
-ALTER TABLE `eb_chat_service` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_service` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_service` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_service` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 用户表
-ALTER TABLE `eb_chat_user` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_user` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_user` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_user` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 对话记录表
-ALTER TABLE `eb_chat_service_dialogue_record` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_service_dialogue_record` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_service_dialogue_record` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_service_dialogue_record` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 客服记录表
-ALTER TABLE `eb_chat_service_record` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_service_record` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_service_record` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_service_record` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 客服反馈表
-ALTER TABLE `eb_chat_service_feedback` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_service_feedback` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_service_feedback` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_service_feedback` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 话术表
-ALTER TABLE `eb_chat_service_speechcraft` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_service_speechcraft` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_service_speechcraft` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_service_speechcraft` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 自动回复表
-ALTER TABLE `eb_chat_auto_reply` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_auto_reply` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_auto_reply` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_auto_reply` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 投诉表
-ALTER TABLE `eb_chat_complain` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_complain` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_complain` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_complain` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 用户标签表
-ALTER TABLE `eb_chat_user_label` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_user_label` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_user_label` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_user_label` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 用户分组表
-ALTER TABLE `eb_chat_user_group` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_chat_user_group` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_chat_user_group` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_chat_user_group` ADD KEY `tenant_code` (`tenant_code`);
 
 -- 二维码表
-ALTER TABLE `eb_qrcode` ADD COLUMN `tenant_id` int(10) unsigned DEFAULT 0 COMMENT '租户ID' AFTER `id`;
-ALTER TABLE `eb_qrcode` ADD KEY `tenant_id` (`tenant_id`);
+ALTER TABLE `eb_qrcode` ADD COLUMN `tenant_code` varchar(16) NOT NULL DEFAULT '' COMMENT '租户编码' AFTER `id`;
+ALTER TABLE `eb_qrcode` ADD KEY `tenant_code` (`tenant_code`);
 ```
 
-### 1.3 数据迁移策略
+### 1.4 数据迁移策略
 
 #### 默认租户数据迁移
 ```sql
@@ -132,21 +144,21 @@ ALTER TABLE `eb_qrcode` ADD KEY `tenant_id` (`tenant_id`);
 INSERT INTO `eb_tenants` (`tenant_code`, `tenant_name`, `company_name`, `seats_purchased`, `seats_used`, `status`, `create_time`, `update_time`) 
 VALUES ('default', '默认租户', '系统默认', 1000, 0, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
 
--- 获取默认租户ID (假设为1)
-SET @default_tenant_id = 1;
+-- 设置默认租户编码
+SET @default_tenant_code = 'default';
 
--- 迁移现有数据到默认租户
-UPDATE `eb_chat_service` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_user` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_service_dialogue_record` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_service_record` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_service_feedback` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_service_speechcraft` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_auto_reply` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_complain` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_user_label` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_chat_user_group` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
-UPDATE `eb_qrcode` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
+-- 迁移现有数据到默认租户（使用tenant_code）
+UPDATE `eb_chat_service` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_user` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_service_dialogue_record` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_service_record` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_service_feedback` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_service_speechcraft` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_auto_reply` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_complain` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_user_label` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_chat_user_group` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
+UPDATE `eb_qrcode` SET `tenant_code` = @default_tenant_code WHERE `tenant_code` = '';
 ```
 
 ---
@@ -170,7 +182,7 @@ UPDATE `eb_qrcode` SET `tenant_id` = @default_tenant_id WHERE `tenant_id` = 0;
 
 #### 参数化租户隔离实现
 
-**核心原则**: Service层方法显式接收可选的tenantId参数，手动控制数据范围
+**核心原则**: Service层方法显式接收可选的tenantCode参数，手动控制数据范围
 
 ```php
 <?php
@@ -195,16 +207,16 @@ class ChatServiceService extends BaseService
     /**
      * 获取客服列表 - 支持租户隔离参数
      * @param array $where 查询条件
-     * @param int|null $tenantId 租户ID，null表示不限制(Admin用户)
+     * @param string|null $tenantCode 租户编码，null表示不限制(Admin用户)
      * @param int $page 页码
      * @param int $limit 每页数量
      * @return array
      */
-    public function getServiceList(array $where = [], ?int $tenantId = null, int $page = 1, int $limit = 20): array
+    public function getServiceList(array $where = [], ?string $tenantCode = null, int $page = 1, int $limit = 20): array
     {
-        // 如果指定了租户ID，添加租户过滤条件
-        if ($tenantId !== null) {
-            $where['tenant_id'] = $tenantId;
+        // 如果指定了租户编码，添加租户过滤条件
+        if ($tenantCode !== null) {
+            $where['tenant_code'] = $tenantCode;
         }
         
         return $this->dao->getList($where, $page, $limit);
@@ -213,32 +225,32 @@ class ChatServiceService extends BaseService
     /**
      * 创建客服 - 支持租户隔离参数
      * @param array $data 客服数据
-     * @param int|null $tenantId 指定租户ID，null时必须在data中提供
+     * @param string|null $tenantCode 指定租户编码，null时必须在data中提供
      * @return array
      * @throws \Exception
      */
-    public function createService(array $data, ?int $tenantId = null): array
+    public function createService(array $data, ?string $tenantCode = null): array
     {
-        // 确保租户ID存在
-        if ($tenantId !== null) {
-            $data['tenant_id'] = $tenantId;
-        } elseif (empty($data['tenant_id'])) {
-            throw new \Exception('必须指定租户ID');
+        // 确保租户编码存在
+        if ($tenantCode !== null) {
+            $data['tenant_code'] = $tenantCode;
+        } elseif (empty($data['tenant_code'])) {
+            throw new \Exception('必须指定租户编码');
         }
         
-        $finalTenantId = $tenantId ?? $data['tenant_id'];
+        $finalTenantCode = $tenantCode ?? $data['tenant_code'];
         
         // 检查坐席数限制
-        $this->checkSeatsLimit($finalTenantId);
+        $this->checkSeatsLimit($finalTenantCode);
         
         // 验证数据
-        $this->validateServiceData($data, $finalTenantId);
+        $this->validateServiceData($data, $finalTenantCode);
         
         // 创建客服
         $service = $this->dao->save($data);
         
         // 更新租户坐席统计
-        $this->updateTenantSeatsUsed($finalTenantId);
+        $this->updateTenantSeatsUsed($finalTenantCode);
         
         return $service;
     }
@@ -246,11 +258,11 @@ class ChatServiceService extends BaseService
     /**
      * 获取客服详情 - 支持租户权限验证
      * @param int $serviceId 客服ID
-     * @param int|null $tenantId 租户ID，null表示不验证(Admin用户)
+     * @param string|null $tenantCode 租户编码，null表示不验证(Admin用户)
      * @return array|null
      * @throws \Exception
      */
-    public function getServiceById(int $serviceId, ?int $tenantId = null): ?array
+    public function getServiceById(int $serviceId, ?string $tenantCode = null): ?array
     {
         $service = $this->dao->get($serviceId);
         
@@ -258,8 +270,8 @@ class ChatServiceService extends BaseService
             return null;
         }
         
-        // 如果指定了租户ID，验证权限
-        if ($tenantId !== null && $service['tenant_id'] != $tenantId) {
+        // 如果指定了租户编码，验证权限
+        if ($tenantCode !== null && $service['tenant_code'] != $tenantCode) {
             throw new \Exception('无权限访问其他租户数据');
         }
         
@@ -270,20 +282,20 @@ class ChatServiceService extends BaseService
      * 更新客服信息 - 支持租户权限验证
      * @param int $serviceId 客服ID
      * @param array $data 更新数据
-     * @param int|null $tenantId 租户ID，null表示不验证(Admin用户)
+     * @param string|null $tenantCode 租户编码，null表示不验证(Admin用户)
      * @return array
      * @throws \Exception
      */
-    public function updateService(int $serviceId, array $data, ?int $tenantId = null): array
+    public function updateService(int $serviceId, array $data, ?string $tenantCode = null): array
     {
         // 先获取并验证权限
-        $service = $this->getServiceById($serviceId, $tenantId);
+        $service = $this->getServiceById($serviceId, $tenantCode);
         if (!$service) {
             throw new \Exception('客服不存在');
         }
         
-        // 不允许修改租户ID
-        unset($data['tenant_id']);
+        // 不允许修改租户编码
+        unset($data['tenant_code']);
         
         return $this->dao->update($serviceId, $data);
     }
@@ -291,13 +303,13 @@ class ChatServiceService extends BaseService
     /**
      * 删除客服 - 支持租户权限验证
      * @param int $serviceId 客服ID
-     * @param int|null $tenantId 租户ID，null表示不验证(Admin用户)
+     * @param string|null $tenantCode 租户编码，null表示不验证(Admin用户)
      * @throws \Exception
      */
-    public function deleteService(int $serviceId, ?int $tenantId = null): void
+    public function deleteService(int $serviceId, ?string $tenantCode = null): void
     {
         // 验证权限
-        $service = $this->getServiceById($serviceId, $tenantId);
+        $service = $this->getServiceById($serviceId, $tenantCode);
         if (!$service) {
             throw new \Exception('客服不存在');
         }
@@ -305,20 +317,20 @@ class ChatServiceService extends BaseService
         $this->dao->delete($serviceId);
         
         // 更新租户坐席统计
-        $this->updateTenantSeatsUsed($service['tenant_id']);
+        $this->updateTenantSeatsUsed($service['tenant_code']);
     }
     
     /**
      * 检查坐席数限制
      */
-    protected function checkSeatsLimit(int $tenantId): void
+    protected function checkSeatsLimit(string $tenantCode): void
     {
-        $tenant = app(\app\services\tenant\TenantService::class)->getTenant($tenantId);
+        $tenant = app(\app\services\tenant\TenantService::class)->getTenantByCode($tenantCode);
         if (!$tenant) {
             throw new \Exception('租户不存在');
         }
         
-        $currentCount = $this->dao->count(['tenant_id' => $tenantId, 'status' => 1]);
+        $currentCount = $this->dao->count(['tenant_code' => $tenantCode, 'status' => 1]);
         if ($currentCount >= $tenant['seats_purchased']) {
             throw new \Exception('已达到最大坐席数限制');
         }
@@ -327,7 +339,7 @@ class ChatServiceService extends BaseService
     /**
      * 验证客服数据
      */
-    protected function validateServiceData(array $data, int $tenantId): void
+    protected function validateServiceData(array $data, string $tenantCode): void
     {
         if (empty($data['account'])) {
             throw new \Exception('客服账号不能为空');
@@ -335,7 +347,7 @@ class ChatServiceService extends BaseService
         
         // 检查同租户内账号唯一性
         $exists = $this->dao->count([
-            'tenant_id' => $tenantId,
+            'tenant_code' => $tenantCode,
             'account' => $data['account']
         ]);
         
@@ -347,10 +359,10 @@ class ChatServiceService extends BaseService
     /**
      * 更新租户已使用坐席数
      */
-    protected function updateTenantSeatsUsed(int $tenantId): void
+    protected function updateTenantSeatsUsed(string $tenantCode): void
     {
-        $usedSeats = $this->dao->count(['tenant_id' => $tenantId, 'status' => 1]);
-        app(\app\services\tenant\TenantService::class)->updateSeatsUsed($tenantId, $usedSeats);
+        $usedSeats = $this->dao->count(['tenant_code' => $tenantCode, 'status' => 1]);
+        app(\app\services\tenant\TenantService::class)->updateSeatsUsedByCode($tenantCode, $usedSeats);
     }
 }
 ```
@@ -388,9 +400,9 @@ class TenantDetectionMiddleware
             $tenant = app(TenantService::class)->getTenantByCode($tenantCode);
             if ($tenant && $tenant['status'] == 1) {
                 // 存储租户信息到请求对象，不设置全局状态
-                $request->tenantId = $tenant['id'];
                 $request->tenantCode = $tenantCode;
                 $request->tenant = $tenant;
+                $request->tenantId = $tenant['id']; // 仅内部使用，业务逻辑使用tenantCode
             } else {
                 return Response::create([
                     'code' => 404, 
@@ -450,12 +462,12 @@ class TenantAuthMiddleware
             $jwtAuth->verifyToken();
             
             // 根据用户类型获取租户信息
-            $userTenantId = $this->getUserTenantId($userId, $userType);
+            $userTenantCode = $this->getUserTenantCode($userId, $userType);
             
             // 设置用户信息到请求对象
             $request->userId = $userId;
             $request->userType = $userType;
-            $request->userTenantId = $userTenantId;
+            $request->userTenantCode = $userTenantCode;
             $request->isAdmin = ($userType === 'admin');
             
             // 验证租户权限
@@ -477,23 +489,27 @@ class TenantAuthMiddleware
     }
     
     /**
-     * 根据用户类型获取租户ID
+     * 根据用户类型获取租户编码
      */
-    protected function getUserTenantId(int $userId, string $userType): ?int
+    protected function getUserTenantCode(int $userId, string $userType): ?string
     {
         switch ($userType) {
             case 'admin':
                 return null; // Admin用户不受租户限制
                 
             case 'tenant_admin':
-                // 从租户管理员表获取租户ID
+                // 从租户管理员表获取租户编码（通过关联查询）
                 $tenantAdmin = app(\app\dao\tenant\TenantAdminDao::class)->get($userId);
-                return $tenantAdmin['tenant_id'] ?? null;
+                if ($tenantAdmin) {
+                    $tenant = app(\app\dao\tenant\TenantDao::class)->get($tenantAdmin['tenant_id']);
+                    return $tenant['tenant_code'] ?? null;
+                }
+                return null;
                 
             case 'kefu':
-                // 从客服表获取租户ID
+                // 从客服表获取租户编码
                 $service = app(\app\dao\chat\ChatServiceDao::class)->get($userId);
-                return $service['tenant_id'] ?? null;
+                return $service['tenant_code'] ?? null;
                 
             case 'mobile':
                 // 移动端用户需要从请求中指定租户
@@ -510,8 +526,8 @@ class TenantAuthMiddleware
     protected function validateTenantAccess(Request $request): bool
     {
         $userType = $request->userType;
-        $userTenantId = $request->userTenantId;
-        $requestTenantId = $request->tenantId ?? null;
+        $userTenantCode = $request->userTenantCode;
+        $requestTenantCode = $request->tenantCode ?? null;
         
         switch ($userType) {
             case 'admin':
@@ -521,19 +537,19 @@ class TenantAuthMiddleware
             case 'tenant_admin':
             case 'kefu':
                 // 租户管理员和客服只能访问自己的租户
-                if ($requestTenantId && $userTenantId != $requestTenantId) {
+                if ($requestTenantCode && $userTenantCode != $requestTenantCode) {
                     return false;
                 }
-                // 设置最终租户ID（优先使用用户所属租户）
-                $request->finalTenantId = $userTenantId ?: $requestTenantId;
+                // 设置最终租户编码（优先使用用户所属租户）
+                $request->finalTenantCode = $userTenantCode ?: $requestTenantCode;
                 return true;
                 
             case 'mobile':
                 // 移动端用户必须指定租户
-                if (!$requestTenantId) {
+                if (!$requestTenantCode) {
                     return false;
                 }
-                $request->finalTenantId = $requestTenantId;
+                $request->finalTenantCode = $requestTenantCode;
                 return true;
                 
             default:
@@ -575,12 +591,12 @@ class ServiceController extends AuthController
     {
         [$page, $limit] = $this->getPageAndLimit();
         $where = $request->getMore([
-            ['tenant_id', ''],
+            ['tenant_code', ''],
             ['status', ''],
             ['keyword', ''],
         ]);
         
-        // Admin用户：不传递tenantId参数，可查看所有租户
+        // Admin用户：不传递tenantCode参数，可查看所有租户
         $list = $this->service->getServiceList($where, null, $page, $limit);
         
         return $this->success($list);
@@ -592,7 +608,7 @@ class ServiceController extends AuthController
     public function save(Request $request)
     {
         $data = $request->postMore([
-            ['tenant_id', 0],
+            ['tenant_code', ''],
             ['account', ''],
             ['password', ''],
             ['nickname', ''],
@@ -600,12 +616,12 @@ class ServiceController extends AuthController
             ['status', 1]
         ]);
         
-        if (!$data['tenant_id']) {
-            return $this->fail('管理员创建客服时必须指定租户');
+        if (empty($data['tenant_code'])) {
+            return $this->fail('管理员创建客服时必须指定租户编码');
         }
         
         try {
-            // Admin创建：不传递tenantId参数，允许跨租户创建
+            // Admin创建：不传递tenantCode参数，允许跨租户创建
             $service = $this->service->createService($data, null);
             return $this->success($service);
         } catch (\Exception $e) {
@@ -625,7 +641,7 @@ class ServiceController extends AuthController
         ]);
         
         try {
-            // Admin更新：不传递tenantId参数，允许跨租户更新
+            // Admin更新：不传递tenantCode参数，允许跨租户更新
             $service = $this->service->updateService($id, $data, null);
             return $this->success($service);
         } catch (\Exception $e) {
@@ -669,9 +685,9 @@ class ServiceController extends AuthController
             ['keyword', ''],
         ]);
         
-        // 租户管理员：传递租户ID参数，限制查询范围
-        $tenantId = $request->userTenantId;
-        $list = $this->service->getServiceList($where, $tenantId, $page, $limit);
+        // 租户管理员：传递租户编码参数，限制查询范围
+        $tenantCode = $request->userTenantCode;
+        $list = $this->service->getServiceList($where, $tenantCode, $page, $limit);
         
         return $this->success($list);
     }
@@ -690,9 +706,9 @@ class ServiceController extends AuthController
         ]);
         
         try {
-            // 租户管理员创建：传递租户ID参数，自动设置租户
-            $tenantId = $request->userTenantId;
-            $service = $this->service->createService($data, $tenantId);
+            // 租户管理员创建：传递租户编码参数，自动设置租户
+            $tenantCode = $request->userTenantCode;
+            $service = $this->service->createService($data, $tenantCode);
             return $this->success($service);
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
@@ -711,9 +727,9 @@ class ServiceController extends AuthController
         ]);
         
         try {
-            // 租户管理员更新：传递租户ID参数，限制操作范围
-            $tenantId = $request->userTenantId;
-            $service = $this->service->updateService($id, $data, $tenantId);
+            // 租户管理员更新：传递租户编码参数，限制操作范围
+            $tenantCode = $request->userTenantCode;
+            $service = $this->service->updateService($id, $data, $tenantCode);
             return $this->success($service);
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
@@ -726,8 +742,8 @@ class ServiceController extends AuthController
     public function delete(Request $request, $id)
     {
         try {
-            $tenantId = $request->userTenantId;
-            $this->service->deleteService($id, $tenantId);
+            $tenantCode = $request->userTenantCode;
+            $this->service->deleteService($id, $tenantCode);
             return $this->success('删除成功');
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
@@ -739,8 +755,8 @@ class ServiceController extends AuthController
      */
     public function getSeatsInfo(Request $request)
     {
-        $tenantId = $request->userTenantId;
-        $info = $this->service->getTenantSeatsInfo($tenantId);
+        $tenantCode = $request->userTenantCode;
+        $info = $this->service->getTenantSeatsInfoByCode($tenantCode);
         return $this->success($info);
     }
 }
@@ -748,7 +764,586 @@ class ServiceController extends AuthController
 
 ---
 
+## 2.4 P1级别架构增强设计 (MVP阶段必需)
+
+### 2.4.1 租户上下文管理器 (MVP简化版)
+
+**设计目标**: 统一租户逻辑处理，减少重复代码，防止安全漏洞
+
+#### 核心实现
+```php
+<?php
+namespace app\services\tenant;
+
+/**
+ * 租户上下文管理器 - MVP简化版
+ * 用于统一处理租户过滤逻辑，避免重复代码和安全漏洞
+ */
+class TenantContext
+{
+    private static $currentTenantCode = null;
+    private static $isAdmin = false;
+    
+    /**
+     * 设置当前租户上下文
+     * @param string|null $tenantCode 租户编码，null表示Admin模式
+     */
+    public static function setTenant(?string $tenantCode): void
+    {
+        self::$currentTenantCode = $tenantCode;
+        self::$isAdmin = ($tenantCode === null);
+    }
+    
+    /**
+     * 获取当前租户编码
+     * @return string|null
+     */
+    public static function getTenantCode(): ?string
+    {
+        return self::$isAdmin ? null : self::$currentTenantCode;
+    }
+    
+    /**
+     * 检查是否为Admin模式
+     * @return bool
+     */
+    public static function isAdmin(): bool
+    {
+        return self::$isAdmin;
+    }
+    
+    /**
+     * 统一添加租户过滤条件
+     * @param array $where 查询条件数组
+     */
+    public static function addTenantFilter(array &$where): void
+    {
+        $tenantCode = self::getTenantCode();
+        if ($tenantCode !== null) {
+            $where['tenant_code'] = $tenantCode;
+        }
+    }
+    
+    /**
+     * 验证数据是否属于当前租户
+     * @param array|object $data 包含tenant_code字段的数据
+     * @throws \Exception
+     */
+    public static function validateTenantAccess($data): void
+    {
+        if (self::$isAdmin) {
+            return; // Admin跳过验证
+        }
+        
+        $dataTenantCode = is_array($data) ? $data['tenant_code'] ?? '' : $data->tenant_code ?? '';
+        
+        if ($dataTenantCode !== self::$currentTenantCode) {
+            throw new \Exception('无权限访问其他租户数据');
+        }
+    }
+    
+    /**
+     * 清除租户上下文
+     */
+    public static function clear(): void
+    {
+        self::$currentTenantCode = null;
+        self::$isAdmin = false;
+    }
+}
+```
+
+#### Service层集成示例
+```php
+<?php
+namespace app\services\chat;
+
+use app\services\tenant\TenantContext;
+use app\dao\chat\ChatServiceDao;
+use app\services\BaseService;
+
+/**
+ * 客服管理Service - 集成租户上下文
+ */
+class ChatServiceService extends BaseService
+{
+    protected $dao;
+    
+    public function __construct(ChatServiceDao $dao)
+    {
+        $this->dao = $dao;
+    }
+    
+    /**
+     * 获取客服列表 - 自动应用租户过滤
+     */
+    public function getServiceList(array $where = [], int $page = 1, int $limit = 20): array
+    {
+        // 自动添加租户过滤条件
+        TenantContext::addTenantFilter($where);
+        
+        return $this->dao->getList($where, $page, $limit);
+    }
+    
+    /**
+     * 创建客服 - 自动设置租户编码
+     */
+    public function createService(array $data): array
+    {
+        // 自动设置租户编码（非Admin模式）
+        if (!TenantContext::isAdmin()) {
+            $data['tenant_code'] = TenantContext::getTenantCode();
+        }
+        
+        // 验证必需字段
+        if (empty($data['tenant_code'])) {
+            throw new \Exception('必须指定租户编码');
+        }
+        
+        return $this->dao->save($data);
+    }
+    
+    /**
+     * 获取客服详情 - 自动验证权限
+     */
+    public function getServiceById(int $serviceId): ?array
+    {
+        $service = $this->dao->get($serviceId);
+        
+        if (!$service) {
+            return null;
+        }
+        
+        // 自动验证租户权限
+        TenantContext::validateTenantAccess($service);
+        
+        return $service;
+    }
+}
+```
+
+### 2.4.2 租户级缓存管理 (MVP简化版)
+
+**设计目标**: 提供基础的租户级缓存，提升查询性能
+
+```php
+<?php
+namespace app\services\tenant;
+
+use think\facade\Cache;
+
+/**
+ * 租户缓存管理器 - MVP简化版
+ * 提供基础的租户级缓存功能
+ */
+class TenantCache
+{
+    /**
+     * 获取租户缓存
+     * @param string $tenantCode 租户编码
+     * @param string $key 缓存键
+     * @param mixed $default 默认值
+     * @return mixed
+     */
+    public static function get(string $tenantCode, string $key, $default = null)
+    {
+        $cacheKey = self::buildKey($tenantCode, $key);
+        return Cache::get($cacheKey, $default);
+    }
+    
+    /**
+     * 设置租户缓存
+     * @param string $tenantCode 租户编码
+     * @param string $key 缓存键
+     * @param mixed $value 缓存值
+     * @param int $ttl 过期时间(秒)
+     * @return bool
+     */
+    public static function put(string $tenantCode, string $key, $value, int $ttl = 300): bool
+    {
+        $cacheKey = self::buildKey($tenantCode, $key);
+        return Cache::set($cacheKey, $value, $ttl);
+    }
+    
+    /**
+     * 记忆化缓存
+     * @param string $tenantCode 租户编码
+     * @param string $key 缓存键
+     * @param callable $callback 回调函数
+     * @param int $ttl 过期时间
+     * @return mixed
+     */
+    public static function remember(string $tenantCode, string $key, callable $callback, int $ttl = 300)
+    {
+        $cacheKey = self::buildKey($tenantCode, $key);
+        
+        $value = Cache::get($cacheKey);
+        if ($value === false) {
+            $value = $callback();
+            Cache::set($cacheKey, $value, $ttl);
+        }
+        
+        return $value;
+    }
+    
+    /**
+     * 删除租户缓存
+     * @param string $tenantCode 租户编码
+     * @param string $key 缓存键
+     * @return bool
+     */
+    public static function forget(string $tenantCode, string $key): bool
+    {
+        $cacheKey = self::buildKey($tenantCode, $key);
+        return Cache::delete($cacheKey);
+    }
+    
+    /**
+     * 清除租户所有缓存
+     * @param string $tenantCode 租户编码
+     */
+    public static function clearTenant(string $tenantCode): void
+    {
+        // 简化版本：通过tag清理（如果缓存驱动支持）
+        $tag = "tenant:{$tenantCode}";
+        try {
+            Cache::tag($tag)->clear();
+        } catch (\Exception $e) {
+            // 如果不支持tag，暂时跳过
+            // 后续可以通过模式匹配删除
+        }
+    }
+    
+    /**
+     * 构建租户缓存键
+     * @param string $tenantCode 租户编码
+     * @param string $key 原始键
+     * @return string
+     */
+    private static function buildKey(string $tenantCode, string $key): string
+    {
+        return "tenant:{$tenantCode}:{$key}";
+    }
+}
+```
+
+#### Service层缓存集成
+```php
+// 在Service中使用租户缓存
+public function getServiceList(array $where = [], int $page = 1): array
+{
+    $tenantCode = TenantContext::getTenantCode();
+    
+    if ($tenantCode) {
+        // 使用租户级缓存
+        $cacheKey = 'services:' . md5(serialize($where) . $page);
+        return TenantCache::remember($tenantCode, $cacheKey, function() use ($where, $page) {
+            TenantContext::addTenantFilter($where);
+            return $this->dao->getList($where, 1, 20, $page);
+        }, 300);
+    } else {
+        // Admin模式：不使用租户缓存
+        return $this->dao->getList($where, 1, 20, $page);
+    }
+}
+```
+
+### 2.4.3 WebSocket租户隔离 (MVP必需)
+
+**设计目标**: 确保WebSocket通信的租户隔离，防止数据泄露
+
+```php
+<?php
+namespace app\websocket\chat;
+
+use app\services\tenant\TenantContext;
+
+/**
+ * 租户隔离的WebSocket处理器
+ * 确保消息只在同租户内传递
+ */
+class TenantChatSocket
+{
+    private $tenantConnections = []; // 按租户分组的连接
+    private $connectionTenants = []; // 连接到租户的映射
+    
+    /**
+     * 连接建立时的租户验证
+     */
+    public function onConnect($connection, $request)
+    {
+        // 从连接参数中提取租户编码
+        $tenantCode = $this->extractTenantFromRequest($request);
+        
+        if (!$tenantCode) {
+            $connection->close();
+            return;
+        }
+        
+        // 验证租户是否存在且有效
+        if (!$this->validateTenant($tenantCode)) {
+            $connection->close();
+            return;
+        }
+        
+        // 按租户分组管理连接
+        $connectionId = spl_object_hash($connection);
+        $this->tenantConnections[$tenantCode][$connectionId] = $connection;
+        $this->connectionTenants[$connectionId] = $tenantCode;
+        
+        // 设置连接属性
+        $connection->tenantCode = $tenantCode;
+        
+        // 发送连接成功消息
+        $this->sendToConnection($connection, [
+            'type' => 'connected',
+            'tenant' => $tenantCode
+        ]);
+    }
+    
+    /**
+     * 消息处理 - 租户隔离
+     */
+    public function onMessage($connection, $data)
+    {
+        $connectionId = spl_object_hash($connection);
+        $tenantCode = $this->connectionTenants[$connectionId] ?? null;
+        
+        if (!$tenantCode) {
+            $connection->close();
+            return;
+        }
+        
+        try {
+            $message = json_decode($data, true);
+            
+            // 验证消息格式
+            if (!$this->validateMessage($message)) {
+                return;
+            }
+            
+            // 自动添加租户信息到消息
+            $message['tenant_code'] = $tenantCode;
+            $message['from_connection'] = $connectionId;
+            
+            // 设置租户上下文
+            TenantContext::setTenant($tenantCode);
+            
+            // 处理不同类型的消息
+            $this->handleMessage($tenantCode, $message);
+            
+        } catch (\Exception $e) {
+            // 发送错误消息
+            $this->sendToConnection($connection, [
+                'type' => 'error',
+                'message' => '消息处理失败'
+            ]);
+        } finally {
+            TenantContext::clear();
+        }
+    }
+    
+    /**
+     * 连接关闭时清理
+     */
+    public function onClose($connection)
+    {
+        $connectionId = spl_object_hash($connection);
+        $tenantCode = $this->connectionTenants[$connectionId] ?? null;
+        
+        if ($tenantCode) {
+            // 从租户连接组中移除
+            unset($this->tenantConnections[$tenantCode][$connectionId]);
+            unset($this->connectionTenants[$connectionId]);
+            
+            // 如果租户没有连接了，清理空数组
+            if (empty($this->tenantConnections[$tenantCode])) {
+                unset($this->tenantConnections[$tenantCode]);
+            }
+        }
+    }
+    
+    /**
+     * 处理消息 - 仅在同租户内广播
+     */
+    private function handleMessage(string $tenantCode, array $message)
+    {
+        switch ($message['type']) {
+            case 'chat_message':
+                // 聊天消息：只发送给同租户的客服
+                $this->broadcastToTenantServices($tenantCode, $message);
+                break;
+                
+            case 'service_status':
+                // 客服状态：只发送给同租户
+                $this->broadcastToTenant($tenantCode, $message);
+                break;
+                
+            case 'user_typing':
+                // 用户输入状态：只发送给对应客服
+                $this->sendToTenantService($tenantCode, $message['service_id'], $message);
+                break;
+                
+            default:
+                // 其他消息类型的处理
+                break;
+        }
+    }
+    
+    /**
+     * 向租户内所有连接广播消息
+     */
+    private function broadcastToTenant(string $tenantCode, array $message)
+    {
+        if (!isset($this->tenantConnections[$tenantCode])) {
+            return;
+        }
+        
+        foreach ($this->tenantConnections[$tenantCode] as $connection) {
+            $this->sendToConnection($connection, $message);
+        }
+    }
+    
+    /**
+     * 向特定连接发送消息
+     */
+    private function sendToConnection($connection, array $message)
+    {
+        try {
+            $connection->send(json_encode($message));
+        } catch (\Exception $e) {
+            // 连接已断开，清理连接
+            $this->onClose($connection);
+        }
+    }
+    
+    /**
+     * 从请求中提取租户编码
+     */
+    private function extractTenantFromRequest($request): ?string
+    {
+        // 从WebSocket握手请求中获取租户参数
+        $query = $request->get ?? [];
+        return $query['tenant'] ?? null;
+    }
+    
+    /**
+     * 验证租户是否有效
+     */
+    private function validateTenant(string $tenantCode): bool
+    {
+        try {
+            $tenant = app(\app\services\tenant\TenantService::class)->getTenantByCode($tenantCode);
+            return $tenant && $tenant['status'] == 1;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 验证消息格式
+     */
+    private function validateMessage($message): bool
+    {
+        return is_array($message) && isset($message['type']);
+    }
+}
+```
+
+#### WebSocket中间件集成
+```php
+<?php
+namespace app\websocket\middleware;
+
+/**
+ * WebSocket租户认证中间件
+ */
+class WebSocketTenantAuth
+{
+    public function handle($request, \Closure $next)
+    {
+        // 验证租户参数
+        $tenantCode = $request->get['tenant'] ?? '';
+        if (empty($tenantCode)) {
+            return response('Missing tenant parameter', 400);
+        }
+        
+        // 验证租户有效性
+        $tenant = app(\app\services\tenant\TenantService::class)->getTenantByCode($tenantCode);
+        if (!$tenant || $tenant['status'] != 1) {
+            return response('Invalid tenant', 403);
+        }
+        
+        // 将租户信息附加到请求
+        $request->tenant = $tenant;
+        $request->tenantCode = $tenantCode;
+        
+        return $next($request);
+    }
+}
+```
+
+### 2.4.4 集成使用指南
+
+#### 中间件中设置租户上下文
+```php
+// 在TenantAuthMiddleware中设置上下文
+public function handle(Request $request, \Closure $next)
+{
+    // ... 验证逻辑 ...
+    
+    // 设置租户上下文
+    TenantContext::setTenant($request->userTenantCode);
+    
+    $response = $next($request);
+    
+    // 请求结束后清理上下文
+    TenantContext::clear();
+    
+    return $response;
+}
+```
+
+#### Service层简化使用
+```php
+// Service方法大幅简化
+public function getServiceList($where = []): array
+{
+    // 自动应用租户过滤，无需手动传参
+    TenantContext::addTenantFilter($where);
+    return $this->dao->getList($where);
+}
+
+public function createService(array $data): array
+{
+    // 自动设置租户编码
+    if (!TenantContext::isAdmin()) {
+        $data['tenant_code'] = TenantContext::getTenantCode();
+    }
+    return $this->dao->save($data);
+}
+```
+
+---
+
 ## 3. 详细开发任务清单
+
+### 🎯 **MVP阶段P1任务优先级说明**
+
+根据前面的分析，MVP阶段必须实现的P1级别功能：
+
+#### ✅ **必须实现** (安全性关键)
+1. **租户上下文管理器** - 防止安全漏洞和重复代码  
+2. **WebSocket租户隔离** - 防止数据泄露，核心安全功能
+3. **基础租户级缓存** - 提升性能，可简化实现
+
+#### 🔄 **可以简化或延后** (优化性功能)
+- 缓存雪崩防护 → 后续优化
+- 复杂监控指标 → 基本日志即可
+- 统一异常处理 → 现有机制即可
+
+**预计时间**: P1级别功能增加 **3-4天** 开发时间
+**投入产出比**: 用 3-4天的时间换取重大安全风险防护，**非常值得**！
 
 ### 阶段一：基础架构搭建 (优先级：P0)
 
@@ -757,7 +1352,7 @@ class ServiceController extends AuthController
 **前置条件**: 无
 **任务内容**:
 - 创建租户相关表结构
-- 为现有表添加tenant_id字段
+- 为现有表添加tenant_code字段
 - 编写数据迁移脚本
 - 创建默认租户并迁移现有数据
 
@@ -766,7 +1361,7 @@ class ServiceController extends AuthController
 创建文件:
 - database/migrations/20241207_create_tenants_table.php
 - database/migrations/20241207_create_tenant_admins_table.php
-- database/migrations/20241207_add_tenant_id_to_tables.php
+- database/migrations/20241207_add_tenant_code_to_tables.php
 - database/seeds/DefaultTenantSeeder.php
 ```
 
@@ -776,6 +1371,29 @@ class ServiceController extends AuthController
 - 数据完整性验证通过
 - 回滚测试通过
 
+#### 任务1.2：P1级别核心组件开发 (2-3天)
+**负责人**: 后端开发
+**前置条件**: 任务1.1完成
+**任务内容**:
+- 开发租户上下文管理器(TenantContext)
+- 实现租户级缓存管理(TenantCache)
+- WebSocket租户隔离基础架构
+- 核心安全验证机制
+
+**具体文件操作**:
+```
+创建文件:
+- app/services/tenant/TenantContext.php
+- app/services/tenant/TenantCache.php
+- app/websocket/chat/TenantChatSocket.php
+- app/websocket/middleware/WebSocketTenantAuth.php
+```
+
+**验收标准**:
+- 租户上下文管理器功能正常
+- 租户级缓存策略有效
+- WebSocket连接按租户正确分组
+- 安全验证机制无漏洞
 
 #### 任务1.3：中间件体系开发 (2天)
 **负责人**: 后端开发
@@ -897,7 +1515,7 @@ class ServiceController extends AuthController
 **具体文件操作**:
 ```
 修改文件:
-- app/services/chat/ServiceService.php
+- app/services/chat/ServiceService.php (集成TenantContext)
 - app/controller/admin/chat/Service.php
 - app/controller/tenant_admin/ServiceController.php
 - app/dao/chat/ServiceDao.php
@@ -908,6 +1526,106 @@ class ServiceController extends AuthController
 - 租户管理员只能管理本租户客服
 - 坐席数限制正常工作
 - 现有功能保持兼容
+
+#### 任务3.1.1：P1级别Service层改造 (1-2天)
+**负责人**: 后端开发  
+**前置条件**: 任务1.2完成(租户上下文管理器)
+**任务内容**:
+- 集成TenantContext到所有Service层
+- 简化Service方法签名，移除手动传参
+- 统一租户过滤逻辑处理
+- 集成租户级缓存策略
+
+**Service层改造示例**:
+```php
+// 改造前 - 复杂的参数传递
+class ChatServiceService {
+    public function getServiceList(array $where = [], ?string $tenantCode = null, int $page = 1): array {
+        if ($tenantCode !== null) {
+            $where['tenant_code'] = $tenantCode;
+        }
+        return $this->dao->getList($where, $page, 20);
+    }
+}
+
+// 改造后 - 简化的自动化处理
+class ChatServiceService {
+    public function getServiceList(array $where = [], int $page = 1): array {
+        // 自动应用租户过滤
+        TenantContext::addTenantFilter($where);
+        
+        // 租户级缓存
+        $tenantCode = TenantContext::getTenantCode();
+        if ($tenantCode) {
+            $cacheKey = 'services:' . md5(serialize($where) . $page);
+            return TenantCache::remember($tenantCode, $cacheKey, function() use ($where, $page) {
+                return $this->dao->getList($where, $page, 20);
+            });
+        }
+        
+        return $this->dao->getList($where, $page, 20);
+    }
+}
+```
+
+**具体文件操作**:
+```
+修改文件:
+- app/services/chat/ChatServiceService.php
+- app/services/chat/ChatUserService.php  
+- app/services/chat/DialogueRecordService.php
+- app/services/chat/ServiceRecordService.php
+- app/services/chat/AutoReplyService.php
+- app/services/chat/ComplainService.php
+```
+
+**验收标准**:
+- 所有Service方法签名简化（移除tenantCode参数）
+- 租户过滤逻辑自动应用
+- 缓存功能正常工作
+- 现有测试用例通过
+
+#### 任务3.1.2：WebSocket租户隔离实现 (1-2天)
+**负责人**: 后端开发
+**前置条件**: 任务1.2完成(TenantChatSocket)
+**任务内容**:
+- 实现WebSocket连接的租户分组管理
+- 消息路由的租户隔离验证
+- 租户间通信完全隔离
+- 连接状态管理和监控
+
+**核心安全验证**:
+```php
+// 在onMessage中必须验证租户权限
+public function onMessage($connection, $data) {
+    $connectionId = spl_object_hash($connection);
+    $tenantCode = $this->connectionTenants[$connectionId] ?? null;
+    
+    if (!$tenantCode) {
+        $connection->close(); // 关键安全措施
+        return;
+    }
+    
+    // 设置租户上下文
+    TenantContext::setTenant($tenantCode);
+    
+    // 处理消息...
+}
+```
+
+**具体文件操作**:
+```
+修改文件:
+- app/websocket/SocketService.php
+- app/websocket/chat/ChatSocket.php
+- config/swoole.php (添加WebSocket中间件配置)
+```
+
+**验收标准**:
+- 租户间WebSocket消息完全隔离
+- 连接管理按租户分组正常
+- 无法通过任何方式跨租户通信
+- 性能测试通过(并发连接数>100)
 
 #### 任务3.2：用户管理模块改造 (2天)
 **负责人**: 后端开发
@@ -1337,17 +2055,17 @@ class TenantIsolationTest extends TestCase
         $tenant2 = $this->createTenant('tenant2');
         
         // 创建属于不同租户的客服
-        $service1 = $this->createService($tenant1['id']);
-        $service2 = $this->createService($tenant2['id']);
+        $service1 = $this->createService($tenant1['tenant_code']);
+        $service2 = $this->createService($tenant2['tenant_code']);
         
         // 以租户1身份查询，应该只能看到自己的客服
-        $this->actingAsTenantUser($tenant1['id']);
+        $this->actingAsTenantUser($tenant1['tenant_code']);
         $services = ChatService::select();
         $this->assertCount(1, $services);
         $this->assertEquals($service1['id'], $services[0]['id']);
         
         // 以租户2身份查询，应该只能看到自己的客服
-        $this->actingAsTenantUser($tenant2['id']);
+        $this->actingAsTenantUser($tenant2['tenant_code']);
         $services = ChatService::select();
         $this->assertCount(1, $services);
         $this->assertEquals($service2['id'], $services[0]['id']);
@@ -1363,10 +2081,10 @@ class TenantIsolationTest extends TestCase
         $tenant1 = $this->createTenant('tenant1');
         $tenant2 = $this->createTenant('tenant2');
         
-        $service1 = $this->createService($tenant1['id']);
+        $service1 = $this->createService($tenant1['tenant_code']);
         
         // 租户2尝试访问租户1的数据，应该失败
-        $this->actingAsTenantUser($tenant2['id']);
+        $this->actingAsTenantUser($tenant2['tenant_code']);
         $this->expectException(\Exception::class);
         ChatService::find($service1['id']);
     }
@@ -1397,10 +2115,10 @@ class TenantPermissionTest extends TestCase
                          ]);
         $response->assertStatus(200);
         
-        // 不应该能指定其他租户ID
+        // 不应该能指定其他租户编码
         $response = $this->withHeaders(['Authorization' => $token])
                          ->post('/tenant_admin/service', [
-                             'tenant_id' => 999,
+                             'tenant_code' => 'other_tenant',
                              'account' => 'test_service2',
                              'password' => '123456',
                              'nickname' => '测试客服2'
@@ -1454,7 +2172,7 @@ class TenantPerformanceTest extends TestCase
         // 测试租户查询性能
         $start = microtime(true);
         
-        $this->actingAsTenantUser(1);
+        $this->actingAsTenantUser('tenant_1');
         $services = ChatService::where('status', 1)->limit(20)->select();
         
         $duration = microtime(true) - $start;
@@ -1464,7 +2182,7 @@ class TenantPerformanceTest extends TestCase
         
         // 结果应该只包含指定租户的数据
         foreach ($services as $service) {
-            $this->assertEquals(1, $service['tenant_id']);
+            $this->assertEquals('tenant_1', $service['tenant_code']);
         }
     }
     
@@ -1475,7 +2193,7 @@ class TenantPerformanceTest extends TestCase
         
         // 第一次查询，会触发数据库查询
         $start1 = microtime(true);
-        $this->actingAsTenantUser($tenant1['id']);
+        $this->actingAsTenantUser($tenant1['tenant_code']);
         $services1 = app(ChatServiceService::class)->getServiceList();
         $duration1 = microtime(true) - $start1;
         
@@ -1489,7 +2207,7 @@ class TenantPerformanceTest extends TestCase
         
         // 查询不同租户，应该是新的数据库查询
         $start3 = microtime(true);
-        $this->actingAsTenantUser($tenant2['id']);
+        $this->actingAsTenantUser($tenant2['tenant_code']);
         $services3 = app(ChatServiceService::class)->getServiceList();
         $duration3 = microtime(true) - $start3;
         
@@ -1511,10 +2229,10 @@ class TenantSecurityTest extends TestCase
     public function testSQLInjectionWithTenantFilter()
     {
         $tenant = $this->createTenant('test_tenant');
-        $this->actingAsTenantUser($tenant['id']);
+        $this->actingAsTenantUser($tenant['tenant_code']);
         
         // 尝试SQL注入绕过租户过滤
-        $maliciousInput = "1' OR tenant_id != {$tenant['id']} --";
+        $maliciousInput = "1' OR tenant_code != '{$tenant['tenant_code']}' --";
         
         $services = ChatService::where('id', $maliciousInput)->select();
         
@@ -1527,11 +2245,11 @@ class TenantSecurityTest extends TestCase
         $tenant1 = $this->createTenant('tenant1');
         $tenant2 = $this->createTenant('tenant2');
         
-        $service1 = $this->createService($tenant1['id']);
-        $service2 = $this->createService($tenant2['id']);
+        $service1 = $this->createService($tenant1['tenant_code']);
+        $service2 = $this->createService($tenant2['tenant_code']);
         
         // 以租户1身份尝试直接通过ID访问租户2的数据
-        $this->actingAsTenantUser($tenant1['id']);
+        $this->actingAsTenantUser($tenant1['tenant_code']);
         
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('无权限访问其他租户数据');
@@ -1547,10 +2265,10 @@ class TenantSecurityTest extends TestCase
         $admin1 = $this->createTenantAdmin($tenant1['id']);
         $token1 = $this->loginAsTenantAdmin($admin1);
         
-        // 尝试修改Token中的租户ID
+        // 尝试修改Token中的租户编码
         $tokenParts = explode('.', $token1);
         $payload = json_decode(base64_decode($tokenParts[1]), true);
-        $payload['tenant_id'] = $tenant2['id'];
+        $payload['tenant_code'] = $tenant2['tenant_code'];
         $tokenParts[1] = base64_encode(json_encode($payload));
         $tamperedToken = implode('.', $tokenParts);
         
@@ -1727,7 +2445,6 @@ static::event('before_select', function (Query $query) {
   "iat": 1640908800,
   "user_id": 123,
   "user_type": "tenant_admin",
-  "tenant_id": 5,
   "tenant_code": "company_abc",
   "permissions": ["service.manage", "user.view"],
   "seats_limit": 10,
@@ -1737,38 +2454,38 @@ static::event('before_select', function (Query $query) {
 
 ### 8.2 数据库索引优化建议
 ```sql
--- 复合索引：租户ID + 状态
-ALTER TABLE `eb_chat_service` ADD INDEX `idx_tenant_status` (`tenant_id`, `status`);
-ALTER TABLE `eb_chat_user` ADD INDEX `idx_tenant_status` (`tenant_id`, `status`);
+-- 复合索引：租户编码 + 状态
+ALTER TABLE `eb_chat_service` ADD INDEX `idx_tenant_status` (`tenant_code`, `status`);
+ALTER TABLE `eb_chat_user` ADD INDEX `idx_tenant_status` (`tenant_code`, `status`);
 
--- 复合索引：租户ID + 时间
-ALTER TABLE `eb_chat_service_dialogue_record` ADD INDEX `idx_tenant_time` (`tenant_id`, `create_time`);
+-- 复合索引：租户编码 + 时间
+ALTER TABLE `eb_chat_service_dialogue_record` ADD INDEX `idx_tenant_time` (`tenant_code`, `create_time`);
 
--- 复合索引：租户ID + 用户ID（对话查询优化）
-ALTER TABLE `eb_chat_service_dialogue_record` ADD INDEX `idx_tenant_user` (`tenant_id`, `to_user_id`);
+-- 复合索引：租户编码 + 用户ID（对话查询优化）
+ALTER TABLE `eb_chat_service_dialogue_record` ADD INDEX `idx_tenant_user` (`tenant_code`, `to_user_id`);
 
--- 分区表建议（大数据量情况下）
--- ALTER TABLE `eb_chat_service_dialogue_record` PARTITION BY HASH(`tenant_id`) PARTITIONS 8;
+-- 分区表建议（大数据量情况下 - 基于tenant_code哈希）
+-- ALTER TABLE `eb_chat_service_dialogue_record` PARTITION BY KEY(`tenant_code`) PARTITIONS 8;
 ```
 
 ### 8.3 缓存策略设计
 ```php
 // 租户信息缓存（30分钟）
-$cacheKey = "tenant:info:{$tenantId}";
-$tenant = Cache::remember($cacheKey, 1800, function() use ($tenantId) {
-    return TenantService::getTenant($tenantId);
+$cacheKey = "tenant:info:{$tenantCode}";
+$tenant = Cache::remember($cacheKey, 1800, function() use ($tenantCode) {
+    return TenantService::getTenantByCode($tenantCode);
 });
 
 // 租户客服列表缓存（5分钟，按页缓存）
-$cacheKey = "tenant:{$tenantId}:services:page:{$page}";
-$services = Cache::remember($cacheKey, 300, function() use ($tenantId, $page) {
-    return ChatServiceService::getServiceList(['tenant_id' => $tenantId], $page);
+$cacheKey = "tenant:{$tenantCode}:services:page:{$page}";
+$services = Cache::remember($cacheKey, 300, function() use ($tenantCode, $page) {
+    return ChatServiceService::getServiceList(['tenant_code' => $tenantCode], $page);
 });
 
 // 坐席数统计缓存（1分钟）
-$cacheKey = "tenant:{$tenantId}:seats:used";
-$usedSeats = Cache::remember($cacheKey, 60, function() use ($tenantId) {
-    return ChatService::where('tenant_id', $tenantId)->where('status', 1)->count();
+$cacheKey = "tenant:{$tenantCode}:seats:used";
+$usedSeats = Cache::remember($cacheKey, 60, function() use ($tenantCode) {
+    return ChatService::where('tenant_code', $tenantCode)->where('status', 1)->count();
 });
 ```
 
