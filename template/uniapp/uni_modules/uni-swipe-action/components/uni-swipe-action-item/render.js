@@ -112,11 +112,18 @@ export default {
 	 */
 	getDom(instance, ownerInstance, self) {
 		let state = self.state
+		// Guard: ownerInstance or its $el may not be ready during immediate watcher execution
+		if (!ownerInstance || !ownerInstance.$el) {
+			state.leftWidth = 0
+			state.rightWidth = 0
+			state.threshold = instance && instance.getDataset ? instance.getDataset().threshold : state.threshold
+			return
+		}
 		var leftDom = ownerInstance.$el.querySelector('.button-group--left')
 		var rightDom = ownerInstance.$el.querySelector('.button-group--right')
 
-		state.leftWidth = leftDom.offsetWidth || 0
-		state.rightWidth = rightDom.offsetWidth || 0
+		state.leftWidth = (leftDom && leftDom.offsetWidth) || 0
+		state.rightWidth = (rightDom && rightDom.offsetWidth) || 0
 		state.threshold = instance.getDataset().threshold
 	},
 

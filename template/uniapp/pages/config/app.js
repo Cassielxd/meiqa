@@ -1,6 +1,6 @@
 module.exports = {
 	//默认域名,域名格式例如:chat.cassie.net
-	defaultDomainName: '',
+	defaultDomainName: '47.97.102.216',
 	//默认请求方式为https或者http
 	defaultRequestType: 'http',
 	//默认ws链接方式,连接方式wss或者ws

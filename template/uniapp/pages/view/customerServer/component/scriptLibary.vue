@@ -5,7 +5,7 @@
 			<scroll-view scroll-y="true" class="script_group_scroll">
 				<div class="tag_list flex-center" @click="addGroup" v-if="speechArtType == 1">
 					<span class="iconfont">&#xe6c1;</span>
-					<span class="title_value">分组</span>
+					<span class="title_value">group</span>
 				</div>
 				<div class="tag_list tag_list_group" v-for="(item, index) in tagList" :key="index" :class="{ selectEdTag: cateId == item.id }" @click="selectTags(item)">
 					<div class="tag_list_tag" v-if="cateId == item.id"></div>
@@ -17,7 +17,7 @@
 			<scroll-view scroll-y="true" class="script_list_scroll">
 				<div class="add_script" v-if="speechArtType == 1" @click="addSpeech">
 					<div><span class="iconfont">&#xe6b9;</span></div>
-					<div><span>添加话术</span></div>
+					<div><span>add script</span></div>
 				</div>
 				<div class="script_list_item" v-for="(item, index) in scriptList" :key="index" @click="selectScript(item)">
 					<div class="script_list_item_label">{{ item.title }}</div>
@@ -34,14 +34,14 @@
 			<div class="addGroup_container">
 				<div class="addGroup_container_title">
 					<div></div>
-					<div>添加话术</div>
+					<div>add script</div>
 					<div @click="closeAddGroup"><span class="iconfont">&#xe6b5;</span></div>
 				</div>
 
 				<div class="addGroup_form">
-					<div class="input_box"><input class="inp_title" maxlength="20" v-model="speechData.title" type="text" placeholder="请输入标题名称" /></div>
-					<div class="input_box"><textarea v-model="speechData.message" type="text" placeholder="请输入您的话术"></textarea></div>
-					<div class="button_box" :class="{ canInput: speechData.title && speechData.message }" @click="handleSubmiteditAdd"><div>确定</div></div>
+					<div class="input_box"><input class="inp_title" maxlength="20" v-model="speechData.title" type="text" placeholder="please input title" /></div>
+					<div class="input_box"><textarea v-model="speechData.message" type="text" placeholder="please input script"></textarea></div>
+					<div class="button_box" :class="{ canInput: speechData.title && speechData.message }" @click="handleSubmiteditAdd"><div>confirm</div></div>
 				</div>
 			</div>
 		</uni-popup>
@@ -55,9 +55,9 @@
 				</div>
 
 				<div class="addGroup_form">
-					<div class="input_box"><input v-model.trim="userGroupData.name" maxlength="4" type="text" placeholder="请输入分组名称" /></div>
-					<div class="input_box"><input v-model="userGroupData.sort" type="text" placeholder="请输入分组排序"></input></div>
-					<div class="button_box" :class="{ canInput: userGroupData.name }" @click="handleSubmitUserGroup"><div>确定</div></div>
+					<div class="input_box"><input v-model.trim="userGroupData.name" maxlength="4" type="text" placeholder="please input group name" /></div>
+					<div class="input_box"><input v-model="userGroupData.sort" type="text" placeholder="please input group sort"></input></div>
+					<div class="button_box" :class="{ canInput: userGroupData.name }" @click="handleSubmitUserGroup"><div>confirm</div></div>
 				</div>
 			</div>
 		</uni-popup>
@@ -128,7 +128,7 @@ export default {
 				sort: ''
 			},
 			handleAdEdType: 1, // 1新增 2修改
-			handleGroupTitle: '新增分组',
+			handleGroupTitle: 'add group',
 			groupType: 1, // 1新增 2修改
 			
 		};
@@ -197,18 +197,18 @@ export default {
 			if(this.cateId == item.id) {
 				console.log(item);
 				this.userGroupData = serialize(item);
-				ActionSheet(['编辑', '删除']).then(res => {
+				ActionSheet(['edit', 'delete']).then(res => {
 					console.log(res)
 					switch(res) {
 						case 0:
 							this.groupType = 2;
-							this.handleGroupTitle = '编辑分组';
+							this.handleGroupTitle = 'edit group';
 							this.$refs.addEdUserGroups.open();
 						break;
 						case 1:
-							Modal('温馨提示', `分组 "${item.name}"将被删除, 请问是否继续？`).then(() => {
+							Modal('reminder', `group "${item.name}"will be deleted, are you sure you want to continue?`).then(() => {
 								http(api.deleteServiceCate, item).then(res => {
-									Toast('删除成功');
+									Toast('delete success');
 									this.selectScriptLibary('init');
 								})
 							})
@@ -262,12 +262,12 @@ export default {
 			});
 
 			if (!canInput) {
-				Toast('请将内容填写完整');
+				Toast('please fill in the content completely');
 				return;
 			}
 
 			http(api.putServiceSpeechcraft, this.speechData).then(res => {
-				Toast('修改成功');
+				Toast('modify success');
 				this.getSpeechArtList();
 				this.$refs.addEdGroup.close();
 			});
@@ -282,7 +282,7 @@ export default {
 				}
 			});
 			if (!canInput) {
-				Toast('请将内容填写完整');
+				Toast('please fill in the content completely');
 				return;
 			}
 			http(api.postServiceSpeechcraft, {
@@ -296,9 +296,9 @@ export default {
 		},
 		// 删除话术
 		handleDeleteServiceSpeechcraft(item) {
-			Modal('温馨提示', `话术"${item.title}"将被删除，请问是否继续？`).then(res => {
+			Modal('reminder', `script "${item.title}"will be deleted, are you sure you want to continue?`).then(res => {
 				http(api.deleteServiceSpeechcraft, item).then(res => {
-					Toast('删除成功');
+					Toast('delete success');
 					this.getSpeechArtList();
 				});
 			});
@@ -317,14 +317,14 @@ export default {
 				await http(api.serviceCate, {
 					...this.userGroupData
 				}).then(res => {
-					Toast('添加成功');
+					Toast('add success');
 				})
 			}
 			
 			if(this.groupType == 2) {
 				console.log(this.userGroupData);
 				await http(api.putServiceCate, this.userGroupData).then(res => {
-						Toast('修改成功');
+						Toast('modify success');
 						this.selectScriptLibary();
 						this.$refs.addEdUserGroups.close();
 					})

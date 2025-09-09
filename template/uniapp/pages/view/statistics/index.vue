@@ -10,19 +10,19 @@
 				<div class="statistics_list">
 					<div class="statistics_list_item">
 						<div class="statistics_list_item_value">{{ statisticsAll.all }}</div>
-						<div class="statistics_list_item_label">全部客户</div>
+						<div class="statistics_list_item_label"> all</div>
 					</div>
 					<div class="statistics_list_item">
 						<div class="statistics_list_item_value">{{ statisticsAll.toDayKefu }}</div>
-						<div class="statistics_list_item_label">今日客户</div>
+						<div class="statistics_list_item_label"> today</div>
 					</div>
 					<div class="statistics_list_item">
 						<div class="statistics_list_item_value">{{ statisticsAll.month }}</div>
-						<div class="statistics_list_item_label">本月客户</div>
+						<div class="statistics_list_item_label">  month</div>
 					</div>
 					<div class="statistics_list_item">
 						<div class="statistics_list_item_value">{{ statisticsAll.toDayTourist }}</div>
-						<div class="statistics_list_item_label">今日游客</div>
+						<div class="statistics_list_item_label"> today</div>
 					</div>
 				</div>
 
@@ -44,7 +44,7 @@
 								<biaofun-datetime-picker
 									class="positionPicker"
 									:class="{ primaryColor: searchChartsData.value }"
-									placeholder="请选择年月"
+									placeholder="select"
 									:defaultValue="searchChartsData.value"
 									start="2000"
 									end="2100"
@@ -59,7 +59,7 @@
 
 						<div class="content_charts_value">
 							<view class="charts-box">
-								<div class="title">新增(人)</div>
+								<div class="title"> add(person)</div>
 								<qiun-data-charts type="area" :inScrollView="true" canvasId="scrolllineid" :opts="opts" :chartData="chartData" :ontouch="true" :canvas2d="true" />
 							</view>
 						</div>
@@ -87,13 +87,13 @@ export default {
 				categories: [],
 				series: [
 					{
-						name: '客户',
+						name: 'customer',
 						data: [],
 						color: '#3875EA',
 						legendShape: 'square' // 长方形
 					},
 					{
-						name: '游客',
+						name: 'tourist',
 						data: [],
 						color: '#3FC7A9',
 						legendShape: 'square'
@@ -142,24 +142,16 @@ export default {
 		monthList() {
 			let arr = [
 				{
-					label: '昨天',
+					label: 'yesterday',
 					value: 'yesterday'
 				},
 				{
-					label: '今天',
+					label: 'today',
 					value: 'today'
 				},
 				{
-					label: '7天',
+					label: '7 days',
 					value: 'lately7'
-				},
-				{
-					label: '30天',
-					value: 'lately30'
-				},
-				{
-					label: '半年',
-					value: 'lately180'
 				}
 			];
 			// for (let i = 1; i < new Date().getMonth(); i++) {

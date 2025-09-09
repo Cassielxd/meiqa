@@ -4,7 +4,7 @@
 		<div class="login_container_bg"><!-- <image class="login_container_bg_image" src="~static/dominName/bg.png" mode="widthFix"></image> --></div>
 		<!-- 头部背景图结束 -->
 		<div class="login_container_content">
-			<div class="login_container_content_title"><span>设置请求域名</span></div>
+			<div class="login_container_content_title"><span>set request domain name</span></div>
 
 			<div class="login_container_content_form">
 				<div class="login_container_content_form_input">
@@ -14,7 +14,7 @@
 							<span>://</span>
 						</view>
 					</picker>
-					<input type="text" v-model="dominName" placeholder="请输入域名" />
+					<input type="text" v-model="dominName" placeholder="please input domain name" />
 					<!-- <span class="iconfont">&#xe6f6;</span> -->
 				</div>
 
@@ -26,8 +26,8 @@
 			</div>
 
 			<div class="login_container_content_handle">
-				<div class="login_button" @click="cancel" v-if="isShowCencel">取消</div>
-				<div class="login_primary_button" @click="handleSetDominName">确定</div>
+				<div class="login_button" @click="cancel" v-if="isShowCencel">cancel</div>
+				<div class="login_primary_button" @click="handleSetDominName">confirm</div>
 			</div>
 		</div>
 	</div>
@@ -79,11 +79,11 @@ export default {
 	methods: {
 		handleSetDominName() {
 			if (!this.dominName) {
-				Toast('请设置域名');
+				Toast('please set domain name');
 				return;
 			}
 
-			Modal('温馨提示', `您设置的域名是 "${this.dominName}", 请问是否继续?`).then(res => {
+			Modal('reminder', `the domain name you set is "${this.dominName}", please confirm?`).then(res => {
 				this.$store.commit('setHttp', {
 					wsFile: this.wsFileConcat[this.selectFile],
 					dominName: this.dominName,

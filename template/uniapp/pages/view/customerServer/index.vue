@@ -23,7 +23,7 @@
 								v-html="replace_em(item.msn)"></text></view>
 						<view class="content_list_message_product" v-if="item.msn_type == 5">
 							<view class="content_list_message_orderId">
-								<span class="content_list_message_orderId_label">商品名称:</span>
+								<span class="content_list_message_orderId_label"> product name:</span>
 								<span class="content_list_message_orderId_value">{{ item.other.store_name }}</span>
 							</view>
 
@@ -35,7 +35,7 @@
 									<view class="content_list_message_detils_value_shopMessag">
 										<view class="content_list_message_detils_value_shopMessag_item">
 											<view class="content_list_message_detils_value_shopMessag_item_label">
-												<span>库存:</span>
+												<span>stock:</span>
 											</view>
 											<view class="content_list_message_detils_value_shopMessag_item_value">
 												<span>{{ item.other.stock }}</span>
@@ -43,7 +43,7 @@
 										</view>
 										<view class="content_list_message_detils_value_shopMessag_item">
 											<view class="content_list_message_detils_value_shopMessag_item_label">
-												<span>销量:</span>
+												<span>sales:</span>
 											</view>
 											<view class="content_list_message_detils_value_shopMessag_item_value">
 												<span>{{ parseInt(item.other.sales) + parseInt(item.other.ficti ? item.other.ficti : 0) }}</span>
@@ -89,7 +89,7 @@
 					</view>
 					<view class="footer_input_icon">
 						<span class="iconfont mr18" @click="selectOption(1)">&#xe6cb;</span>
-						<span class="sendMessage" v-if="sendMessage" @click.stop="sendText">发送</span>
+						<span class="sendMessage" v-if="sendMessage" @click.stop="sendText">send</span>
 						<span class="iconfont" @click="selectOption(2)" v-if="!sendMessage">&#xe6c2;</span>
 					</view>
 				</view>
@@ -98,15 +98,15 @@
 					<view class="option" v-if="selectModel == 2">
 						<view @click="uploadImage">
 							<image src="~static/image/messageList/picture.png" mode="widthFix"></image>
-							<view>图片</view>
+							<view>picture</view>
 						</view>
 						<view @click="transfer">
 							<image src="~static/image/messageList/connection.png" mode="widthFix"></image>
-							<view>转接</view>
+							<view>transfer</view>
 						</view>
 						<view @click="authReply">
 							<image src="~static/images/auth-reply.png" mode="widthFix"></image>
-							<view>自动回复</view>
+							<view>automatic reply</view>
 						</view>
 					</view>
 
@@ -140,7 +140,7 @@
 				<view class="scriptLibary_search">
 					<view class="search">
 						<span @click="handleSetTitle" class="iconfont icon_search">&#xe6d8;</span>
-						<input v-model="scriptTitle" type="text" placeholder="搜索快捷回复" />
+						<input v-model="scriptTitle" type="text" placeholder="search shortcut reply" />
 					</view>
 				</view>
 				<view class="scriptLibary_content">
@@ -203,11 +203,11 @@
 				propstitle: '',
 				speechArtTypeList: [{
 						id: 1,
-						label: '个人库'
+						label: 'personal library'
 					},
 					{
 						id: 0,
-						label: '公共库'
+						label: 'public library'
 					}
 				],
 				customerServerData: {

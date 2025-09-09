@@ -3,13 +3,13 @@
 		<lay-out>
 			<div slot="header" class="header">
 				<div class="header_title">{{speechArtTypeConcat[speechArtType]}}</div>
-				<div @click="finish">完成</div>
+				<div @click="finish"> finish</div>
 			</div>
 			<div slot="content" class="content">
 				<div class="scriptLibary_search">
 					<div>
 						<span class="iconfont">&#xe6d8;</span>
-						<input v-model="propstitle" type="text" placeholder="搜索快捷回复" />
+						<input v-model="propstitle" type="text" placeholder="search shortcut reply" />
 					</div>
 				</div>
 				<div class="scriptLibary_content">

@@ -4,30 +4,30 @@
 		<div class="login_container_bg"><image class="login_container_bg_image" src="~static/image/login/bg.png" mode="widthFix"></image></div>
 		<!-- 头部背景图结束 -->
 		<div class="login_container_content">
-			<div class="login_container_content_title"><span>欢迎登录</span></div>
+			<div class="login_container_content_title"><span>welcome to login</span></div>
 
 			<div class="login_container_content_form">
 				<div class="login_container_content_form_input">
-					<login-input v-model="loginData.account" type="text" placeholder="请输入账号"><span slot="icon" class="iconfont">&#xe6bc;</span></login-input>
+					<login-input v-model="loginData.account" type="text" placeholder="please input account"><span slot="icon" class="iconfont">&#xe6bc;</span></login-input>
 				</div>
 
 				<div class="login_container_content_form_input">
-					<login-input v-model="loginData.password" type="password" placeholder="请输入密码"><span slot="icon" class="iconfont">&#xe6bd;</span></login-input>
+					<login-input v-model="loginData.password" type="password" placeholder="please input password"><span slot="icon" class="iconfont">&#xe6bd;</span></login-input>
 				</div>
 
 				<div class="login_container_content_form_input privacy_agreement">
 					<div class="privacy_agreement_content">
 						<checkbox-group @change="checkoutPrivaey">
 							<checkbox class="checkbox" :value="isCheckEd" />
-							<span>请阅读并勾选</span>
-							<text @click="showPrivaey">隐私协议</text>
+							<span>please read and check</span>
+							<text @click="showPrivaey">privacy protocol</text>
 						</checkbox-group>
 					</div>
 				</div>
 			</div>
 
-			<div class="login_container_content_handle"><div class="login_primary_button" @click="handleLogin">登录</div></div>
-			<div v-if='isDomainName' class="login-to-set-domin-name"><navigator hover-class="none" url="/pages/view/dominName/index">修改域名</navigator></div>
+			<div class="login_container_content_handle"><div class="login_primary_button" @click="handleLogin">login</div></div>
+			<div v-if='isDomainName' class="login-to-set-domin-name"><navigator hover-class="none" url="/pages/view/dominName/index">modify domain name</navigator></div>
 		</div>
 	</div>
 </template>
@@ -66,7 +66,7 @@ export default {
 	methods: {
 		async handleLogin() {
 			if (!this.isCheckEdArr.length) {
-				Toast('请勾选隐私协议');
+				Toast('please check the privacy protocol');
 				return;
 			}
 			//#ifdef APP-PLUS

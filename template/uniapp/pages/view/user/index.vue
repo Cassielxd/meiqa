@@ -13,21 +13,21 @@
 							<span class="isOnline" :class="{ online: customerServerData.online == '1' }"
 								@click="handleChangeOnline">
 								<span></span>
-								<span>{{ customerServerData.online == '1' ? '在线' : '离线' }}</span>
+								<span>{{ customerServerData.online == '1' ? ' online' : 'offline' }}</span>
 
 								<!-- 切换上线下线弹框开始 -->
 								<span class="onLineModel" v-if="onlineModel">
 									<span class="sanjiao"></span>
 									<span class="model_text" @click="online(1)">
 										<span class="dian online"></span>
-										<span>在线</span>
+										<span>online</span>
 										<span class="iconfont"
 											:class="{ opacity0: !(customerServerData.online == '1') }">&#xe6d1;</span>
 									</span>
 									<span class="xian"></span>
 									<span class="model_text" @click="online(0)">
 										<span class="dian"></span>
-										<span>离线</span>
+										<span>offline</span>
 										<span class="iconfont"
 											:class="{ opacity0: !(!customerServerData.online || customerServerData.online == '0') }">&#xe6d1;</span>
 									</span>
@@ -36,14 +36,14 @@
 								<!-- 切换上线下线弹框结束 -->
 							</span>
 						</div>
-						<div class="box_font2">手机号：{{ customerServerData.phone }}</div>
+						<div class="box_font2">phone：{{ customerServerData.phone }}</div>
 					</div>
 				</div>
 
 				<div class="content">
 					<div class="content_box" @click="setting">
 						<div class="icon"><span class="iconfont iconPrimaryColor">&#xe6bc;</span></div>
-						<div class="text">个人信息</div>
+						<div class="text">personal information</div>
 						<div>
 							<image src="~static/images/right.png" alt=""></image>
 						</div>
@@ -51,7 +51,7 @@
 					<div class="line"></div>
 					<div class="content_box" @click="authReply">
 						<div class="icon"><span class="iconfont iconPrimaryColor">&#xe6d9;</span></div>
-						<div class="text">自动回复</div>
+						<div class="text">automatic reply</div>
 						<div>
 							<image src="~static/images/right.png" alt=""></image>
 						</div>
@@ -59,7 +59,7 @@
 					<div class="line"></div>
 					<div class="content_box" @click="feedback">
 						<div class="icon"><span class="iconfont iconPrimaryColor">&#xe6d9;</span></div>
-						<div class="text">意见反馈</div>
+						<div class="text">feedback</div>
 						<div>
 							<image src="~static/images/right.png" alt=""></image>
 						</div>
@@ -67,7 +67,7 @@
 					<div class="line" v-if='isDomainName'></div>
 					<div class="content_box" v-if='isDomainName' @click="editDominName">
 						<div class="icon"><span class="iconfont iconPrimaryColor">&#xe6f9;</span></div>
-						<div class="text">域名设置</div>
+						<div class="text">domain name</div>
 						<div class="message">
 							<span>{{ dominName }}</span>
 							<image src="~static/images/right.png" alt=""></image>
@@ -78,14 +78,13 @@
 				<div class="content">
 					<div class="content_box" @click="loginOut">
 						<div class="icon"><span class="iconfont iconPrimaryColor">&#xe6f8;</span></div>
-						<div class="text">退出登录</div>
+						<div class="text">logout</div>
 						<div>
 							<image src="~static/images/right.png" alt=""></image>
 						</div>
 					</div>
 				</div>
 
-				<div class="copyright"><span class="iconfont">&#xe6f7;</span></div>
 			</div>
 		</lay-out>
 	</div>

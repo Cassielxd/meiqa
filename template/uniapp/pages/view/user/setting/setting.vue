@@ -1,29 +1,29 @@
 <template>
 	<div class="container">
-		<lay-out  titleName="设置">
+		<lay-out  titleName="setting">
 			<div slot="content">
 				<view class='personal-data'>
 					<view class='list'>
 						<view class='item'>
-							<view>头像</view>
+							<view>avatar</view>
 							<view class="avatar-box" @click='uploadpic'>
 								<image :src="customerServerData.avatar"></image>
 							</view>
 						</view>
 						<view class='item'>
-							<view>昵称</view>
-							<view class='input'><input v-model="customerServerData.nickname" type='text' placeholder="请输入客服名称"></input></view>
+							<view>nickname</view>
+							<view class='input'><input v-model="customerServerData.nickname" type='text' placeholder="please input nickname"></input></view>
 						</view>
 						<view class='item'>
-							<view>手机号</view>
+							<view>phone</view>
 							<view class='input'>
-								<view class='input'><input v-model="customerServerData.phone" type='number' placeholder="请填写联系方式"></input></view>
+								<view class='input'><input v-model="customerServerData.phone" type='number' placeholder="please input phone"></input></view>
 							</view>
 						</view>
 						<view class="item">
-							<view>密码</view>
+							<view>password</view>
 							<view class='input'>
-								<view class='input'><input v-model="customerServerData.password" type='number' placeholder="请输入密码"></input></view>
+								<view class='input'><input v-model="customerServerData.password" type='number' placeholder="please input password"></input></view>
 							</view>
 						</view>
 					</view>
@@ -120,7 +120,7 @@
 						}
 					},
 					fail: res => {
-						Toast('上传图片失败');
+						Toast('upload image failed');
 					},
 					complete: res => {
 						console.log(res);
@@ -135,14 +135,14 @@
 					postData.password = '******'
 				}
 				http(api.putKefuUserUserInfo, postData).then(res => {
-					Toast('修改成功');
+					Toast('modify success');
 					this.initData();
 				})
 			},
 			// 退出登录
 			loginOut() {
 				http(api.userLogout).then(res => {
-					Modal('温馨提示', '您确定要退出登录吗?').then(() => {
+					Modal('reminder', 'are you sure you want to logout?').then(() => {
 						navigateTo(3, '/pages/view/login/index');
 					});
 				});

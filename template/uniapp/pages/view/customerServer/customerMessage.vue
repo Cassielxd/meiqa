@@ -17,23 +17,23 @@
 
 				<div class="content_message">
 					<div class="content_message_item">
-						<div class="content_message_item_label"><span>备注昵称</span></div>
+						<div class="content_message_item_label"><span>nickname</span></div>
 						<div class="content_message_item_value">
-							<input type="text" v-model="userDetilsData.remark_nickname" placeholder="请输入备注昵称" v-if="inputRadio" />
-							<span v-else>{{ userDetilsData.remark_nickname ? userDetilsData.remark_nickname : '暂无数据' }}</span>
+							<input type="text" v-model="userDetilsData.remark_nickname" placeholder="please input nickname" v-if="inputRadio" />
+							<span v-else>{{ userDetilsData.remark_nickname ? userDetilsData.remark_nickname : 'no data' }}</span>
 						</div>
 					</div>
 
 					<div class="content_message_item">
-						<div class="content_message_item_label"><span>手机号</span></div>
+						<div class="content_message_item_label"><span>phone</span></div>
 						<div class="content_message_item_value">
-							<input type="text" v-model="userDetilsData.phone" placeholder="请输入客户联系方式" v-if="inputRadio" />
-							<span v-else>{{ userDetilsData.phone ? userDetilsData.phone : '暂无数据' }}</span>
+							<input type="text" v-model="userDetilsData.phone" placeholder="please input phone" v-if="inputRadio" />
+							<span v-else>{{ userDetilsData.phone ? userDetilsData.phone : 'no data' }}</span>
 						</div>
 					</div>
 
 					<div class="content_message_item">
-						<div class="content_message_item_label"><span>性别</span></div>
+						<div class="content_message_item_label"><span>gender</span></div>
 
 						<div class="content_message_item_value" v-if="inputRadio">
 							<picker mode="selector" :range="sexArr" range-key="label" @change="changeSex">
@@ -47,14 +47,14 @@
 					</div>
 
 					<div class="content_message_item">
-						<div class="content_message_item_label"><span>备注</span></div>
+						<div class="content_message_item_label"><span>remarks</span></div>
 						<div class="content_message_item_value">
-							<input type="text" v-model="userDetilsData.remarks" placeholder="请输入备注" v-if="inputRadio" />
-							<span v-else>{{ userDetilsData.remarks ? userDetilsData.remarks : '暂无数据' }}</span>
+							<input type="text" v-model="userDetilsData.remarks" placeholder="please input remarks" v-if="inputRadio" />
+							<span v-else>{{ userDetilsData.remarks ? userDetilsData.remarks : 'no data' }}</span>
 						</div>
 					</div>
 					<div class="content_message_item" @click="openUserTag">
-						<div class="content_message_item_label"><span>用户标签</span></div>
+						<div class="content_message_item_label"><span>user label</span></div>
 						<div class="content_message_item_value flex">
 							<div class="tag_list">
 								<span v-for="(item, index) in userDetilsData.label" :key="index">{{ item.label }}</span>
@@ -63,7 +63,7 @@
 						</div>
 					</div>
 					<div class="content_message_item" @click="editGroup">
-						<div class="content_message_item_label"><span>分组</span></div>
+						<div class="content_message_item_label"><span>group</span></div>
 						<div class="content_message_item_value">
 							<span>{{ userGroupConcat[userDetilsData.group_id] }}</span>
 						</div>
@@ -71,7 +71,7 @@
 					</div>
 
 					<div class="content_message_item">
-						<div class="content_message_item_label"><span>用户类型</span></div>
+						<div class="content_message_item_label"><span>user type</span></div>
 						<div class="content_message_item_value">
 							<span>{{ formType[userDetilsData.type] }}</span>
 						</div>
@@ -82,14 +82,14 @@
 					</div> -->
 
 					<div class="content_message_item marginTop16" @click="handelComplaint">
-						<div class="content_message_item_label"><span>投诉</span></div>
+						<div class="content_message_item_label"><span>complaint</span></div>
 						<div class="content_message_item_value">
 							<span>{{ formType[userDetilsData.type] }}</span>
 						</div>
 					</div>
 
 					<div class="content_message_item marginTop16" @click="handelblock">
-						<div class="content_message_item_label"><span>拉黑</span></div>
+						<div class="content_message_item_label"><span>block</span></div>
 						<div class="content_message_item_value">
 							<span>{{ formType[userDetilsData.type] }}</span>
 						</div>
@@ -109,7 +109,7 @@
 		<uni-popup ref="userTagModel" type="center" animation>
 			<div class="userTag_container">
 				<div class="userTag_container_title">
-					<div class="userTag_container_title_message"><span>用户标签</span></div>
+					<div class="userTag_container_title_message"><span>user label</span></div>
 					<div class="closeModel" @click="closeUserTagModel"><span class="iconfont">&#xe6c6;</span></div>
 				</div>
 
@@ -125,7 +125,7 @@
 				</div>
 
 				<div class="userTag_container_handle" @click="handleSetTags">
-					<div class="userTag_container_handle_button" ><span>确定</span></div>
+					<div class="userTag_container_handle_button" ><span>confirm</span></div>
 				</div>
 			</div>
 		</uni-popup>
@@ -133,7 +133,7 @@
 		<uni-popup ref="userGroupModel" type="center" animation>
 			<div class="userTag_container">
 				<div class="userTag_container_title">
-					<div class="userTag_container_title_message"><span>用户分组</span></div>
+					<div class="userTag_container_title_message"><span>user group</span></div>
 					<div class="closeModel" @click="closeUserGroupModel"><span class="iconfont">&#xe6c6;</span></div>
 				</div>
 				<div class="userTag_container_list">
@@ -145,7 +145,7 @@
 				</div>
 
 				<div class="userTag_container_handle" @click="handleSetGroup">
-					<div class="userTag_container_handle_button"><span>确定</span></div>
+					<div class="userTag_container_handle_button"><span>confirm</span></div>
 				</div>
 			</div>
 		</uni-popup>
@@ -164,27 +164,27 @@ export default {
 			userTagList: [],
 			formType: {
 				0: 'pc',
-				1: '微信',
-				2: '小程序',
+				1: 'wechat',
+				2: 'mini program',
 				3: 'H5'
 			},
 			sexType: {
-				0: '未知',
-				1: '男',
-				2: '女'
+				0: 'unknown',
+				1: 'male',
+				2: 'female'
 			},
 			sexArr: [
 				{
 					value: 0,
-					label: '未知'
+					label: 'unknown'
 				},
 				{
 					value: 1,
-					label: '男'
+					label: 'male'
 				},
 				{
 					value: 2,
-					label: '女'
+					label: 'female'
 				}
 			],
 			userGroup: [], // 用户分组
@@ -203,9 +203,9 @@ export default {
 	methods: {
 		// 拉黑
 		handelblock() {
-			Modal('拉黑用户', `"${this.userDetilsData.nickname}"将被拉黑，请问是否继续？`).then(() => {
+			Modal('reminder', `"${this.userDetilsData.nickname}"will be blocked, are you sure you want to continue?`).then(() => {
 				http(api.putUserStatus, { userId: this.userDetilsData.user_id }).then(res => {
-					Toast('拉黑成功');
+					Toast('block success');
 					this.$store.commit('setRefresh', true);
 					navigateTo(4, '/pages/view/messageList/index');
 				});
@@ -240,7 +240,7 @@ export default {
 		// 打开用户标签选择选项
 		openUserTag() {
 			if (!this.inputRadio) {
-				Toast('请打开修改开关');
+				Toast('please open the modify switch');
 				return;
 			}
 			http(api.userLabelSelect, { id: this.queryUserData.user_id }).then(res => {
@@ -259,7 +259,7 @@ export default {
 		// 选择分组弹框
 		editGroup() {
 			if (!this.inputRadio) {
-				Toast('请打开修改开关');
+				Toast('please open the modify switch');
 				return;
 			}
 			this.$refs.userGroupModel.open();
@@ -283,7 +283,7 @@ export default {
 				id: this.userDetilsData.group_id,
 				userId: this.userDetilsData.id
 			}).then(res => {
-				Toast('用户分组设置完成');
+				Toast('user group set success');
 				this.$refs.userGroupModel.close();
 			});
 		},

@@ -3,7 +3,7 @@
 		{
 			"path": "pages/view/messageList/index",
 			"style": {
-				"navigationBarTitleText": "加载中...",
+				"navigationBarTitleText": "loading...",
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": true,
@@ -25,7 +25,7 @@
 		{
 			"path": "pages/view/customerServer/index",
 			"style": {
-				"navigationBarTitleText": "客服工作台",
+				"navigationBarTitleText": "customer server",//客服工作台
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -44,7 +44,7 @@
 		{
 			"path": "pages/view/list/addbook",
 			"style": {
-				"navigationBarTitleText": "客户列表",
+				"navigationBarTitleText": "customer list",//客户列表
 				"app-plus": {
 					"navigationStyle": "default",
 					"navigationBarTextStyle": "write",
@@ -66,7 +66,7 @@
 		{
 			"path": "pages/view/authReply/index",
 			"style": {
-				"navigationBarTitleText": "自动回复",
+				"navigationBarTitleText": "automatic reply",//自动回复
 				"app-plus": {
 					"navigationStyle": "default",
 					"navigationBarTextStyle": "write",
@@ -77,7 +77,7 @@
 		{
 			"path": "pages/view/setTags/index",
 			"style": {
-				"navigationBarTitleText": "标签",
+				"navigationBarTitleText": "tag",//标签
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -90,7 +90,7 @@
 		{
 			"path": "pages/view/setTags/addTag",
 			"style": {
-				"navigationBarTitleText": "标签详情",
+				"navigationBarTitleText": "tag details",//标签详情
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -103,7 +103,7 @@
 		{
 			"path": "pages/view/statistics/index",
 			"style": {
-				"navigationBarTitleText": "统计",
+				"navigationBarTitleText": "statistics",//统计
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -116,7 +116,7 @@
 		{
 			"path": "pages/view/user/index",
 			"style": {
-				"navigationBarTitleText": "我的",
+				"navigationBarTitleText": "my",//我的
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -129,7 +129,7 @@
 		{
 			"path": "pages/view/login/index",
 			"style": {
-				"navigationBarTitleText": "登录页",
+				"navigationBarTitleText": "login page",//登录页
 				"app-plus": {
 					"navigationStyle": "custom",
 					"titleView": false,
@@ -140,7 +140,7 @@
 		{
 			"path": "pages/view/authorizedLogin/index",
 			"style": {
-				"navigationBarTitleText": "授权登录",
+				"navigationBarTitleText": "authorized login",//授权登录
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -162,7 +162,7 @@
 		{
 			"path": "pages/view/customerServer/script",
 			"style": {
-				"navigationBarTitleText": "常用语",
+				"navigationBarTitleText": "script",//常用语
 				"app-plus": {
 					"navigationStyle": "custom",
 					"titleView": false,
@@ -173,7 +173,7 @@
 		{
 			"path": "pages/view/user/setting/setting",
 			"style": {
-				"navigationBarTitleText": "设置",
+				"navigationBarTitleText": "setting",//设置
 				"app-plus": {
 					"navigationStyle": "default",
 					"navigationBarTextStyle": "write",
@@ -185,7 +185,7 @@
 							"fontSize": "14px",
 							"float": "right",
 							// "fontSrc":"/static/font/iconfont.ttf",
-							"text": "保存",
+							"text": "save",
 							"width": "50px"
 						}]
 					}
@@ -196,7 +196,7 @@
 		{
 			"path": "pages/view/customerServer/customerMessage",
 			"style": {
-				"navigationBarTitleText": "客户信息",
+				"navigationBarTitleText": "customer information",
 				"app-plus": {
 					"navigationStyle": "default",
 					"navigationBarTextStyle": "write",
@@ -207,7 +207,7 @@
 							"fontSize": "14px",
 							"float": "right",
 							// "fontSrc":"/static/font/iconfont.ttf",
-							"text": "保存",
+							"text": "save",
 							"width": "50px"
 						}]
 					}
@@ -217,7 +217,7 @@
 		{
 			"path": "pages/view/customerServer/complaint",
 			"style": {
-				"navigationBarTitleText": "投诉",
+				"navigationBarTitleText": "complaint",
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -228,7 +228,7 @@
 		{
 			"path": "pages/view/feedback/index",
 			"style": {
-				"navigationBarTitleText": "客户反馈",
+				"navigationBarTitleText": "customer feedback",
 				"app-plus": {
 					"navigationStyle": "default",
 					"titleView": false,
@@ -240,7 +240,7 @@
 			"path": "pages/view/privacyAgreement/index",
 			"style": {
 				"navigationBarTextStyle": "black",
-				"navigationBarTitleText": "隐私协议"
+				"navigationBarTitleText": "privacy agreement"
 			}
 		}
 	],
@@ -263,22 +263,22 @@
 			"pagePath": "pages/view/messageList/index",
 			"iconPath": "static/image/footer/chatUnSelcect.png",
 			"selectedIconPath": "static/image/footer/chatSelect.png",
-			"text": "聊天"
+			"text": "chat"
 		}, {
 			"pagePath": "pages/view/list/addbook",
 			"iconPath": "static/image/footer/userUnselect.png",
 			"selectedIconPath": "static/image/footer/userselect.png",
-			"text": "客户"
+			"text": "customer"
 		}, {
 			"pagePath": "pages/view/statistics/index",
 			"iconPath": "static/image/footer/staticUnSelect.png",
 			"selectedIconPath": "static/image/footer/staticSelect.png",
-			"text": "统计"
+			"text": "statistics"
 		}, {
 			"pagePath": "pages/view/user/index",
 			"iconPath": "static/image/footer/myUnSelect.png",
 			"selectedIconPath": "static/image/footer/mySelect.png",
-			"text": "我的"
+			"text": "my"
 		}]
 	}
 }

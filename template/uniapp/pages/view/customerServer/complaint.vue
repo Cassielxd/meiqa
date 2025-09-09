@@ -2,7 +2,7 @@
 	<div class="container">
 		<div class="header_banner">
 			<div class="header_banner_content">
-				<div class="header_banner_content_title"><span>提建议或举报不良内容</span></div>
+				<div class="header_banner_content_title"><span>suggest or report</span></div>
 				<div class="header_banner_content_message">
 					<span>亲，若您收到不良信息，请及时反馈，我们非常重视您给我们提出宝贵的建议，帮助我们不断完善产品，谢谢！</span></div>
 			</div>
@@ -35,7 +35,7 @@
 				</div> -->
 
 		<div class="feedback">
-			<div class="feedback_title"><span>我要投诉</span></div>
+			<div class="feedback_title"><span> i want to complaint</span></div>
 
 			<div class="feedback_list">
 				<div class="feedback_list_item" v-for="(item, index) in feedbackList" :key="index"
@@ -54,10 +54,10 @@
 						<input v-model="feedBackData.phone" type="text" value="" placeholder="请输入您的联系电话" />
 					</div> -->
 
-			<div class="feedback_textarea"><textarea v-model="feedBackData.content" value="" placeholder="请填写留言内容" />
+			<div class="feedback_textarea"><textarea v-model="feedBackData.content" value="" placeholder="please input" />
 			</div>
 
-			<div class="handle_button" @click="handleSubmit"><span>提交</span></div>
+			<div class="handle_button" @click="handleSubmit"><span>submit</span></div>
 		</div>
 
 		<uni-popup ref="feedbackReslove" animation>

@@ -10,7 +10,7 @@
 						<div class="icon" @click="searchUser"><span class="iconfont">&#xe6bf;</span></div>
 						<div class="input">
 							<input class="uni-input" @confirm="searchUser" @focus="searchFocus" @blur="searchBlur"
-								v-model="nickname" type="text" placeholder="搜索用户名称" />
+								v-model="nickname" type="text" placeholder="search user name" />
 						</div>
 					</div>
 				</div>
@@ -19,7 +19,7 @@
 			<div slot="content" class="content">
 				<!-- 聊天列表 -->
 				<div class="content_userMessgae">
-					<uni-swipe-action>
+					<uni-swipe-action v-if="listReady">
 						<uni-swipe-action-item v-for="(item, index) in userList" :right-options="options"
 							@click="deleteUserRecord($event, index)" :key="item.id">
 							<div :id="`content_userMessgae_item${item.id}`" class="content_userMessgae_item"
@@ -56,7 +56,7 @@
 									</div>
 								</div>
 								<!-- 聊天时间结束 -->
-								<div class="content_userMessgae_item_del">删除</div>
+								<div class="content_userMessgae_item_del">delete</div>
 							</div>
 						</uni-swipe-action-item>
 					</uni-swipe-action>
@@ -154,7 +154,8 @@
 					}
 				}],
 				download: false,
-				percent: 0
+				percent: 0,
+				listReady: false
 			};
 		},
 		watch: {
@@ -174,6 +175,9 @@
 		onLoad(opt) {
 			this.initSocket();
 			this.userList = this.$store.getters.userRecord.userList;
+			this.$nextTick(() => {
+				this.listReady = true;
+			});
 			this.appVersionLevel();
 		},
 		onShow(opt) {
@@ -334,6 +338,7 @@
 			// 获取客户列表, 客服信息
 			initData(type) {
 				this.pageData.limit = 10;
+				this.listReady = false;
 				this.$store.dispatch('getUserRecord', {
 					nickname: this.nickname,
 					pageData: this.pageData,
@@ -351,6 +356,9 @@
 					if (this.refresherTriggered) {
 						this.refresherTriggered = false;
 					}
+					this.$nextTick(() => {
+						this.listReady = true;
+					});
 				});
 			},
 

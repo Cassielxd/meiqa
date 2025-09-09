@@ -1,7 +1,7 @@
 <template>
 	<div class="transfer_container">
 		<div class="transfer_container_title">
-			<div class="transfer_container_title_value"><span>转接客服</span></div>
+			<div class="transfer_container_title_value"><span>transfer</span></div>
 			<div class="transfer_container_title_icon" @click="close"><span class="iconfont">&#xe6b5;</span></div>
 		</div>
 
@@ -19,7 +19,7 @@
 			</scroll-view>
 		</div>
 
-		<div class="handle_box" @click="handleSubmit"><div>确定</div></div>
+		<div class="handle_box" @click="handleSubmit"><div>confirm</div></div>
 	</div>
 </template>
 

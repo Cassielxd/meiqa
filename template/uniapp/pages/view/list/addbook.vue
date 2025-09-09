@@ -3,7 +3,7 @@
 		<lay-out noBottomHeight>
 			<div slot="header">
 				<view class="search-content padding">
-					<view class="uni-input-wrapper"><input class="uni-input" @confirm="initData" v-model="searchData.nickname" placeholder="搜索用户名称" /></view>
+					<view class="uni-input-wrapper"><input class="uni-input" @confirm="initData" v-model="searchData.nickname" placeholder="search user name" /></view>
 				</view>
 			</div>
 
@@ -28,8 +28,8 @@
 		<uni-popup ref="userTagModel" type="bottom" animation>
 			<div class="userTag_container">
 				<div class="userTag_container_title">
-					<div :class="{ on: tabOn == 1 }" class="userTag_container_title_message" @click="tabOn = 1"><span>用户标签</span></div>
-					<div :class="{ on: tabOn == 2 }" class="userTag_container_title_message" @click="tabOn = 2"><span>分组标签</span></div>
+					<div :class="{ on: tabOn == 1 }" class="userTag_container_title_message" @click="tabOn = 1"><span>user tag</span></div>
+					<div :class="{ on: tabOn == 2 }" class="userTag_container_title_message" @click="tabOn = 2"><span>group tag</span></div>
 					<div class="closeModel" @click="closeUserTagModel"><span class="iconfont">&#xe6b5;</span></div>
 				</div>
 
@@ -49,7 +49,7 @@
 					</div>
 				</scroll-view>
 				<div class="userTag_container_handle" @click="handleSetTags">
-					<div class="userTag_container_handle_button"><span>确定</span></div>
+					<div class="userTag_container_handle_button"><span>confirm</span></div>
 				</div>
 			</div>
 		</uni-popup>
@@ -83,7 +83,28 @@ export default {
 	},
 	onLoad() {
 		this.customerServerData = this.$store.state.kefuInfo;
-		this.bookList = this.$store.state.bookList;
+		const cached = this.$store.state.bookList;
+		if (Array.isArray(cached)) {
+			const grouped = {};
+			this.letter.forEach(letter => {
+				grouped[letter] = [];
+			});
+			cached.forEach(item => {
+				const name = item.nickname || item.username || '';
+				const first = name ? (makePy(name).substr(0, 1) || '').toUpperCase() : '';
+				if (grouped[first] !== undefined) {
+					grouped[first].push(item);
+				}
+			});
+			Object.keys(grouped).forEach(k => {
+				if (!grouped[k].length) delete grouped[k];
+			});
+			this.bookList = grouped;
+		} else if (cached && typeof cached === 'object') {
+			this.bookList = cached;
+		} else {
+			this.bookList = {};
+		}
 	},
 	onShow() {
 		this.searchData.label_id = '';
@@ -142,7 +163,31 @@ export default {
 		// 查询当前客服的客户列表
 		initData() {
 			this.$store.dispatch('getBookList', this.searchData).then(res => {
-				this.bookList = res;
+				// Ensure bookList is an object keyed by initial letters with array values
+				const grouped = {};
+				// Initialize buckets in A-Z order to keep consistent key order
+				this.letter.forEach(letter => {
+					grouped[letter] = [];
+				});
+				// Group incoming array (res) by the first letter of nickname (using makePy for pinyin when needed)
+				if (Array.isArray(res)) {
+					res.forEach(item => {
+						const name = item.nickname || item.username || '';
+						const first = name ? (makePy(name).substr(0, 1) || '').toUpperCase() : '';
+						if (grouped[first] !== undefined) {
+							grouped[first].push(item);
+						}
+					});
+					// Remove empty groups to avoid rendering empty headers
+					Object.keys(grouped).forEach(k => {
+						if (!grouped[k].length) delete grouped[k];
+					});
+					this.bookList = grouped;
+				} else if (res && typeof res === 'object') {
+					this.bookList = res;
+				} else {
+					this.bookList = {};
+				}
 			});
 		},
 
