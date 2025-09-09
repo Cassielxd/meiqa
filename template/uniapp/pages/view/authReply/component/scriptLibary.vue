@@ -5,7 +5,7 @@
 			<scroll-view scroll-y="true" class="script_list_scroll">
 				<div class="add_script" v-if="speechArtType == 1" @click="addSpeech">
 					<div><span class="iconfont">&#xe6b9;</span></div>
-					<div><span>添加自动回复</span></div>
+					<div><span>add</span></div>
 				</div>
 				<div class="script_list_item" v-for="(item, index) in authReply" :key="index" @click="selectScript(item)">
 					<div class="script_list_item_label">{{ item.keyword }}</div>
@@ -22,16 +22,16 @@
 			<div class="addGroup_container">
 				<div class="addGroup_container_title">
 					<div></div>
-					<div v-if="speechData.id">编辑自动回复</div>
-					<div v-else>添加自动回复</div>
+					<div v-if="speechData.id">edit</div>
+					<div v-else>add</div>
 					<div @click="closeAddGroup"><span class="iconfont">&#xe6b5;</span></div>
 				</div>
 
 				<div class="addGroup_form">
-					<div class="input_box"><input v-model="speechData.keyword" type="text" placeholder="请输入关键词,多个关键字请用逗号隔开" /></div>
-					<div class="input_box"><textarea v-model="speechData.content" type="text" placeholder="请输入自动回复内容"></textarea></div>
-					<div class="input_box" style='width: 40%;'><input v-model="speechData.sort" type="number" placeholder='排序' /></div>
-					<div class="button_box" :class="{ canInput: speechData.keyword && speechData.content }" @click="handleSubmiteditAdd"><div>确定</div></div>
+					<div class="input_box"><input v-model="speechData.keyword" type="text" placeholder="please input keyword, multiple keywords please use comma to separate" /></div>
+					<div class="input_box"><textarea v-model="speechData.content" type="text" placeholder="please input auto reply content"></textarea></div>
+					<div class="input_box" style='width: 40%;'><input v-model="speechData.sort" type="number" placeholder='sort' /></div>
+					<div class="button_box" :class="{ canInput: speechData.keyword && speechData.content }" @click="handleSubmiteditAdd"><div>confirm</div></div>
 				</div>
 			</div>
 		</uni-popup>

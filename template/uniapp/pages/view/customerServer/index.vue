@@ -203,11 +203,11 @@
 				propstitle: '',
 				speechArtTypeList: [{
 						id: 1,
-						label: 'personal library'
+						label: 'personal'
 					},
 					{
 						id: 0,
-						label: 'public library'
+						label: 'public'
 					}
 				],
 				customerServerData: {

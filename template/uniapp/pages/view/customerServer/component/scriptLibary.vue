@@ -17,7 +17,7 @@
 			<scroll-view scroll-y="true" class="script_list_scroll">
 				<div class="add_script" v-if="speechArtType == 1" @click="addSpeech">
 					<div><span class="iconfont">&#xe6b9;</span></div>
-					<div><span>add script</span></div>
+					<div><span>add</span></div>
 				</div>
 				<div class="script_list_item" v-for="(item, index) in scriptList" :key="index" @click="selectScript(item)">
 					<div class="script_list_item_label">{{ item.title }}</div>
@@ -34,7 +34,7 @@
 			<div class="addGroup_container">
 				<div class="addGroup_container_title">
 					<div></div>
-					<div>add script</div>
+					<div>add</div>
 					<div @click="closeAddGroup"><span class="iconfont">&#xe6b5;</span></div>
 				</div>
 

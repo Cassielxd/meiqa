@@ -4,7 +4,7 @@
 			<!-- <div slot="header" class="header"><div class="header_title">自动回复</div></div> -->
 			<div slot="content" class="content">
 				<div class="caption">
-					<div class="">自动回复开关:</div>
+					<div class="">auto reply:</div>
 					<div class="right"><switch @change="changeSwitch" :checked="authReply" /></div>
 				</div>
 
@@ -31,8 +31,8 @@ export default {
 			maxHeight: '',
 			speechArtType: '',
 			speechArtTypeConcat: {
-				1: '个人库',
-				0: '公共库'
+				1: 'personal',
+				0: 'public'
 			},
 			speechTagList: [], // 话术分类
 			propstitle: ''

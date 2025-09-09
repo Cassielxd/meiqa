@@ -5,10 +5,10 @@
 				<div  class="header_banner">
 					<div class="header_banner_content">
 						<div class="header_banner_content_title">
-							<span>应用反馈</span>
+							<span>feedback</span>
 						</div>
 						<div class="header_banner_content_message">
-							<span>亲，您有其他对应用的已意见或者您收到不良信息，都可以向时反馈，我们非常重视您给我们提出宝贵的建议，帮助我们不断完善产品，谢谢！</span>
+							<span>Dear, you have other opinions about the application or you receive</span>
 						</div>
 					</div>
 					<div class="header_banner_image">
@@ -20,20 +20,20 @@
 	
 				<div class="feedback">
 					<div class="feedback_title">
-						<span>我要反馈</span>
+						<span>i want to feedback</span>
 					</div>
 					<div class="feedback_input">
-						<input v-model="feedBackData.rela_name" type="text" value="" placeholder="请输入您的姓名"/>
+						<input v-model="feedBackData.rela_name" type="text" value="" placeholder="please input your name"/>
 					</div>
 					<div class="feedback_input">
-						<input v-model="feedBackData.phone" type="text" value="" placeholder="请输入您的联系电话" />
+						<input v-model="feedBackData.phone" type="text" value="" placeholder="please input your phone number" />
 					</div>
 					<div class="feedback_textarea">
-						<textarea v-model="feedBackData.content" value="" placeholder="请填写留言内容" />
+						<textarea v-model="feedBackData.content" value="" placeholder="please input your feedback content" />
 					</div>
 					
 					<div class="handle_button" @click="handleSubmit">
-						<span>提交</span>
+						<span>submit</span>
 					</div>
 				</div>
 			
