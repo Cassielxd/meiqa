@@ -77,6 +77,13 @@ class ChatService extends BaseModel
         $query->where('account_status', $value);
     }
 
+    public function searchAppidAttr($query, $value)
+    {
+        if ($value) {
+            $query->where('appid', $value);
+        }
+    }
+
     /**
      * account搜索器
      * @param Model $query
