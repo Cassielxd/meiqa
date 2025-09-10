@@ -108,28 +108,28 @@ export default {
 			selectId: 1,
 			footerData: [
 				{
-					title: '聊天',
+					title: 'chat',
 					selectImage: require('../../static/image/footer/chatSelect.png'),
 					unSelectImage: require('../../static/image/footer/chatUnSelcect.png'),
 					id: 1,
 					path: 'pages/view/messageList/index'
 				},
 				{
-					title: '客户',
+					title: 'customer',
 					selectImage: require('../../static/image/footer/userselect.png'),
 					unSelectImage: require('../../static/image/footer/userUnselect.png'),
 					id: 2,
 					path: 'pages/view/list/addbook'
 				},
 				{
-					title: '统计',
+					title: 'statistics',
 					selectImage: require('../../static/image/footer/staticSelect.png'),
 					unSelectImage: require('../../static/image/footer/staticUnSelect.png'),
 					id: 3,
 					path: 'pages/view/statistics/index'
 				},
 				{
-					title: '我的',
+					title: 'my',
 					selectImage: require('../../static/image/footer/mySelect.png'),
 					unSelectImage: require('../../static/image/footer/myUnSelect.png'),
 					id: 4,

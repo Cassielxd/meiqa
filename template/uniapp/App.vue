@@ -81,12 +81,13 @@
 					this.$store.dispatch('getKeufuInfo').then(res => {
 						if (res.client_id && res.client_id !== cid) {
 							that.globalData.openLogin = true;
-							//需要强制退出登录
+							//需要强制退出登录 
+							//提示信息翻译成英文
 							uni.showModal({
-								title: '强制退出登录',
-								content: '您的账号已在另一台设备上登录',
+								title: 'Force logout',
+								content: 'Your account has been logged in on another device',
 								showCancel: false,
-								confirmText: '确认退出',
+								confirmText: 'Confirm logout',
 								success() {
 									//关闭长连接
 									that.scoket.clearPing();
