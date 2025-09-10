@@ -8,26 +8,26 @@
 
 			<div class="login_container_content_form">
 				<div class="login_container_content_form_input">
-					<login-input v-model="loginData.account" type="text" placeholder="please input account"><span slot="icon" class="iconfont">&#xe6bc;</span></login-input>
+					<login-input v-model="loginData.account" type="text" placeholder="input account"><span slot="icon" class="iconfont">&#xe6bc;</span></login-input>
 				</div>
 
 				<div class="login_container_content_form_input">
-					<login-input v-model="loginData.password" type="password" placeholder="please input password"><span slot="icon" class="iconfont">&#xe6bd;</span></login-input>
+					<login-input v-model="loginData.password" type="password" placeholder="input password"><span slot="icon" class="iconfont">&#xe6bd;</span></login-input>
 				</div>
 
 				<div class="login_container_content_form_input privacy_agreement">
 					<div class="privacy_agreement_content">
 						<checkbox-group @change="checkoutPrivaey">
 							<checkbox class="checkbox" :value="isCheckEd" />
-							<span>please read and check</span>
-							<text @click="showPrivaey">privacy protocol</text>
+							<span>check</span>
+							<text @click="showPrivaey">privacy</text>
 						</checkbox-group>
 					</div>
 				</div>
 			</div>
 
 			<div class="login_container_content_handle"><div class="login_primary_button" @click="handleLogin">login</div></div>
-			<div v-if='isDomainName' class="login-to-set-domin-name"><navigator hover-class="none" url="/pages/view/dominName/index">modify domain name</navigator></div>
+			<div v-if='isDomainName' class="login-to-set-domin-name"><navigator hover-class="none" url="/pages/view/dominName/index">modify domain</navigator></div>
 		</div>
 	</div>
 </template>

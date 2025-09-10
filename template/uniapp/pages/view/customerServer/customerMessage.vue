@@ -95,10 +95,11 @@
 						</div>
 					</div>
 				</div>
-
-				<!-- 	<div class="userTag_container_handle" v-if="inputRadio" @click="handleEditUserMessage">
-					<div class="userTag_container_handle_button"><span>确认修改</span></div>
-				</div> -->
+                 <!-- #ifdef H5 -->
+                 <div class="userTag_container_handle" v-if="inputRadio" @click="handleEditUserMessage">
+                 	<div class="userTag_container_handle_button"><span>confirm</span></div>
+                 </div> 
+                 
 
 				<!-- 	<div class="userTag_container_handle"  @click="toMessage">
 					<div class="userTag_container_handle_button"><span>发消息</span></div>
