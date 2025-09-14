@@ -84,6 +84,36 @@ Route::group('api', function () {
             TenantCheckRoleMiddleware::class,
         ]);
         
+        /**
+         * 租户管理相关路由（支持admin向下兼容访问）
+         */
+        Route::group(function () {
+            // 租户列表
+            Route::get('list', 'Tenant/index')->option(['real_name' => '租户列表']);
+            // 租户详情
+            Route::get('info/:id', 'Tenant/read')->option(['real_name' => '租户详情']);
+            // 创建租户
+            Route::post('save', 'Tenant/save')->option(['real_name' => '创建租户']);
+            // 更新租户
+            Route::put('update/:id', 'Tenant/update')->option(['real_name' => '更新租户']);
+            // 删除租户
+            Route::delete('delete/:id', 'Tenant/delete')->option(['real_name' => '删除租户']);
+            // 更新租户状态
+            Route::put('status/:id', 'Tenant/updateStatus')->option(['real_name' => '更新租户状态']);
+            // 批量更新状态
+            Route::put('batch/status', 'Tenant/batchUpdateStatus')->option(['real_name' => '批量更新状态']);
+            // 获取统计信息
+            Route::get('statistics', 'Tenant/statistics')->option(['real_name' => '获取统计信息']);
+            // 获取即将过期的租户
+            Route::get('expiring', 'Tenant/expiring')->option(['real_name' => '获取即将过期的租户']);
+            // 获取状态选项
+            Route::get('status/options', 'Tenant/statusOptions')->option(['real_name' => '获取状态选项']);
+            // 验证唯一性
+            Route::get('check/unique', 'Tenant/checkUnique')->option(['real_name' => '验证唯一性']);
+        })->middleware([
+            TenantAuthTokenMiddleware::class,
+        ]);
+        
     })->prefix('tenant.');
     
 })->middleware([

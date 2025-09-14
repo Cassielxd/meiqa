@@ -250,37 +250,6 @@ Route::group('api', function () {
             AdminLogMiddleware::class
         ]);
         
-        /**
-         * 租户管理相关路由
-         */
-        Route::group('tenant', function () {
-            // 租户列表
-            Route::get('list', 'v1.tenant.Tenant/index')->name('TenantList')->option(['real_name' => '获取租户列表']);
-            // 租户详情
-            Route::get('info/:id', 'v1.tenant.Tenant/read')->name('TenantInfo')->option(['real_name' => '获取租户详情']);
-            // 创建租户
-            Route::post('save', 'v1.tenant.Tenant/save')->name('TenantSave')->option(['real_name' => '创建租户']);
-            // 更新租户
-            Route::put('update/:id', 'v1.tenant.Tenant/update')->name('TenantUpdate')->option(['real_name' => '更新租户']);
-            // 删除租户
-            Route::delete('delete/:id', 'v1.tenant.Tenant/delete')->name('TenantDelete')->option(['real_name' => '删除租户']);
-            // 更新租户状态
-            Route::put('status/:id', 'v1.tenant.Tenant/updateStatus')->name('TenantUpdateStatus')->option(['real_name' => '更新租户状态']);
-            // 批量更新状态
-            Route::put('batch_status', 'v1.tenant.Tenant/batchUpdateStatus')->name('TenantBatchUpdateStatus')->option(['real_name' => '批量更新租户状态']);
-            // 获取统计信息
-            Route::get('statistics', 'v1.tenant.Tenant/statistics')->name('TenantStatistics')->option(['real_name' => '获取租户统计信息']);
-            // 获取即将过期的租户
-            Route::get('expiring', 'v1.tenant.Tenant/expiring')->name('TenantExpiring')->option(['real_name' => '获取即将过期的租户']);
-            // 获取状态选项
-            Route::get('status_options', 'v1.tenant.Tenant/statusOptions')->name('TenantStatusOptions')->option(['real_name' => '获取租户状态选项']);
-            // 验证唯一性
-            Route::get('check_unique', 'v1.tenant.Tenant/checkUnique')->name('TenantCheckUnique')->option(['real_name' => '验证租户字段唯一性']);
-        })->middleware([
-            AdminAuthTokenMiddleware::class,
-            AdminCkeckRoleMiddleware::class,
-            AdminLogMiddleware::class
-        ]);
         
         /**
          * 系统设置维护 系统权限管理、系统菜单管理 系统配置 相关路由

@@ -46,7 +46,7 @@ class Login
             'pwd',
         ], true);
 
-        validate(TenantLoginValidate::class)->check(['account' => $account, 'pwd' => $password]);
+        validate(TenantLoginValidate::class)->scene('login')->check(['account' => $account, 'pwd' => $password]);
 
         return app('json')->success($this->services->login($account, $password));
     }

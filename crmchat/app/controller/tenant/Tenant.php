@@ -1,7 +1,7 @@
 <?php
 declare (strict_types = 1);
 
-namespace app\controller\admin\v1\tenant;
+namespace app\controller\tenant;
 
 use app\controller\admin\AuthController;
 use app\services\tenant\TenantServices;

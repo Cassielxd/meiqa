@@ -44,6 +44,7 @@ class TenantLoginValidate extends Validate
      * @var array
      */
     protected $scene = [
+        'login' => ['account', 'pwd'],
         'change_password' => ['old_password', 'new_password'],
     ];
 }
