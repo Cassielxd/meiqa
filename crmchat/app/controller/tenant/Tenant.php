@@ -3,22 +3,29 @@ declare (strict_types = 1);
 
 namespace app\controller\tenant;
 
-use app\controller\admin\AuthController;
 use app\services\tenant\TenantServices;
 use app\validates\tenant\TenantValidate;
-use think\Request;
+use app\Request;
+use crmeb\traits\Help;
 
 /**
  * 租户管理控制器
  * Class Tenant
- * @package app\controller\admin\v1\tenant
+ * @package app\controller\tenant
  */
-class Tenant extends AuthController
+class Tenant
 {
+    use Help;
+    
     /**
      * @var TenantServices
      */
     protected $services;
+    
+    /**
+     * @var Request
+     */
+    protected $request;
 
     /**
      * Tenant constructor.
@@ -26,8 +33,8 @@ class Tenant extends AuthController
      */
     public function __construct(TenantServices $services)
     {
-        parent::__construct();
         $this->services = $services;
+        $this->request = app()->request;
     }
 
     /**
