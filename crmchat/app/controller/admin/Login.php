@@ -88,15 +88,15 @@ class Login
             ['captchaType', '']
         ], true);
 
-        if (!app()->make(Captcha::class)->check($imgcode)) {
-            return app('json')->fail('请输入正确的验证码');
-        }
+        // if (!app()->make(Captcha::class)->check($imgcode)) {
+        //     return app('json')->fail('请输入正确的验证码');
+        // }
 
-        try {
-            aj_captcha_check_two($captchaType, $captchaVerification);
-        } catch (\Throwable $e) {
-            return app('json')->fail('滑块验证失败');
-        }
+        // try {
+        //     aj_captcha_check_two($captchaType, $captchaVerification);
+        // } catch (\Throwable $e) {
+        //     return app('json')->fail('滑块验证失败');
+        // }
 
         validate(SystemAdminValidata::class)->scene('get')->check(['account' => $account, 'pwd' => $password]);
 

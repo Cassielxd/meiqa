@@ -28,7 +28,7 @@ return [
     // 跨域header
     'header'    => [
         'Access-Control-Allow-Origin'       => '*',
-        'Access-Control-Allow-Headers'      => 'Authori-zation,Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With, Form-type',
+        'Access-Control-Allow-Headers'      => 'Authori-zation, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With, Form-type',
         'Access-Control-Allow-Methods'      => 'GET,POST,PATCH,PUT,DELETE,OPTIONS,DELETE',
         'Access-Control-Max-Age'            =>  '1728000',
         'Access-Control-Allow-Credentials'  => 'true',

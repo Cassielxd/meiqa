@@ -41,7 +41,7 @@ return is_win() ? [] : [
                 'client_size' => 2048,
             ],
             'redis' => [
-                'host'          => '127.0.0.1',
+                'host'          => '172.17.0.3',
                 'port'          => 6379,
                 'max_active'    => 10,
                 'max_wait_time' => 5,
