@@ -1,0 +1,302 @@
+[
+  {
+    "id": 7,
+    "pid": 0,
+    "menu_name": "统计",
+    "menu_path": "/admin/home/",
+    "unique_auth": "admin-index-index",
+    "sort": 127,
+    "type": 0,
+    "html": "|-----"
+  },
+  {
+    "id": 9,
+    "pid": 0,
+    "menu_name": "用户管理",
+    "menu_path": "/admin/user",
+    "unique_auth": "admin-user",
+    "sort": 100,
+    "type": 1,
+    "html": "|-----"
+  },
+  {
+    "id": 10,
+    "pid": 9,
+    "menu_name": "用户列表",
+    "menu_path": "/admin/user/list",
+    "unique_auth": "admin-user-user-index",
+    "sort": 10,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 227,
+    "pid": 9,
+    "menu_name": "用户分组",
+    "menu_path": "/admin/user/group",
+    "unique_auth": "user-user-group",
+    "sort": 9,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 1008,
+    "pid": 9,
+    "menu_name": "用户标签",
+    "menu_path": "/admin/user/label",
+    "unique_auth": "user-user-label",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 165,
+    "pid": 0,
+    "menu_name": "客服管理",
+    "menu_path": "/admin/kefu",
+    "unique_auth": "setting-store-service",
+    "sort": 2,
+    "type": 1,
+    "html": "|-----"
+  },
+  {
+    "id": 1104,
+    "pid": 165,
+    "menu_name": "站点统计",
+    "menu_path": "/admin/kefu/statistics",
+    "unique_auth": "admin-kefu-statistics",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 1105,
+    "pid": 165,
+    "menu_name": "客服二维码",
+    "menu_path": "/admin/kefu/qrcode",
+    "unique_auth": "admin-kefu-qrcode",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 1106,
+    "pid": 165,
+    "menu_name": "聊天记录",
+    "menu_path": "/admin/kefu/record",
+    "unique_auth": "admin-kefu-record",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 678,
+    "pid": 165,
+    "menu_name": "客服列表",
+    "menu_path": "/admin/setting/store_service/index",
+    "unique_auth": "admin-setting-store_service-index",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 679,
+    "pid": 165,
+    "menu_name": "客服话术",
+    "menu_path": "/admin/setting/store_service/speechcraft",
+    "unique_auth": "admin-setting-store_service-speechcraft",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 738,
+    "pid": 165,
+    "menu_name": "用户留言",
+    "menu_path": "/admin/setting/store_service/feedback",
+    "unique_auth": "admin-setting-store_service-feedback",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 12,
+    "pid": 0,
+    "menu_name": "设置管理",
+    "menu_path": "/admin/setting",
+    "unique_auth": "admin-setting",
+    "sort": 0,
+    "type": 1,
+    "html": "|-----"
+  },
+  {
+    "id": 23,
+    "pid": 12,
+    "menu_name": "系统设置",
+    "menu_path": "/admin/setting/system_config",
+    "unique_auth": "setting-system-config",
+    "sort": 10,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 656,
+    "pid": 12,
+    "menu_name": "页面管理",
+    "menu_path": "/admin/setting/pages",
+    "unique_auth": "admin-setting-pages",
+    "sort": 1,
+    "type": 1,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 1108,
+    "pid": 656,
+    "menu_name": "客服图标",
+    "menu_path": "/admin/setting/system_group_data/kf_icon",
+    "unique_auth": "setting-system-group_data-kf_icon",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 1131,
+    "pid": 656,
+    "menu_name": "隐私协议",
+    "menu_path": "/admin/setting/system_group_data/privacy",
+    "unique_auth": "setting-system-group_data-privacy",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 913,
+    "pid": 656,
+    "menu_name": "客服页面广告",
+    "menu_path": "/admin/setting/system_group_data/kf_adv",
+    "unique_auth": "setting-system-group_data-kf_adv",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 14,
+    "pid": 12,
+    "menu_name": "管理权限",
+    "menu_path": "/admin/setting/auth/list",
+    "unique_auth": "setting-system-admin",
+    "sort": 0,
+    "type": 1,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 19,
+    "pid": 14,
+    "menu_name": "角色管理",
+    "menu_path": "/admin/setting/system_role/index",
+    "unique_auth": "setting-system-role",
+    "sort": 1,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 20,
+    "pid": 14,
+    "menu_name": "管理员列表",
+    "menu_path": "/admin/setting/system_admin/index",
+    "unique_auth": "setting-system-list",
+    "sort": 1,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 21,
+    "pid": 14,
+    "menu_name": "权限规则",
+    "menu_path": "/admin/setting/system_menus/index",
+    "unique_auth": "setting-system-menus",
+    "sort": 1,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 1103,
+    "pid": 12,
+    "menu_name": "APP在线升级",
+    "menu_path": "/admin/setting/app/version",
+    "unique_auth": "setting-app-version",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 1011,
+    "pid": 12,
+    "menu_name": "代码获取",
+    "menu_path": "/admin/system/code",
+    "unique_auth": "admin-system-code",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 25,
+    "pid": 0,
+    "menu_name": "维护管理",
+    "menu_path": "/admin/system",
+    "unique_auth": "admin-system",
+    "sort": -1,
+    "type": 1,
+    "html": "|-----"
+  },
+  {
+    "id": 56,
+    "pid": 25,
+    "menu_name": "开发配置",
+    "menu_path": "/admin/system/config",
+    "unique_auth": "system-config-index",
+    "sort": 10,
+    "type": 1,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 111,
+    "pid": 56,
+    "menu_name": "配置分类",
+    "menu_path": "/admin/system/config/system_config_tab/index",
+    "unique_auth": "system-config-system_config-tab",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 112,
+    "pid": 56,
+    "menu_name": "组合数据",
+    "menu_path": "/admin/system/config/system_group/index",
+    "unique_auth": "system-config-system_config-group",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  },
+  {
+    "id": 65,
+    "pid": 25,
+    "menu_name": "安全维护",
+    "menu_path": "/admin/system/maintain",
+    "unique_auth": "system-maintain-index",
+    "sort": 7,
+    "type": 1,
+    "html": "|-----|-----"
+  },
+  {
+    "id": 47,
+    "pid": 65,
+    "menu_name": "系统日志",
+    "menu_path": "/admin/system/maintain/system_log/index",
+    "unique_auth": "system-maintain-system-log",
+    "sort": 0,
+    "type": 0,
+    "html": "|-----|-----|-----"
+  }
+]
