@@ -458,7 +458,7 @@ class TenantServices extends BaseServices
             'tenant_name' => $data['tenant_name'],
             'tenant_code' => $tenantCode,
             'appid' => $appId,
-            'account' => $tenantCode, // 使用租户编码作为账号
+            'account' => $data['contact_email'], // 使用租户编码作为账号
             'pwd' => password_hash($data['pwd'], PASSWORD_DEFAULT), // 注册时设置密码
             'contact_name' => $data['contact_name'],
             'contact_phone' => $data['contact_phone'],
