@@ -250,6 +250,35 @@ Route::group('api', function () {
             AdminLogMiddleware::class
         ]);
         
+        /**
+         * 租户管理相关路由
+         */
+        Route::group('tenant', function () {
+            // 租户列表
+            Route::get('list', 'tenant.Tenant/list')->name('TenantList')->option(['real_name' => '获取租户列表']);
+            // 租户详情
+            Route::get('info/:id', 'tenant.Tenant/read')->name('TenantInfo')->option(['real_name' => '获取租户详情']);
+            // 创建租户
+            Route::post('save', 'tenant.Tenant/save')->name('TenantSave')->option(['real_name' => '创建租户']);
+            // 更新租户
+            Route::put('update/:id', 'tenant.Tenant/update')->name('TenantUpdate')->option(['real_name' => '更新租户']);
+            // 删除租户
+            Route::delete('delete/:id', 'tenant.Tenant/delete')->name('TenantDelete')->option(['real_name' => '删除租户']);
+            // 更新租户状态
+            Route::put('status/:id', 'tenant.Tenant/updateStatus')->name('TenantUpdateStatus')->option(['real_name' => '更新租户状态']);
+            // 批量更新状态
+            Route::put('batch_status', 'tenant.Tenant/batchUpdateStatus')->name('TenantBatchUpdateStatus')->option(['real_name' => '批量更新租户状态']);
+            // 获取统计信息
+            Route::get('statistics', 'tenant.Tenant/statistics')->name('TenantStatistics')->option(['real_name' => '获取租户统计信息']);
+            // 获取即将过期的租户
+            Route::get('expiring', 'tenant.Tenant/expiring')->name('TenantExpiring')->option(['real_name' => '获取即将过期的租户']);
+            // 重置租户密码
+            Route::put('reset_password/:id', 'tenant.Tenant/resetPassword')->name('TenantResetPassword')->option(['real_name' => '重置租户密码']);
+        })->middleware([
+            AdminAuthTokenMiddleware::class,
+            AdminCkeckRoleMiddleware::class,
+            AdminLogMiddleware::class
+        ]);
         
         /**
          * 系统设置维护 系统权限管理、系统菜单管理 系统配置 相关路由
