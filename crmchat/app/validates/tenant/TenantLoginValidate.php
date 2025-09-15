@@ -17,7 +17,7 @@ class TenantLoginValidate extends Validate
      * @var array
      */
     protected $rule = [
-        'account' => 'require|alphaNum|length:4,32',
+        'account' => 'require|regex:/^[a-zA-Z0-9_]{4,32}$/|length:4,32',
         'pwd' => 'require|length:6,32',
         'old_password' => 'require|length:6,32',
         'new_password' => 'require|length:6,32',
@@ -29,7 +29,7 @@ class TenantLoginValidate extends Validate
      */
     protected $message = [
         'account.require' => '请输入账号',
-        'account.alphaNum' => '账号只能包含字母和数字',
+        'account.regex' => '账号只能包含字母、数字和下划线',
         'account.length' => '账号长度必须在4-32个字符之间',
         'pwd.require' => '请输入密码',
         'pwd.length' => '密码长度必须在6-32个字符之间',

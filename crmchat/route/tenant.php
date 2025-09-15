@@ -54,7 +54,7 @@ Route::group('api', function () {
              */
             Route::group('service', function () {
                 // 客服列表
-                Route::get('list', 'Service/index')->option(['real_name' => '获取客服列表']);
+                Route::get('list', 'Service/list')->option(['real_name' => '获取客服列表']);
                 // 客服详情
                 Route::get('info/:id', 'Service/read')->option(['real_name' => '获取客服详情']);
                 // 创建客服
@@ -65,6 +65,8 @@ Route::group('api', function () {
                 Route::delete('delete/:id', 'Service/delete')->option(['real_name' => '删除客服']);
                 // 更新客服状态
                 Route::put('status/:id', 'Service/updateStatus')->option(['real_name' => '更新客服状态']);
+                // 获取客服分组
+                Route::get('groups', 'Service/groups')->option(['real_name' => '获取客服分组列表']);
             });
             
             /**

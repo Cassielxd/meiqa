@@ -11,7 +11,7 @@ use think\Validate;
  */
 class LoginValidate extends Validate
 {
-    protected $regex = ['account' => '/^[a-zA-Z0-9]{4,30}$/'];
+    protected $regex = ['account' => '/^[a-zA-Z0-9_]{4,30}$/'];
 
     /**
      * @var string[]
