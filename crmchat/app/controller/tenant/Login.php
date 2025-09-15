@@ -5,7 +5,9 @@ namespace app\controller\tenant;
 
 use app\Request;
 use app\services\tenant\TenantLoginServices;
+use app\services\tenant\TenantServices;
 use app\validates\tenant\TenantLoginValidate;
+use app\validates\tenant\TenantRegisterValidate;
 use think\Response;
 
 /**
@@ -26,12 +28,19 @@ class Login
     protected $services;
 
     /**
+     * @var TenantServices
+     */
+    protected $tenantServices;
+
+    /**
      * Login constructor.
      * @param TenantLoginServices $services
+     * @param TenantServices $tenantServices
      */
-    public function __construct(TenantLoginServices $services)
+    public function __construct(TenantLoginServices $services, TenantServices $tenantServices)
     {
         $this->services = $services;
+        $this->tenantServices = $tenantServices;
         $this->request = app()->request;
     }
 
@@ -122,6 +131,59 @@ class Login
         try {
             $this->services->changePassword((int)$tenantInfo['id'], $oldPassword, $newPassword);
             return app('json')->success('密码修改成功，请重新登录');
+        } catch (\Exception $e) {
+            return app('json')->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * 发送注册验证码
+     * @return mixed
+     */
+    public function sendCaptcha()
+    {
+        $phone = $this->request->post('phone', '');
+        
+        if (!$phone) {
+            return app('json')->fail('请输入手机号码');
+        }
+        
+        try {
+            $result = $this->tenantServices->sendRegisterCaptcha($phone);
+            
+            // 如果是开发环境，返回验证码
+            if (is_array($result) && isset($result['captcha'])) {
+                return app('json')->success($result['message']);
+            }
+            
+            return app('json')->success('验证码发送成功');
+        } catch (\Exception $e) {
+            return app('json')->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * 租户注册
+     * @return mixed
+     */
+    public function register()
+    {
+        $data = $this->request->post();
+
+        // 验证数据
+        try {
+            validate(TenantRegisterValidate::class)->scene('register')->check($data);
+        } catch (\Exception $e) {
+            return app('json')->fail($e->getMessage());
+        }
+
+        try {
+            $result = $this->tenantServices->register($data);
+            return app('json')->success($result['message'], [
+                'tenant_id' => $result['tenant_id'],
+                'tenant_code' => $result['tenant_code'],
+                'status' => $result['status']
+            ]);
         } catch (\Exception $e) {
             return app('json')->fail($e->getMessage());
         }

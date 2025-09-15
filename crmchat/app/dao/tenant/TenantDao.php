@@ -217,6 +217,17 @@ class TenantDao extends BaseDao
     }
 
     /**
+     * 更新租户状态
+     * @param int $id
+     * @param int $status
+     * @return bool
+     */
+    public function updateTenantStatus(int $id, int $status): bool
+    {
+        return $this->update($id, ['status' => $status, 'updated_at' => date('Y-m-d H:i:s')]) !== false;
+    }
+
+    /**
      * 批量更新租户状态
      * @param array $ids
      * @param int $status

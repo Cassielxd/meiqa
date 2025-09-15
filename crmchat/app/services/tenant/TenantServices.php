@@ -4,11 +4,13 @@ declare (strict_types = 1);
 namespace app\services\tenant;
 
 use app\dao\tenant\TenantDao;
+use app\models\tenant\Tenant;
 use crmeb\basic\BaseServices;
 use app\services\other\UploadService;
 use crmeb\exceptions\AdminException;
 use crmeb\services\CacheService;
 use think\exception\ValidateException;
+use think\facade\Cache;
 
 /**
  * 租户业务逻辑层
@@ -220,6 +222,20 @@ class TenantServices extends BaseServices
     }
 
     /**
+     * 更新租户状态（别名方法，用于Admin控制器）
+     * @param int $id
+     * @param int $status
+     * @return bool
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function updateTenantStatus(int $id, int $status)
+    {
+        return $this->updateStatus($id, $status);
+    }
+
+    /**
      * 批量更新租户状态
      * @param array $ids
      * @param int $status
@@ -265,6 +281,15 @@ class TenantServices extends BaseServices
             'expiring_count' => $expiringCount,
             'expired_count' => $expiredCount,
         ];
+    }
+
+    /**
+     * 获取租户统计信息（别名方法，用于Admin控制器）
+     * @return array
+     */
+    public function getTenantStatistics()
+    {
+        return $this->getStatistics();
     }
 
     /**
@@ -402,5 +427,156 @@ class TenantServices extends BaseServices
         return $this->dao->update($id, [
             'pwd' => password_hash($newPassword, PASSWORD_DEFAULT)
         ]) !== false;
+    }
+
+    /**
+     * 租户注册
+     * @param array $data
+     * @return array
+     * @throws ValidateException
+     */
+    public function register(array $data): array
+    {
+        // 验证密码确认
+        if (!isset($data['pwd']) || !isset($data['confirm_pwd'])) {
+            throw new ValidateException('请输入密码和确认密码');
+        }
+        
+        if ($data['pwd'] !== $data['confirm_pwd']) {
+            throw new ValidateException('两次输入的密码不一致');
+        }
+        
+        // 验证验证码
+        $this->validateCaptcha($data['captcha'], $data['contact_phone']);
+        
+        // 生成唯一的租户编码和APP ID
+        $tenantCode = $this->generateTenantCode();
+        $appId = $this->generateAppId();
+        
+        // 准备租户数据
+        $tenantData = [
+            'tenant_name' => $data['tenant_name'],
+            'tenant_code' => $tenantCode,
+            'appid' => $appId,
+            'account' => $tenantCode, // 使用租户编码作为账号
+            'pwd' => password_hash($data['pwd'], PASSWORD_DEFAULT), // 注册时设置密码
+            'contact_name' => $data['contact_name'],
+            'contact_phone' => $data['contact_phone'],
+            'contact_email' => $data['contact_email'],
+            'status' => Tenant::STATUS_PENDING, // 待审核状态
+            'max_users' => 100, // 默认最大用户数
+            'max_services' => 5, // 默认最大客服数
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+        
+        // 创建租户
+        $tenant = $this->dao->save($tenantData);
+        if (!$tenant) {
+            throw new ValidateException('注册失败，请重试');
+        }
+        
+        // 清除验证码缓存
+        $this->clearCaptcha($data['contact_phone']);
+        
+        return [
+            'tenant_id' => $tenant->id,
+            'tenant_code' => $tenantCode,
+            'status' => '待审核',
+            'message' => '注册成功，请等待管理员审核'
+        ];
+    }
+    
+    /**
+     * 验证验证码
+     * @param string $captcha
+     * @param string $phone
+     * @throws ValidateException
+     */
+    private function validateCaptcha(string $captcha, string $phone = ''): void
+    {
+        // 从缓存中获取验证码
+        $cacheKey = 'tenant_register_captcha_' . $phone;
+        $cachedCaptcha = Cache::get($cacheKey);
+        
+        if (!$cachedCaptcha) {
+            throw new ValidateException('验证码已过期，请重新获取');
+        }
+        
+        if (strtolower($captcha) !== strtolower($cachedCaptcha)) {
+            throw new ValidateException('验证码错误');
+        }
+    }
+    
+    /**
+     * 清除验证码缓存
+     * @param string $phone
+     */
+    private function clearCaptcha(string $phone = ''): void
+    {
+        $cacheKey = 'tenant_register_captcha_' . $phone;
+        Cache::delete($cacheKey);
+    }
+    
+    /**
+     * 生成唯一的租户编码
+     * @return string
+     */
+    private function generateTenantCode(): string
+    {
+        do {
+            $code = 'tenant_' . date('Ymd') . '_' . mt_rand(1000, 9999);
+            $exists = $this->dao->getOne(['tenant_code' => $code]);
+        } while ($exists);
+        
+        return $code;
+    }
+    
+    /**
+     * 生成唯一的APP ID
+     * @return string
+     */
+    private function generateAppId(): string
+    {
+        do {
+            $appId = 'app_' . date('Ymd') . '_' . strtoupper(uniqid());
+            $exists = $this->dao->getOne(['appid' => $appId]);
+        } while ($exists);
+        
+        return $appId;
+    }
+    
+    /**
+     * 发送注册验证码
+     * @param string $phone
+     * @return array
+     */
+    public function sendRegisterCaptcha(string $phone): array
+    {
+        // 检查手机号格式
+        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
+            throw new ValidateException('请输入正确的手机号码');
+        }
+        
+        // 检查是否已注册
+        $exists = $this->dao->getOne(['contact_phone' => $phone]);
+        if ($exists) {
+            throw new ValidateException('该手机号已注册');
+        }
+        
+        // 生成验证码
+        $captcha = (string)mt_rand(100000, 999999);
+        
+        // 缓存验证码，10分钟有效
+        $cacheKey = 'tenant_register_captcha_' . $phone;
+        Cache::set($cacheKey, $captcha, 600);
+        
+        // TODO: 这里集成真实的短信发送服务
+        // 开发环境直接返回验证码用于测试
+        return [
+            'status' => 'success',
+            'captcha' => $captcha,
+            'message' => '验证码发送成功，开发环境验证码：' . $captcha
+        ];
     }
 }

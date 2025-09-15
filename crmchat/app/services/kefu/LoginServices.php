@@ -50,7 +50,7 @@ class LoginServices extends BaseServices
         if (!$kefuInfo) {
             throw new ValidateException('没有此用户');
         }
-        if ($password && !password_verify($password, $kefuInfo->password)) {
+        if ($password && md5($password) !== $kefuInfo->password) {
             throw new ValidateException('账号或密码错误');
         }
         if (!$kefuInfo->status) {

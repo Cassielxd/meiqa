@@ -1,6 +1,7 @@
 # CRMChat API Schema Documentation
 
 ## 目录
+- [系统流程图](#系统流程图)
 - [认证说明](#认证说明)
 - [默认账户信息](#默认账户信息)
 - [Admin API](#admin-api)
@@ -8,6 +9,124 @@
 - [Kefu API](#kefu-api)
 - [Mobile API](#mobile-api)
 - [安全特性](#安全特性)
+
+## 系统流程图
+
+### 租户完整生命周期流程
+
+```mermaid
+flowchart TD
+    A[开始] --> B[发送注册验证码]
+    B --> |POST /api/tenant/send_captcha| C[接收验证码]
+    C --> D[租户注册]
+    D --> |POST /api/tenant/register<br/>包含 pwd + confirm_pwd| E{注册验证}
+    E --> |密码不一致| F[返回400错误:<br/>两次输入的密码不一致]
+    E --> |验证成功| G[租户创建成功<br/>状态: 待审核]
+    
+    G --> H[尝试登录]
+    H --> |POST /api/tenant/login| I{租户状态检查}
+    I --> |待审核状态| J[登录失败:<br/>租户状态异常：待审核]
+    
+    I --> K[管理员审核]
+    K --> |PUT /api/admin/tenant/status/{id}<br/>{"status": 1}| L[租户状态更新为已激活]
+    
+    L --> M[租户重新登录]
+    M --> |POST /api/tenant/login| N[登录成功<br/>获取Token]
+    
+    N --> O[创建客服账号]
+    O --> |POST /api/tenant/service/save<br/>包含 password + true_password| P{客服创建验证}
+    P --> |密码不一致| Q[返回400错误:<br/>两次密码输入不一致]
+    P --> |验证成功| R[客服账号创建成功<br/>默认状态: 禁用]
+    
+    R --> S[启用客服账号]
+    S --> |PUT /api/tenant/service/update_status/{id}<br/>{"status": 1}| T[客服账号已启用]
+    
+    T --> U[客服登录]
+    U --> |POST /api/kefu/login| V[客服登录成功<br/>获取Token]
+    
+    V --> W[开始使用系统]
+    
+    style G fill:#e1f5fe
+    style N fill:#e8f5e8
+    style V fill:#e8f5e8
+    style W fill:#f3e5f5
+    style F fill:#ffebee
+    style J fill:#ffebee
+    style Q fill:#ffebee
+```
+
+### 主要API调用序列
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant TenantAPI as Tenant API
+    participant AdminAPI as Admin API
+    participant KefuAPI as Kefu API
+    participant DB as 数据库
+
+    Note over User,DB: 1. 租户注册阶段
+    User->>TenantAPI: POST /api/tenant/send_captcha
+    TenantAPI-->>User: 返回验证码
+    
+    User->>TenantAPI: POST /api/tenant/register<br/>{pwd, confirm_pwd, ...}
+    TenantAPI->>TenantAPI: 验证密码一致性
+    TenantAPI->>DB: 创建租户记录(状态:待审核)
+    TenantAPI-->>User: 注册成功，等待审核
+
+    Note over User,DB: 2. 管理员审核阶段  
+    User->>TenantAPI: POST /api/tenant/login
+    TenantAPI-->>User: 登录失败：状态异常
+    
+    User->>AdminAPI: POST /api/admin/login
+    AdminAPI-->>User: 返回管理员Token
+    
+    User->>AdminAPI: PUT /api/admin/tenant/status/{id}
+    AdminAPI->>DB: 更新租户状态为已激活
+    AdminAPI-->>User: 审核成功
+
+    Note over User,DB: 3. 租户使用阶段
+    User->>TenantAPI: POST /api/tenant/login
+    TenantAPI->>DB: 验证租户状态
+    TenantAPI-->>User: 登录成功，返回Token
+    
+    User->>TenantAPI: POST /api/tenant/service/save<br/>{password, true_password, ...}
+    TenantAPI->>TenantAPI: 验证密码一致性
+    TenantAPI->>DB: 创建客服记录
+    TenantAPI-->>User: 客服创建成功
+
+    Note over User,DB: 4. 客服使用阶段
+    User->>KefuAPI: POST /api/kefu/login
+    KefuAPI->>DB: 验证客服账号
+    KefuAPI-->>User: 登录成功，返回Token
+```
+
+### API安全隔离机制
+
+```mermaid
+flowchart LR
+    A[API请求] --> B{认证中间件}
+    B --> |租户Token| C[TenantAuthTokenMiddleware]
+    B --> |客服Token| D[KefuAuthTokenMiddleware] 
+    B --> |管理员Token| E[AdminAuthTokenMiddleware]
+    
+    C --> F[注入租户APP ID]
+    D --> G[注入客服APP ID]
+    E --> H[管理员权限验证]
+    
+    F --> I[控制器层APP ID验证]
+    G --> I
+    H --> J[管理员控制器]
+    
+    I --> K{访问权限检查}
+    K --> |有权限| L[访问资源]
+    K --> |无权限| M[返回统一错误:<br/>资源不存在]
+    
+    style F fill:#e1f5fe
+    style G fill:#e1f5fe  
+    style H fill:#fff3e0
+    style M fill:#ffebee
+```
 
 ## 认证说明
 
@@ -196,7 +315,63 @@ Content-Type: application/json
 
 ## Tenant API
 
-### 1. 租户登录
+### 1. 发送注册验证码
+**Endpoint:** `POST /api/tenant/send_captcha`
+
+**Request:**
+```json
+{
+  "phone": "13800138000"
+}
+```
+
+**Response:**
+```json
+{
+  "status": 200,
+  "msg": "验证码发送成功，开发环境验证码：123456",
+  "data": []
+}
+```
+
+**说明**: 开发环境直接返回验证码用于测试，生产环境通过短信发送
+
+### 2. 租户注册
+**Endpoint:** `POST /api/tenant/register`
+
+**Request:**
+```json
+{
+  "tenant_name": "测试企业",
+  "contact_name": "张三",
+  "contact_phone": "13800138000",
+  "contact_email": "zhangsan@example.com",
+  "pwd": "yourpassword",
+  "confirm_pwd": "yourpassword",
+  "captcha": "123456"
+}
+```
+
+**Response:**
+```json
+{
+  "status": 200,
+  "msg": "注册成功，请等待管理员审核",
+  "data": {
+    "tenant_id": 5,
+    "tenant_code": "tenant_20250915_8765",
+    "status": "待审核"
+  }
+}
+```
+
+**说明**: 
+- 注册成功后状态为"待审核"，需要管理员审核通过后才能使用
+- 租户编码和APP ID自动生成
+- 验证码有效期10分钟
+- pwd和confirm_pwd必须一致，否则返回400错误"两次输入的密码不一致"
+
+### 3. 租户登录
 **Endpoint:** `POST /api/tenant/login`
 
 **Request:**
@@ -688,6 +863,15 @@ ws://localhost:20108
 }
 ```
 
+### 密码确认错误
+```json
+{
+  "status": 400,
+  "msg": "两次输入的密码不一致",
+  "data": []
+}
+```
+
 ### 参数错误
 ```json
 {
@@ -748,9 +932,27 @@ curl -H "Authori-zation: Bearer $TOKEN" \
   http://localhost:20108/api/admin/tenant/list | jq
 ```
 
-### 2. Tenant登录并管理客服
+### 2. Tenant注册和登录
 ```bash
-# 登录
+# 发送注册验证码
+curl -s -X POST -H "Content-Type: application/json" \
+  -d '{"phone":"13900139000"}' \
+  http://localhost:20108/api/tenant/send_captcha | jq
+
+# 租户注册
+curl -s -X POST -H "Content-Type: application/json" \
+  -d '{
+    "tenant_name":"测试企业001",
+    "contact_name":"李四",
+    "contact_phone":"13900139000",
+    "contact_email":"lisi@example.com",
+    "pwd":"123456",
+    "confirm_pwd":"123456",
+    "captcha":"123456"
+  }' \
+  http://localhost:20108/api/tenant/register | jq
+
+# 租户登录（审核通过后）
 TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
   -d '{"account":"tenant002","pwd":"123456"}' \
   http://localhost:20108/api/tenant/login | jq -r .data.token)
@@ -880,6 +1082,24 @@ CRMChat系统采用基于APP ID的多租户隔离架构，确保不同租户间�
 ---
 
 ## 更新日志
+
+### v1.2.2 - 2025-09-15  
+**租户注册安全增强**
+
+**🔒 安全功能**
+- 实现租户注册密码确认验证
+- 双重密码验证：验证器层 + 服务层
+- 防止密码输入错误导致的安全隐患
+
+**🔧 功能更新**
+- 租户注册接口增加confirm_pwd字段
+- 实现密码一致性验证逻辑
+- 优化密码验证错误消息
+
+**✅ 测试验证**
+- 验证密码不一致时返回400错误
+- 验证密码一致时注册成功
+- 验证缺少确认密码字段的边界情况
 
 ### v1.2.1 - 2025-09-15
 **租户隔离安全增强**

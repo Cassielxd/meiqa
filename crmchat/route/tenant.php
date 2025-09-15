@@ -16,6 +16,10 @@ Route::group('api', function () {
         Route::group(function () {
             // 租户登录
             Route::post('login', 'Login/login')->name('TenantLogin')->option(['real_name' => '租户登录']);
+            
+            // 租户注册相关接口
+            Route::post('send_captcha', 'Login/sendCaptcha')->name('TenantSendCaptcha')->option(['real_name' => '发送注册验证码']);
+            Route::post('register', 'Login/register')->name('TenantRegister')->option(['real_name' => '租户注册']);
         });
 
         /**
