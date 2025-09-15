@@ -98,17 +98,18 @@ class TenantServices extends BaseServices
      */
     public function createTenant(array $data)
     {
-        // 验证唯一性
+        /*// 验证唯一性
         if ($this->dao->checkAppidExists($data['appid'])) {
             throw new AdminException('应用ID已存在');
         }
         if ($this->dao->checkTenantCodeExists($data['tenant_code'])) {
             throw new AdminException('租户编码已存在');
-        }
+        }*/
         if ($this->dao->checkAccountExists($data['account'])) {
             throw new AdminException('管理员账号已存在');
         }
-        
+        $tenantCode = $this->generateTenantCode();
+        $appId = $this->generateAppId();
         // 密码加密
         $data['pwd'] = password_hash($data['pwd'], PASSWORD_DEFAULT);
         
