@@ -142,14 +142,14 @@ class Login
      */
     public function sendCaptcha()
     {
-        $phone = $this->request->post('phone', '');
+        $email = $this->request->post('email', '');
         
-        if (!$phone) {
-            return app('json')->fail('请输入手机号码');
+        if (!$email) {
+            return app('json')->fail('请输入邮箱地址');
         }
         
         try {
-            $result = $this->tenantServices->sendRegisterCaptcha($phone);
+            $result = $this->tenantServices->sendRegisterCaptcha($email);
             
             // 如果是开发环境，返回验证码
             if (is_array($result) && isset($result['captcha'])) {

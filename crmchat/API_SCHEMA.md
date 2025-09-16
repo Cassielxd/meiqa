@@ -151,7 +151,7 @@ http://localhost:20108
 | 用户类型 | 用户名 | 密码 | 说明 |
 |---------|--------|------|------|
 | Admin | admin | 123456 | 平台管理员 |
-| Tenant | tenant002@example.com | 123456 | 测试租户（邮箱即账号） |
+| Tenant | test@example.com | password123 | 测试租户（邮箱即账号） |
 | Kefu | - | - | 由租户创建 |
 | Mobile | - | - | 手机号登录 |
 
@@ -321,7 +321,7 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "phone": "13800138000"
+  "email": "test@example.com"
 }
 ```
 
@@ -334,7 +334,7 @@ Content-Type: application/json
 }
 ```
 
-**说明**: 开发环境直接返回验证码用于测试，生产环境通过短信发送
+**说明**: 开发环境直接返回验证码用于测试，生产环境通过邮件发送。面向欧美用户，使用邮箱验证码而非手机验证码。
 
 ### 2. 租户注册
 **Endpoint:** `POST /api/tenant/register`
@@ -342,15 +342,19 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "tenant_name": "测试企业",
-  "contact_name": "张三",
-  "contact_phone": "13800138000",
-  "contact_email": "zhangsan@example.com",
-  "pwd": "yourpassword",
-  "confirm_pwd": "yourpassword",
+  "tenant_name": "Test Company",
+  "contact_name": "John Doe",
+  "contact_phone": "+1-555-123-4567",
+  "contact_email": "test@example.com",
+  "pwd": "password123",
+  "confirm_pwd": "password123",
   "captcha": "123456"
 }
 ```
+
+**注意**: 
+- `contact_phone` 字段为可选，面向欧美用户
+- `contact_email` 将作为登录账号使用
 
 **Response:**
 ```json
@@ -377,8 +381,8 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "account": "tenant002@example.com",
-  "pwd": "123456"
+  "account": "test@example.com",
+  "pwd": "password123"
 }
 ```
 
@@ -391,14 +395,14 @@ Content-Type: application/json
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
     "expires_time": 1760498108,
     "tenant_info": {
-      "id": 2,
-      "appid": "tenant002",
-      "tenant_name": "测试租户002",
-      "tenant_code": "test002",
-      "account": "tenant002",
+      "id": 10,
+      "appid": "app_20250916_68C8D67B243BC",
+      "tenant_name": "Test Company",
+      "tenant_code": "tenant_20250916_9957",
+      "account": "test@example.com",
       "status": 1,
-      "max_users": 1000,
-      "max_services": 10,
+      "max_users": 100,
+      "max_services": 5,
       "expire_at": "",
       "is_expired": false,
       "remaining_days": -1
@@ -407,7 +411,7 @@ Content-Type: application/json
 }
 ```
 
-### 2. 获取租户信息
+### 3. 获取当前租户信息
 **Endpoint:** `GET /api/tenant/info`
 
 **Headers:**
@@ -422,19 +426,19 @@ Authori-zation: Bearer <tenant_token>
   "msg": "ok",
   "data": {
     "tenant_info": {
-      "id": 2,
-      "appid": "tenant002",
-      "tenant_name": "测试租户002",
-      "tenant_code": "test002",
-      "account": "tenant002",
-      "domain": null,
-      "logo": null,
-      "contact_name": "王五",
-      "contact_phone": "13700137000",
-      "contact_email": null,
+      "id": 10,
+      "appid": "app_20250916_68C8D67B243BC",
+      "tenant_name": "Test Company",
+      "tenant_code": "tenant_20250916_9957",
+      "account": "test@example.com",
+      "domain": "testcompany.com",
+      "logo": "new_logo.png",
+      "contact_name": "John Smith",
+      "contact_phone": "+1-555-987-6543",
+      "contact_email": "test@example.com",
       "status": 1,
-      "max_users": 1000,
-      "max_services": 10,
+      "max_users": 100,
+      "max_services": 5,
       "expire_at": "",
       "is_expired": false,
       "remaining_days": -1
@@ -443,8 +447,10 @@ Authori-zation: Bearer <tenant_token>
 }
 ```
 
-### 3. 修改密码
-**Endpoint:** `POST /api/tenant/change_password`
+**说明**: 租户只能查看自己的信息，不能查看其他租户信息
+
+### 4. 更新当前租户信息
+**Endpoint:** `PUT /api/tenant/update`
 
 **Headers:**
 ```
@@ -455,9 +461,43 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "old_password": "123456",
-  "new_password": "newpassword123",
-  "confirm_password": "newpassword123"
+  "tenant_name": "Updated Company Name",
+  "contact_name": "John Smith",
+  "contact_phone": "+1-555-987-6543",
+  "domain": "newdomain.com",
+  "logo": "new_logo.png"
+}
+```
+
+**注意**: 
+- 租户只能修改非敏感字段
+- `contact_email`（登录账号）不能修改
+- `appid`、`tenant_code`、`status`、`max_users`等敏感字段只能由管理员修改
+
+**Response:**
+```json
+{
+  "status": 200,
+  "msg": "更新成功",
+  "data": []
+}
+```
+
+### 5. 修改密码
+**Endpoint:** `PUT /api/tenant/change_password`
+
+**Headers:**
+```
+Authori-zation: Bearer <tenant_token>
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "old_password": "password123",
+  "new_password": "newpassword456",
+  "confirm_password": "newpassword456"
 }
 ```
 
@@ -465,10 +505,66 @@ Content-Type: application/json
 ```json
 {
   "status": 200,
-  "msg": "密码修改成功，请重新登录",
+  "msg": "密码修改成功",
   "data": []
 }
 ```
+
+### 6. 获取当前租户状态
+**Endpoint:** `GET /api/tenant/status`
+
+**Headers:**
+```
+Authori-zation: Bearer <tenant_token>
+```
+
+**Response:**
+```json
+{
+  "status": 200,
+  "msg": "ok",
+  "data": {
+    "status": 1,
+    "status_text": "已批准",
+    "is_expired": false,
+    "remaining_days": -1,
+    "expire_at": ""
+  }
+}
+```
+
+**说明**: 租户只能查看自己的状态信息
+
+---
+
+## 租户端API重构说明
+
+### 重构前（已删除的不合适API）
+- `GET /api/tenant/list` - 租户列表（租户不应该看到其他租户）
+- `GET /api/tenant/info/:id` - 租户详情（可以查看任意租户信息）
+- `POST /api/tenant/save` - 创建租户（租户不应该创建其他租户）
+- `PUT /api/tenant/update/:id` - 更新租户（可以更新任意租户）
+- `DELETE /api/tenant/delete/:id` - 删除租户（可以删除任意租户）
+- `PUT /api/tenant/status/:id` - 更新租户状态（可以修改任意租户状态）
+- `PUT /api/tenant/batch/status` - 批量更新状态（可以批量修改任意租户状态）
+- `GET /api/tenant/statistics` - 获取统计信息（可以看到所有租户统计）
+- `GET /api/tenant/expiring` - 获取即将过期的租户（可以看到其他租户信息）
+
+### 重构后（当前可用的自助管理API）
+- `GET /api/tenant/info` - 获取当前租户信息（只能查看自己的信息）
+- `PUT /api/tenant/update` - 更新当前租户信息（只能更新自己的信息）
+- `PUT /api/tenant/change_password` - 修改密码（只能修改自己的密码）
+- `GET /api/tenant/status` - 获取当前租户状态（只能查看自己的状态）
+
+### 安全特性
+1. **基于Token的身份验证**: 所有API都需要通过 `TenantAuthTokenMiddleware` 验证
+2. **数据隔离**: 租户只能操作自己的数据，无法访问其他租户信息
+3. **权限控制**: 租户只能修改非敏感字段，敏感字段只能由管理员修改
+4. **登录账号保护**: `contact_email`（登录账号）不允许租户修改
+
+---
+
+## 客服管理API
 
 ### 4. 客服管理 - 获取客服列表
 **Endpoint:** `GET /api/tenant/service/list`
@@ -936,25 +1032,25 @@ curl -H "Authori-zation: Bearer $TOKEN" \
 ```bash
 # 发送注册验证码
 curl -s -X POST -H "Content-Type: application/json" \
-  -d '{"phone":"13900139000"}' \
+  -d '{"email":"test@example.com"}' \
   http://localhost:20108/api/tenant/send_captcha | jq
 
 # 租户注册
 curl -s -X POST -H "Content-Type: application/json" \
   -d '{
-    "tenant_name":"测试企业001",
-    "contact_name":"李四",
-    "contact_phone":"13900139000",
-    "contact_email":"lisi@example.com",
-    "pwd":"123456",
-    "confirm_pwd":"123456",
+    "tenant_name":"Test Company",
+    "contact_name":"John Doe",
+    "contact_phone":"+1-555-123-4567",
+    "contact_email":"test@example.com",
+    "pwd":"password123",
+    "confirm_pwd":"password123",
     "captcha":"123456"
   }' \
   http://localhost:20108/api/tenant/register | jq
 
 # 租户登录（审核通过后）
 TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
-  -d '{"account":"tenant002","pwd":"123456"}' \
+  -d '{"account":"test@example.com","pwd":"password123"}' \
   http://localhost:20108/api/tenant/login | jq -r .data.token)
 
 # 获取客服列表

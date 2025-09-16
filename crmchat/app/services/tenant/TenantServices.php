@@ -235,7 +235,7 @@ class TenantServices extends BaseServices
         return $this->updateStatus($id, $status);
     }
 
-    /**
+     /**
      * 批量更新租户状态
      * @param array $ids
      * @param int $status
@@ -447,7 +447,7 @@ class TenantServices extends BaseServices
         }
         
         // 验证验证码
-        $this->validateCaptcha($data['captcha'], $data['contact_phone']);
+        $this->validateCaptcha($data['captcha'], $data['contact_email']);
         
         // 生成唯一的租户编码和APP ID
         $tenantCode = $this->generateTenantCode();
@@ -462,7 +462,7 @@ class TenantServices extends BaseServices
             'account' => $data['contact_email'],
             'pwd' => password_hash($data['pwd'], PASSWORD_DEFAULT), // 注册时设置密码
             'contact_name' => $data['contact_name'],
-            'contact_phone' => $data['contact_phone'],
+            'contact_phone' => $data['contact_phone'] ?? '',
             'contact_email' => $data['contact_email'],
             'status' => Tenant::STATUS_PENDING, // 待审核状态
             'max_users' => 100, // 默认最大用户数
@@ -478,7 +478,7 @@ class TenantServices extends BaseServices
         }
         
         // 清除验证码缓存
-        $this->clearCaptcha($data['contact_phone']);
+        $this->clearCaptcha($data['contact_email']);
         
         return [
             'tenant_id' => $tenant->id,
@@ -491,13 +491,13 @@ class TenantServices extends BaseServices
     /**
      * 验证验证码
      * @param string $captcha
-     * @param string $phone
+     * @param string $email
      * @throws ValidateException
      */
-    private function validateCaptcha(string $captcha, string $phone = ''): void
+    private function validateCaptcha(string $captcha, string $email = ''): void
     {
         // 从缓存中获取验证码
-        $cacheKey = 'tenant_register_captcha_' . $phone;
+        $cacheKey = 'tenant_register_captcha_' . md5($email);
         $cachedCaptcha = Cache::get($cacheKey);
         
         if (!$cachedCaptcha) {
@@ -511,11 +511,11 @@ class TenantServices extends BaseServices
     
     /**
      * 清除验证码缓存
-     * @param string $phone
+     * @param string $email
      */
-    private function clearCaptcha(string $phone = ''): void
+    private function clearCaptcha(string $email = ''): void
     {
-        $cacheKey = 'tenant_register_captcha_' . $phone;
+        $cacheKey = 'tenant_register_captcha_' . md5($email);
         Cache::delete($cacheKey);
     }
     
@@ -549,30 +549,30 @@ class TenantServices extends BaseServices
     
     /**
      * 发送注册验证码
-     * @param string $phone
+     * @param string $email
      * @return array
      */
-    public function sendRegisterCaptcha(string $phone): array
+    public function sendRegisterCaptcha(string $email): array
     {
-        // 检查手机号格式
-        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
-            throw new ValidateException('请输入正确的手机号码');
+        // 检查邮箱格式
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ValidateException('请输入正确的邮箱地址');
         }
         
         // 检查是否已注册
-        $exists = $this->dao->getOne(['contact_phone' => $phone]);
+        $exists = $this->dao->getOne(['contact_email' => $email]);
         if ($exists) {
-            throw new ValidateException('该手机号已注册');
+            throw new ValidateException('该邮箱已注册');
         }
         
         // 生成验证码
         $captcha = (string)mt_rand(100000, 999999);
         
         // 缓存验证码，10分钟有效
-        $cacheKey = 'tenant_register_captcha_' . $phone;
+        $cacheKey = 'tenant_register_captcha_' . md5($email);
         Cache::set($cacheKey, $captcha, 600);
         
-        // TODO: 这里集成真实的短信发送服务
+        // TODO: 这里集成真实的邮件发送服务
         // 开发环境直接返回验证码用于测试
         return [
             'status' => 'success',

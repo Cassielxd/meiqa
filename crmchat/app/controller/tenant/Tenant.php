@@ -7,9 +7,11 @@ use app\services\tenant\TenantServices;
 use app\validates\tenant\TenantValidate;
 use app\Request;
 use crmeb\traits\Help;
+use crmeb\exceptions\AdminException;
 
 /**
- * 租户管理控制器
+ * 租户自助管理控制器
+ * 只允许租户管理自己的信息，不允许管理其他租户
  * Class Tenant
  * @package app\controller\tenant
  */
@@ -38,98 +40,43 @@ class Tenant
     }
 
     /**
-     * 租户列表
+     * 获取当前租户信息
      * @return mixed
      */
-    public function index()
+    public function info()
     {
-        $where = $this->request->getMore([
-            ['tenant_name', ''],
-            ['tenant_code', ''],
-            ['contact_name', ''],
-            ['contact_phone', ''],
-            ['status', ''],
-            ['is_expired', ''],
-            ['date', ''],
-        ]);
-        
-        return $this->success($this->services->getTenantList($where));
-    }
-
-    /**
-     * 租户详情
-     * @param int $id
-     * @return mixed
-     */
-    public function read($id)
-    {
-        if (!$id) {
-            return $this->fail('参数错误');
+        // 从token中获取当前租户ID
+        $tenantId = $this->request->tenantId();
+        if (!$tenantId) {
+            return $this->fail('未登录或登录已过期');
         }
         
-        return $this->success($this->services->getTenantInfo((int)$id));
-    }
-
-    /**
-     * 创建租户
-     * @return mixed
-     */
-    public function save()
-    {
-        $data = $this->request->postMore([
-            'appid',
-            'tenant_name',
-            'tenant_code',
-            'account',
-            'pwd',
-            'domain',
-            'logo',
-            'contact_name',
-            'contact_phone',
-            'contact_email',
-            'status',
-            'max_users',
-            'max_services',
-            'expire_at',
-        ]);
-        
-        // 验证数据
-        $this->validate($data, TenantValidate::class);
-        
         try {
-            $tenant = $this->services->createTenant($data);
-            return $this->success('创建成功', $tenant);
+            $info = $this->services->getTenantInfo($tenantId);
+            return $this->success($info);
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
         }
     }
 
     /**
-     * 更新租户
-     * @param int $id
+     * 更新当前租户信息
      * @return mixed
      */
-    public function update($id)
+    public function update()
     {
-        if (!$id) {
-            return $this->fail('参数错误');
+        // 从token中获取当前租户ID
+        $tenantId = $this->request->tenantId();
+        if (!$tenantId) {
+            return $this->fail('未登录或登录已过期');
         }
         
         $data = $this->request->postMore([
-            ['appid', ''],
             ['tenant_name', ''],
-            ['tenant_code', ''],
-            ['account', ''],
-            ['pwd', ''],
-            ['domain', ''],
-            ['logo', ''],
             ['contact_name', ''],
             ['contact_phone', ''],
-            ['contact_email', ''],
-            ['status', ''],
-            ['max_users', ''],
-            ['max_services', ''],
-            ['expire_at', ''],
+            ['domain', ''],
+            ['logo', ''],
         ]);
         
         // 过滤空值
@@ -137,11 +84,12 @@ class Tenant
             return $value !== '';
         });
         
-        // 验证数据（更新时密码可选）
-        $this->validate($data, TenantValidate::class . '.update');
+        // 租户不能修改敏感字段，如appid、tenant_code、status、max_users、contact_email等
+        // 这些字段只能由管理员修改
+        // contact_email是登录账号，不允许租户修改
         
         try {
-            $result = $this->services->updateTenant((int)$id, $data);
+            $result = $this->services->updateTenant($tenantId, $data);
             return $this->success('更新成功');
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
@@ -149,124 +97,62 @@ class Tenant
     }
 
     /**
-     * 删除租户
-     * @param int $id
+     * 修改密码
      * @return mixed
      */
-    public function delete($id)
+    public function changePassword()
     {
-        if (!$id) {
-            return $this->fail('参数错误');
+        // 从token中获取当前租户ID
+        $tenantId = $this->request->tenantId();
+        if (!$tenantId) {
+            return $this->fail('未登录或登录已过期');
+        }
+        
+        $data = $this->request->postMore([
+            ['old_password', ''],
+            ['new_password', ''],
+            ['confirm_password', ''],
+        ]);
+        
+        // 验证参数
+        if (empty($data['old_password']) || empty($data['new_password']) || empty($data['confirm_password'])) {
+            return $this->fail('请填写完整信息');
+        }
+        
+        if ($data['new_password'] !== $data['confirm_password']) {
+            return $this->fail('两次输入的新密码不一致');
+        }
+        
+        if (strlen($data['new_password']) < 6) {
+            return $this->fail('新密码长度不能少于6位');
         }
         
         try {
-            $result = $this->services->deleteTenant((int)$id);
-            return $this->success('删除成功');
+            $result = $this->services->updatePassword($tenantId, $data['old_password'], $data['new_password']);
+            return $this->success('密码修改成功');
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
         }
     }
 
     /**
-     * 更新租户状态
-     * @param int $id
+     * 获取当前租户状态信息
      * @return mixed
      */
-    public function updateStatus($id)
+    public function status()
     {
-        if (!$id) {
-            return $this->fail('参数错误');
+        // 从token中获取当前租户信息
+        $tenantInfo = $this->request->tenantInfo();
+        if (!$tenantInfo) {
+            return $this->fail('未登录或登录已过期');
         }
         
-        $status = $this->request->post('status/d', 0);
-        
-        try {
-            $result = $this->services->updateStatus((int)$id, $status);
-            return $this->success('操作成功');
-        } catch (\Exception $e) {
-            return $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * 批量更新状态
-     * @return mixed
-     */
-    public function batchUpdateStatus()
-    {
-        $ids = $this->request->post('ids/a', []);
-        $status = $this->request->post('status/d', 0);
-        
-        try {
-            $result = $this->services->batchUpdateStatus($ids, $status);
-            return $this->success('操作成功');
-        } catch (\Exception $e) {
-            return $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * 获取统计信息
-     * @return mixed
-     */
-    public function statistics()
-    {
-        return $this->success($this->services->getStatistics());
-    }
-
-    /**
-     * 获取即将过期的租户
-     * @return mixed
-     */
-    public function expiring()
-    {
-        $days = $this->request->get('days/d', 7);
-        return $this->success($this->services->getExpiringTenants($days));
-    }
-
-    /**
-     * 获取状态选项
-     * @return mixed
-     */
-    public function statusOptions()
-    {
-        $options = [];
-        foreach (\app\models\tenant\Tenant::$statusMap as $value => $label) {
-            $options[] = [
-                'value' => $value,
-                'label' => $label,
-            ];
-        }
-        return $this->success($options);
-    }
-
-    /**
-     * 验证唯一性
-     * @return mixed
-     */
-    public function checkUnique()
-    {
-        $field = $this->request->get('field', '');
-        $value = $this->request->get('value', '');
-        $excludeId = $this->request->get('exclude_id/d', 0);
-        
-        if (!in_array($field, ['appid', 'tenant_code', 'account'])) {
-            return $this->fail('参数错误');
-        }
-        
-        $exists = false;
-        switch ($field) {
-            case 'appid':
-                $exists = $this->services->checkAppidExists($value, $excludeId);
-                break;
-            case 'tenant_code':
-                $exists = $this->services->checkTenantCodeExists($value, $excludeId);
-                break;
-            case 'account':
-                $exists = $this->services->checkAccountExists($value, $excludeId);
-                break;
-        }
-        
-        return $this->success(['exists' => $exists]);
+        return $this->success([
+            'status' => $tenantInfo['status'],
+            'status_text' => \app\models\tenant\Tenant::$statusMap[$tenantInfo['status']] ?? '未知',
+            'is_expired' => $tenantInfo['is_expired'] ?? false,
+            'remaining_days' => $tenantInfo['remaining_days'] ?? -1,
+            'expire_at' => $tenantInfo['expire_at'] ?? null,
+        ]);
     }
 }

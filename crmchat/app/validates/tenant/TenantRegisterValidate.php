@@ -19,7 +19,7 @@ class TenantRegisterValidate extends Validate
     protected $rule = [
         'tenant_name' => 'require|length:2,50|unique:tenants',
         'contact_name' => 'require|length:2,20',
-        'contact_phone' => 'require|mobile',
+        'contact_phone' => 'max:20',
         'contact_email' => 'require|email|unique:tenants',
         'captcha' => 'require|length:4,6',
         'pwd' => 'require|length:6,32',
@@ -36,8 +36,7 @@ class TenantRegisterValidate extends Validate
         'tenant_name.unique' => '租户名称已存在',
         'contact_name.require' => '请输入联系人姓名',
         'contact_name.length' => '联系人姓名长度必须在2-20个字符之间',
-        'contact_phone.require' => '请输入联系电话',
-        'contact_phone.mobile' => '请输入正确的手机号码',
+        'contact_phone.max' => '联系电话长度不能超过20个字符',
         'contact_email.require' => '请输入联系邮箱',
         'contact_email.email' => '请输入正确的邮箱地址',
         'contact_email.unique' => '该邮箱已被注册',
