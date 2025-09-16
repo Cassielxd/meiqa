@@ -140,7 +140,7 @@ class Service
         try {
             // 设置APP ID
             $data['appid'] = $tenantInfo['appid'];
-            $data['password'] = md5($data['password']);
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
             unset($data['true_password']);
             
             $service = $this->services->save($data);
@@ -189,7 +189,7 @@ class Service
             if ($data['password'] !== $data['true_password']) {
                 return $this->fail('两次密码输入不一致');
             }
-            $data['password'] = md5($data['password']);
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
         unset($data['true_password']);
 

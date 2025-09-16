@@ -50,8 +50,26 @@ class LoginServices extends BaseServices
         if (!$kefuInfo) {
             throw new ValidateException('没有此用户');
         }
-        if ($password && md5($password) !== $kefuInfo->password) {
-            throw new ValidateException('账号或密码错误');
+        if ($password) {
+            // 支持新旧密码验证，并自动升级旧密码
+            $isPasswordValid = false;
+            
+            // 检查是否是新的 bcrypt 密码格式
+            if (strpos($kefuInfo->password, '$2y$') === 0) {
+                $isPasswordValid = password_verify($password, $kefuInfo->password);
+            } else {
+                // 兼容旧的 MD5 密码
+                if (md5($password) === $kefuInfo->password) {
+                    $isPasswordValid = true;
+                    // 自动升级为 bcrypt 密码
+                    $kefuInfo->password = password_hash($password, PASSWORD_DEFAULT);
+                    $kefuInfo->save();
+                }
+            }
+            
+            if (!$isPasswordValid) {
+                throw new ValidateException('账号或密码错误');
+            }
         }
         if (!$kefuInfo->status) {
             throw new ValidateException('您已被禁止登录');
