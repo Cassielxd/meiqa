@@ -1,7 +1,7 @@
 # CRMChat API Schema Documentation
 
 ## 目录
-- [系统流程图](#系统流程图)
+to  - [系统流程图](#系统流程图)
 - [认证说明](#认证说明)
 - [默认账户信息](#默认账户信息)
 - [Admin API](#admin-api)
@@ -151,7 +151,7 @@ http://localhost:20108
 | 用户类型 | 用户名 | 密码 | 说明 |
 |---------|--------|------|------|
 | Admin | admin | 123456 | 平台管理员 |
-| Tenant | tenant002 | 123456 | 测试租户 |
+| Tenant | tenant002@example.com | 123456 | 测试租户（邮箱即账号） |
 | Kefu | - | - | 由租户创建 |
 | Mobile | - | - | 手机号登录 |
 
@@ -251,7 +251,7 @@ Content-Type: application/json
 {
   "tenant_name": "新租户",
   "tenant_code": "new_tenant",
-  "account": "tenant_new",
+  "account": "tenant_new@example.com",
   "pwd": "123456",
   "contact_name": "张三",
   "contact_phone": "13800138000",
@@ -377,7 +377,7 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "account": "tenant002",
+  "account": "tenant002@example.com",
   "pwd": "123456"
 }
 ```

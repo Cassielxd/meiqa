@@ -17,7 +17,8 @@ class TenantLoginValidate extends Validate
      * @var array
      */
     protected $rule = [
-        'account' => 'require|regex:/^[a-zA-Z0-9_]{4,32}$/|length:4,32',
+        // 登录账号改为邮箱
+        'account' => 'require|email|max:100',
         'pwd' => 'require|length:6,32',
         'old_password' => 'require|length:6,32',
         'new_password' => 'require|length:6,32',
@@ -28,9 +29,9 @@ class TenantLoginValidate extends Validate
      * @var array
      */
     protected $message = [
-        'account.require' => '请输入账号',
-        'account.regex' => '账号只能包含字母、数字和下划线',
-        'account.length' => '账号长度必须在4-32个字符之间',
+        'account.require' => '请输入邮箱账号',
+        'account.email' => '账号必须为有效邮箱',
+        'account.max' => '邮箱长度最多100个字符',
         'pwd.require' => '请输入密码',
         'pwd.length' => '密码长度必须在6-32个字符之间',
         'old_password.require' => '请输入原密码',
