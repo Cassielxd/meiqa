@@ -233,4 +233,67 @@ class ApplicationServices extends BaseServices
             return ['appInfo' => $appInfo];
         }
     }
+
+    /**
+     * 生成唯一的APP ID
+     * 参考InstallController的生成逻辑
+     * @return string
+     */
+    public function generateAppId(): string
+    {
+        do {
+            // 使用时间戳和随机数生成唯一的appid，类似安装控制器的逻辑
+            $timestamp = time();
+            $rand = rand(1000, 9999);
+            // 生成格式: 年月日时分秒 + 4位随机数
+            $appId = date('YmdHis') . $rand;
+            $exists = $this->dao->get(['appid' => $appId, 'is_delete' => 0]);
+        } while ($exists);
+
+        return $appId;
+    }
+
+    /**
+     * 生成APP Secret
+     * 基于appid、时间戳和随机数生成
+     * @param string $appId
+     * @param int|null $timestamp
+     * @param int|null $rand
+     * @return array 返回包含app_secret, timestamp, rand的数组
+     */
+    public function generateAppSecret(string $appId, int $timestamp = null, int $rand = null): array
+    {
+        if ($timestamp === null) {
+            $timestamp = time();
+        }
+        if ($rand === null) {
+            $rand = rand(1000, 9999);
+        }
+
+        // 按照现有的逻辑生成app_secret
+        $appSecret = md5($appId . $timestamp . $rand);
+
+        return [
+            'app_secret' => $appSecret,
+            'timestamp' => $timestamp,
+            'rand' => $rand
+        ];
+    }
+
+    /**
+     * 生成完整的应用信息 (appid + app_secret + 相关数据)
+     * @return array
+     */
+    public function generateAppInfo(): array
+    {
+        $appId = $this->generateAppId();
+        $secretData = $this->generateAppSecret($appId);
+
+        return [
+            'appid' => $appId,
+            'app_secret' => $secretData['app_secret'],
+            'timestamp' => $secretData['timestamp'],
+            'rand' => $secretData['rand']
+        ];
+    }
 }

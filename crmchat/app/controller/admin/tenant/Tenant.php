@@ -52,7 +52,6 @@ class Tenant extends AuthController
             return $this->fail($e->getMessage());
         }
     }
-
     /**
      * 获取租户详情
      * @param int $id
@@ -63,12 +62,12 @@ class Tenant extends AuthController
         if (!$id) {
             return $this->fail('参数错误');
         }
-        
+
         $info = $this->services->getTenantInfo((int)$id);
         if (!$info) {
             return $this->fail('租户不存在');
         }
-        
+
         return $this->success($info);
     }
 
@@ -80,21 +79,21 @@ class Tenant extends AuthController
     {
         $data = $this->request->postMore([
             ['tenant_name', ''],
-            ['tenant_code', ''],
             ['account', ''],
             ['pwd', ''],
-            ['contact_name', ''],
-            ['contact_phone', ''],
             ['contact_email', ''],
-            ['max_users', 1000],
-            ['max_services', 10],
+            ['contact_phone', ''],
+            ['user_limit', 100],
+            ['service_limit', 10],
             ['expire_at', ''],
-            ['status', 0],
+            ['auto_renew', 0],
+            ['status', 1],
+            ['remark', ''],
         ]);
 
         try {
             $tenant = $this->services->createTenant($data);
-            return $this->success('创建成功', ['id' => $tenant->id]);
+            return $this->success('创建成功', $tenant);
         } catch (\Exception $e) {
             return $this->fail($e->getMessage());
         }
@@ -113,13 +112,14 @@ class Tenant extends AuthController
 
         $data = $this->request->postMore([
             ['tenant_name', ''],
-            ['contact_name', ''],
-            ['contact_phone', ''],
             ['contact_email', ''],
-            ['max_users', ''],
-            ['max_services', ''],
+            ['contact_phone', ''],
+            ['user_limit', ''],
+            ['service_limit', ''],
             ['expire_at', ''],
+            ['auto_renew', ''],
             ['status', ''],
+            ['remark', ''],
         ]);
 
         // 过滤空值

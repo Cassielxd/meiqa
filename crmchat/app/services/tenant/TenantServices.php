@@ -5,6 +5,7 @@ namespace app\services\tenant;
 
 use app\dao\tenant\TenantDao;
 use app\models\tenant\Tenant;
+use app\services\ApplicationServices;
 use crmeb\basic\BaseServices;
 use app\services\other\UploadService;
 use crmeb\exceptions\AdminException;
@@ -98,31 +99,59 @@ class TenantServices extends BaseServices
      */
     public function createTenant(array $data)
     {
-        // 验证唯一性
-        if ($this->dao->checkAppidExists($data['appid'])) {
-            throw new AdminException('应用ID已存在');
-        }
-        if ($this->dao->checkTenantCodeExists($data['tenant_code'])) {
-            throw new AdminException('租户编码已存在');
-        }
+        // 验证账号唯一性
         if ($this->dao->checkAccountExists($data['account'])) {
             throw new AdminException('管理员账号已存在');
         }
-        
+
+        // 生成唯一的租户编码
+        $tenantCode = $this->generateTenantCode();
+
+        // 使用ApplicationServices生成应用信息
+        /** @var ApplicationServices $applicationServices */
+        $applicationServices = app()->make(ApplicationServices::class);
+        $appInfo = $applicationServices->generateAppInfo();
+        $appId = $appInfo['appid'];
+
         // 密码加密
-        $data['pwd'] = password_hash($data['pwd'], PASSWORD_DEFAULT);
-        
+        if (!empty($data['pwd'])) {
+            $data['pwd'] = password_hash($data['pwd'], PASSWORD_DEFAULT);
+        }
+
+        // 设置必要字段
+        $data['tenant_code'] = $tenantCode;
+        $data['appid'] = $appId;
+        $data['tenant_name'] =  $data['tenant_name'];
+        $data['contact_name'] =  $data['tenant_name'];
+        $data['contact_email'] = $data['account'] ?? '';
+        $data['contact_phone'] = $data['contact_phone'] ?? '';
+
         // 设置默认值
-        $data['status'] = $data['status'] ?? 0;
-        $data['max_users'] = $data['max_users'] ?? 1000;
-        $data['max_services'] = $data['max_services'] ?? 10;
-        
+        $data['status'] = $data['status'] ?? 0; // 管理员创建默认为启用状态
+        $data['max_users'] = $data['user_limit'] ?? 1000;
+        $data['max_services'] = $data['service_limit'] ?? 10;
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        // 处理到期时间
+        if (!empty($data['expire_time']) && $data['expire_time'] !== '') {
+            $data['expire_at'] = $data['expire_time'];
+        } else {
+            $data['expire_at'] = null; // 空值设置为null
+        }
+        unset($data['expire_time']);
+
         // 创建租户
         $tenant = $this->dao->save($data);
-        
+
+        // 如果租户状态为启用（1），自动创建应用数据
+        if ($data['status'] == 1) {
+            $this->createTenantApplication($tenant, $appInfo);
+        }
+
         // 清除缓存
         $this->clearTenantCache();
-        
+
         return $tenant->toArray();
     }
 
@@ -141,7 +170,7 @@ class TenantServices extends BaseServices
         if (!$tenant) {
             throw new AdminException('租户不存在');
         }
-        
+
         // 验证唯一性
         if (isset($data['appid']) && $this->dao->checkAppidExists($data['appid'], $id)) {
             throw new AdminException('应用ID已存在');
@@ -152,23 +181,32 @@ class TenantServices extends BaseServices
         if (isset($data['account']) && $this->dao->checkAccountExists($data['account'], $id)) {
             throw new AdminException('管理员账号已存在');
         }
-        
+
         // 密码处理
         if (!empty($data['pwd'])) {
             $data['pwd'] = password_hash($data['pwd'], PASSWORD_DEFAULT);
         } else {
             unset($data['pwd']);
         }
-        
+
+        // 检查状态变化：如果更新为启用状态(1)，需要检查应用信息
+        $oldStatus = $tenant['status'];
+        $newStatus = isset($data['status']) ? $data['status'] : $oldStatus;
+
         // 更新数据
         $result = $this->dao->update($id, $data);
-        
+
+        // 如果状态更新为启用(1)，检查并生成应用信息
+        if ($result && $newStatus == 1) {
+            $this->checkAndCreateApplication($tenant, $data);
+        }
+
         // 清除缓存
         $this->clearTenantCache($tenant['appid']);
         if (isset($data['appid']) && $data['appid'] != $tenant['appid']) {
             $this->clearTenantCache($data['appid']);
         }
-        
+
         return $result !== false;
     }
 
@@ -449,9 +487,14 @@ class TenantServices extends BaseServices
         // 验证验证码
         $this->validateCaptcha($data['captcha'], $data['contact_email']);
         
-        // 生成唯一的租户编码和APP ID
+        // 生成唯一的租户编码
         $tenantCode = $this->generateTenantCode();
-        $appId = $this->generateAppId();
+
+        // 使用ApplicationServices生成应用信息
+        /** @var ApplicationServices $applicationServices */
+        $applicationServices = app()->make(ApplicationServices::class);
+        $appInfo = $applicationServices->generateAppInfo();
+        $appId = $appInfo['appid'];
         
         // 准备租户数据
         $tenantData = [
@@ -533,19 +576,6 @@ class TenantServices extends BaseServices
         return $code;
     }
     
-    /**
-     * 生成唯一的APP ID
-     * @return string
-     */
-    private function generateAppId(): string
-    {
-        do {
-            $appId = 'app_' . date('Ymd') . '_' . strtoupper(uniqid());
-            $exists = $this->dao->getOne(['appid' => $appId]);
-        } while ($exists);
-        
-        return $appId;
-    }
     
     /**
      * 发送注册验证码
@@ -579,5 +609,137 @@ class TenantServices extends BaseServices
             'captcha' => $captcha,
             'message' => '验证码发送成功，开发环境验证码：' . $captcha
         ];
+    }
+
+    /**
+     * 为租户创建应用数据
+     * @param $tenant 租户数据
+     * @param array $appInfo 应用信息
+     * @return bool
+     */
+    private function createTenantApplication($tenant, array $appInfo)
+    {
+        try {
+            // 获取APP_KEY用于加密token
+            $appKey = config('app.key');
+
+            // 使用Encrypter生成token（参考InstallController的逻辑）
+            $encrypter = new \crmeb\utils\Encrypter($this->parseKey($appKey), 'AES-256-CBC');
+            $token = $encrypter->encrypt(json_encode([
+                'appid' => $appInfo['appid'],
+                'app_secret' => $appInfo['app_secret'],
+                'rand' => $appInfo['rand'],
+                'timestamp' => $appInfo['timestamp'],
+            ]));
+            $tokenMd5 = md5($token);
+
+            // 准备应用数据
+            $applicationData = [
+                'appid' => $appInfo['appid'],
+                'name' => $tenant['tenant_name'] . '的客服应用',
+                'icon' => '', // 可以设置默认图标
+                'introduce' => '由系统自动为租户 ' . $tenant['tenant_name'] . ' 创建的客服应用',
+                'app_secret' => $appInfo['app_secret'],
+                'timestamp' => $appInfo['timestamp'],
+                'rand' => $appInfo['rand'],
+                'token' => $token,
+                'token_md5' => $tokenMd5,
+                'status' => 1, // 启用状态
+                'is_delete' => 0,
+                'add_time' => time(),
+            ];
+
+            // 获取ApplicationDao直接保存
+            $applicationDao = app()->make(\app\dao\ApplicationDao::class);
+            $result = $applicationDao->save($applicationData);
+
+            return $result !== false;
+        } catch (\Exception $e) {
+            // 记录错误日志，但不阻断租户创建流程
+            \think\facade\Log::error('创建租户应用失败: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 检查并创建应用信息（用于更新租户时）
+     * @param $tenant 租户数据
+     * @param array $updateData 更新的数据
+     * @return bool
+     */
+    private function checkAndCreateApplication($tenant, array $updateData = [])
+    {
+        try {
+            // 获取租户的appid
+            $appid = $tenant['appid'];
+            if (!$appid) {
+                // 如果租户没有appid，先生成一个
+                /** @var ApplicationServices $applicationServices */
+                $applicationServices = app()->make(\app\services\ApplicationServices::class);
+                $appInfo = $applicationServices->generateAppInfo();
+                $appid = $appInfo['appid'];
+
+                // 更新租户的appid
+                $this->dao->update($tenant['id'], ['appid' => $appid]);
+            } else {
+                // 检查应用记录是否存在
+                $applicationDao = app()->make(\app\dao\ApplicationDao::class);
+                $existingApp = $applicationDao->get(['appid' => $appid, 'is_delete' => 0]);
+
+                if ($existingApp) {
+                    // 应用已存在，无需重新创建
+                    return true;
+                }
+
+                // 应用不存在，有两种选择：
+                // 1. 使用现有appid重新生成应用信息
+                // 2. 重新生成appid和应用信息（如果现有appid有问题）
+
+                /** @var ApplicationServices $applicationServices */
+                $applicationServices = app()->make(\app\services\ApplicationServices::class);
+
+                // 尝试使用现有appid生成应用信息
+                try {
+                    $appInfo = $applicationServices->generateAppSecret($appid);
+                    $appInfo['appid'] = $appid;
+                    $this->dao->update($tenant['id'], ['appid' => $appid]);
+                } catch (\Exception $e) {
+                    // 如果现有appid有问题，重新生成
+                    \think\facade\Log::warning('现有appid可能有问题，重新生成: ' . $e->getMessage());
+                    $appInfo = $applicationServices->generateAppInfo();
+                    $appid = $appInfo['appid'];
+
+                    // 更新租户表中的appid
+                    $this->dao->update($tenant['id'], ['appid' => $appid]);
+                }
+            }
+
+            // 合并租户信息和更新数据
+            $tenantData = array_merge($tenant->toArray(), $updateData);
+
+            // 确保租户数据包含正确的appid
+            $tenantData['appid'] = $appid;
+
+            // 创建应用记录
+            return $this->createTenantApplication($tenantData, $appInfo);
+
+        } catch (\Exception $e) {
+            // 记录错误日志，但不阻断租户更新流程
+            \think\facade\Log::error('检查并创建租户应用失败: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 解析APP_KEY（参考InstallController）
+     * @param string $key
+     * @return false|mixed|string
+     */
+    private function parseKey(string $key)
+    {
+        if (\think\helper\Str::startsWith($key, $prefix = 'base64:')) {
+            $key = base64_decode(\crmeb\utils\Str::after($key, $prefix));
+        }
+        return $key;
     }
 }

@@ -5,6 +5,7 @@ import user from './modules/user'
 // import echarts from './modules/echarts'
 import setting from './modules/setting'
 import system from './modules/system'
+import tenant from './modules/tenant'
 import BasicLayout from '@/components/main'
 import frameOut from './modules/frameOut'
 import kefu from './modules/kefu'
@@ -89,6 +90,7 @@ const frameIn = [
     user,
     setting,
     system,
+    tenant,
     kefu
 ]
 

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/work2025/php/crmchat/crmchat/app/controller/admin/tenant/**)",
+      "Read(//d/work2025/php/crmchat/crmchat/app/services/tenant/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -249,7 +249,6 @@ Route::group('api', function () {
             AdminCkeckRoleMiddleware::class,
             AdminLogMiddleware::class
         ]);
-        
         /**
          * 租户管理相关路由
          */
@@ -279,7 +278,7 @@ Route::group('api', function () {
             AdminCkeckRoleMiddleware::class,
             AdminLogMiddleware::class
         ]);
-        
+
         /**
          * 系统设置维护 系统权限管理、系统菜单管理 系统配置 相关路由
          */
