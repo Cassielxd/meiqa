@@ -17,13 +17,10 @@ class TenantRegisterValidate extends Validate
      * @var array
      */
     protected $rule = [
-        'tenant_name' => 'require|length:2,50|unique:tenants',
-        'contact_name' => 'require|length:2,20',
+        'account' => 'require|length:2,50|unique:tenants',
         'contact_phone' => 'max:20',
-        'contact_email' => 'require|email|unique:tenants',
-        'captcha' => 'require|length:4,6',
+        'email' => 'require|email|unique:tenants',
         'pwd' => 'require|length:6,32',
-        'confirm_pwd' => 'require|confirm:pwd',
     ];
 
     /**

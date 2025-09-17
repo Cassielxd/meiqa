@@ -85,6 +85,10 @@ class ChatServiceRecordDao extends BaseDao
             });
         })->when(isset($where['delete']), function ($query) {
             $query->whereNull('delete_time');
+        })->when(isset($where['appid']) && $where['appid'], function ($query) use ($where) {
+            $query->whereIn('to_user_id', function ($query) use ($where) {
+                $query->name('chat_user')->where('appid', $where['appid'])->field(['id']);
+            });
         })->field($field)->order('update_time desc')
             ->select()->toArray();
     }
@@ -114,6 +118,10 @@ class ChatServiceRecordDao extends BaseDao
             });
         })->when(isset($where['delete']), function ($query) {
             $query->whereNull('delete_time');
+        })->when(isset($where['appid']) && $where['appid'], function ($query) use ($where) {
+            $query->whereIn('to_user_id', function ($query) use ($where) {
+                $query->name('chat_user')->where('appid', $where['appid'])->field(['id']);
+            });
         });
     }
 

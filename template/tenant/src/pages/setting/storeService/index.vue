@@ -345,8 +345,8 @@ export default {
   },
   async created() {
     let res = await adminAppCustomer();
-    if (res.status == 200 && res.data.list.length) {
-      this.qrcodeTextStart += `&token=${res.data.list[0].token_md5}`;
+    if (res.status == 200) {
+      this.qrcodeTextStart += `&token=${res.data.token_md5}`;
     }
     this.getGroupList();
     this.getList();

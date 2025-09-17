@@ -484,9 +484,6 @@ class TenantServices extends BaseServices
             throw new ValidateException('两次输入的密码不一致');
         }
         
-        // 验证验证码
-        $this->validateCaptcha($data['captcha'], $data['contact_email']);
-        
         // 生成唯一的租户编码
         $tenantCode = $this->generateTenantCode();
 
@@ -498,18 +495,18 @@ class TenantServices extends BaseServices
         
         // 准备租户数据
         $tenantData = [
-            'tenant_name' => $data['tenant_name'],
+            'tenant_name' => $data['contact_email'],
             'tenant_code' => $tenantCode,
             'appid' => $appId,
             // 使用邮箱作为账号
             'account' => $data['contact_email'],
             'pwd' => password_hash($data['pwd'], PASSWORD_DEFAULT), // 注册时设置密码
-            'contact_name' => $data['contact_name'],
+            'contact_name' => $data['contact_email'],
             'contact_phone' => $data['contact_phone'] ?? '',
             'contact_email' => $data['contact_email'],
             'status' => Tenant::STATUS_PENDING, // 待审核状态
-            'max_users' => 100, // 默认最大用户数
-            'max_services' => 5, // 默认最大客服数
+            'max_users' => 0, // 默认最大用户数
+            'max_services' => 0, // 默认最大客服数
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];

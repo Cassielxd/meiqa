@@ -89,6 +89,28 @@ class ChatServiceServices extends BaseServices
         $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
         return $field;
     }
+    public function createServiceFormForTent(array $formData = [])
+    {
+        /** @var ChatServiceGroupServices $seervice */
+        $seervice = app()->make(ChatServiceGroupServices::class);
+        $field[] = $this->builder->select('group_id', '请选择分组', $formData['group_id'] ?? 0)->options($seervice->getOptions());
+        $field[] = $this->builder->frameImage('avatar', '客服头像', $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true), $formData['avatar'] ?? '')->icon('ios-add')->width('950px')->height('420px');
+        $field[] = $this->builder->input('nickname', '客服名称', $formData['nickname'] ?? '')->col(24)->required();
+        $field[] = $this->builder->input('phone', '手机号码', $formData['phone'] ?? '')->col(24)->required();
+        if ($formData) {
+            $field[] = $this->builder->input('account', '登录账号', $formData['account'] ?? '')->col(24)->required();
+            $field[] = $this->builder->input('password', '登录密码')->type('password')->col(24);
+            $field[] = $this->builder->input('true_password', '确认密码')->type('password')->col(24);
+        } else {
+            $field[] = $this->builder->input('account', '登录账号')->col(24)->required();
+            $field[] = $this->builder->input('password', '登录密码')->type('password')->col(24)->required();
+            $field[] = $this->builder->input('true_password', '确认密码')->type('password')->col(24)->required();
+        }
+        $field[] = $this->builder->textarea('welcome_words', '欢迎语', $formData['welcome_words'] ?? '');
+        $field[] = $this->builder->switches('auto_reply', '自动回复', (int)($formData['auto_reply'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        return $field;
+    }
 
     /**
      * 创建客服获取表单
@@ -98,6 +120,10 @@ class ChatServiceServices extends BaseServices
     public function create()
     {
         return create_form('添加客服', $this->createServiceForm(), $this->url('/chat/kefu'), 'POST');
+    }
+    public function createKefuForTent()
+    {
+        return create_form('添加客服', $this->createServiceFormForTent(), $this->url('/chat/kefu'), 'POST');
     }
 
     /**

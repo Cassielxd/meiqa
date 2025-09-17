@@ -80,9 +80,10 @@ export default {
     // 获取token
     getAdminAppCustomer() {
       adminAppCustomer().then(res => {
+        debugger
         if(res.status == 200) {
-          if(res.data.list.length) {
-            this.token = res.data.list[0];
+          if(res.data) {
+            this.token = res.data;
           }
         }
       })

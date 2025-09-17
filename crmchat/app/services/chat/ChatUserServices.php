@@ -172,14 +172,16 @@ class ChatUserServices extends BaseServices
     /**
      * 获取统计数据
      * @param int $id
+     * @param int $type
      * @param int $year
      * @param int $month
+     * @param string $appid
      * @return array
      * @throws DataNotFoundException
      * @throws DbException
      * @throws ModelNotFoundException
      */
-    public function getKefuStatistics(int $id, int $type, int $year, int $month)
+    public function getKefuStatistics(int $id, int $type, int $year, int $month, string $appid = '')
     {
         if ($type) {
             $date = Carbon::create($year, $month);
@@ -190,23 +192,26 @@ class ChatUserServices extends BaseServices
             $startTime = $date->startOfYear()->toDateTimeString();
             $endTime = $date->endOfYear()->toDateTimeString();
         }
-
+        $listWhere = [
+            'user_id' => $id,
+            'type' => $type,
+            'is_tourist' => 0,
+            'startTime' => $startTime,
+            'endTime' => $endTime,
+        ];
+        if ($appid) {
+            $listWhere['appid'] = $appid;
+        }
 
         return [
-            'list' => $this->dao->kefuStatistics([
-                'user_id' => $id,
-                'type' => $type,
-                'is_tourist' => 0,
-                'startTime' => $startTime,
-                'endTime' => $endTime,
-            ]),
-            'tourist' => $this->dao->kefuStatistics([
+            'list' => $this->dao->kefuStatistics($listWhere),
+            'tourist' => $this->dao->kefuStatistics(array_merge([
                 'user_id' => $id,
                 'type' => $type,
                 'is_tourist' => 1,
                 'startTime' => $startTime,
                 'endTime' => $endTime,
-            ])
+            ], $appid ? ['appid' => $appid] : []))
         ];
     }
 

@@ -62,9 +62,13 @@ class ChatUserLabelCateServices extends CategoryServices
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function getLabelAll(int $id)
+    public function getLabelAll(int $id,string $appid="")
     {
-        $labelAll = $this->dao->getDataList(['type' => 0], ['name', 'id'], 'id', 0, 0, ['label' => function ($query) {
+        $where = ['type' => 0];
+        if (!empty($appid)) {
+            $where['appid'] = $appid;
+        }
+        $labelAll = $this->dao->getDataList($where, ['name', 'id'], 'id', 0, 0, ['label' => function ($query) {
             $query->with(['userone' => function ($query) {
                 $query->field(['count(*) count_user', 'label_id', 'user_id']);
             }]);

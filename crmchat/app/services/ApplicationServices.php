@@ -46,7 +46,7 @@ class ApplicationServices extends BaseServices
     {
         [$page, $limit] = $this->getPageValue();
         $list  = $this->dao->getDataList($where, ['*'], 'id', $page, $limit);
-        $count = $this->dao->count();
+        $count = $this->dao->count($where);
         return compact('list', 'count');
     }
 

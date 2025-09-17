@@ -30,9 +30,9 @@ class ChatServiceGroupServices extends BaseServices
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function getGroupList()
+    public function getGroupList($where=[])
     {
-        return $this->dao->getDataList([], ['*'], 'sort');
+        return $this->dao->getDataList($where, ['*'], 'sort');
     }
 
     /**

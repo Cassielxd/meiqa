@@ -467,8 +467,8 @@
             getAdminAppCustomer() {
                 adminAppCustomer().then(res => {
                     if(res.status == 200) {
-                        if(res.data.list.length) {
-                            this.token = res.data.list[0];
+                        if(res.data) {
+                            this.token = res.data;
 
 
                             // js 引入

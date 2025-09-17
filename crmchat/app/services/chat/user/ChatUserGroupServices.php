@@ -46,14 +46,24 @@ class ChatUserGroupServices extends BaseServices
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function getGroupList($feild = ['id', 'group_name'], bool $is_page = false)
+    public function getGroupList($feild = ['id', 'group_name'], bool $is_page = false,$appid="")
     {
         $page = $limit = 0;
         if ($is_page) {
             [$page, $limit] = $this->getPageValue();
-            $count = $this->dao->count([]);
+            if($appid){
+                $count = $this->dao->count(["appid"=>$appid]);
+            }else{
+                $count = $this->dao->count([]);
+            }
+
         }
-        $list = $this->dao->getDataList([], $feild, 'id', $page, $limit);
+        if($appid){
+            $list = $this->dao->getDataList(["appid"=>$appid], $feild, 'id', $page, $limit);
+        }else{
+            $list = $this->dao->getDataList([], $feild, 'id', $page, $limit);
+        }
+
 
         return $is_page ? compact('list', 'count') : $list;
     }

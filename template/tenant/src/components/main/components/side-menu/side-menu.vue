@@ -141,7 +141,7 @@
   .ivu-menu {
     .ivu-menu-item {
       margin: 0 !important;
-      padding: 0 !important;
+      padding: 0 24px 0 24px !important;
       line-height: 40px !important;
       height: 40px !important;
     }
@@ -149,7 +149,7 @@
     .ivu-menu-submenu {
       .ivu-menu-submenu-title {
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 0 24px 0 24px !important;
         line-height: 40px !important;
         height: 40px !important;
       }
@@ -157,7 +157,7 @@
       .ivu-menu {
         .ivu-menu-item {
           margin: 0 !important;
-          padding: 0 !important;
+          padding: 0 24px 0 48px !important;
           line-height: 36px !important;
           height: 36px !important;
         }

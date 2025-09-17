@@ -216,7 +216,7 @@ export default {
         toUserId:getLoc('to_user_id') || 0,
         type: this.upperData.deviceType == 'Mobile' ? '3' : '0'
       }
-
+      debugger
       userRecord(postData).then(res => {
           this.chatServerData = res.data;
           this.$nextTick(() => {
@@ -244,8 +244,9 @@ export default {
           this.connentServer(); // 建立socket 链接
 
       }).catch(rej => {
+        console.log(rej);
         if(rej.status == 400) {
-          this.$router.replace({ name: 'customerOutLine', query: this.$route.query });
+          /*this.$router.replace({ name: 'customerOutLine', query: this.$route.query });*/
         }
       })
     },
@@ -266,11 +267,13 @@ export default {
         })
 
         ws.$on('kefu_logout',data=>{
+          console.log(data);
+          debugger
           if(data.online == 0){
-            this.$router.replace({
+            /*this.$router.replace({
               name: 'customerOutLine',
               query: this.$route.query
-            });
+            });*/
           }
         })
 

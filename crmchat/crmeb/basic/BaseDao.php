@@ -90,7 +90,14 @@ abstract class BaseDao
      */
     public function getDataList(array $where, array $field = ['*'], $sort = null, int $page = 0, int $limit = 0, array $with = [])
     {
-        return $this->search($where)->field($field)->when($sort, function ($query, $sort) {
+        $query = $this->search($where);
+
+        // 如果where条件中包含appid，直接添加到查询条件中
+        if (isset($where['appid']) && !empty($where['appid'])) {
+            $query = $query->where('appid', $where['appid']);
+        }
+
+        return $query->field($field)->when($sort, function ($query, $sort) {
             if (is_array($sort)) {
                 foreach ($sort as $k => $v) {
                     if (is_numeric($k)) {

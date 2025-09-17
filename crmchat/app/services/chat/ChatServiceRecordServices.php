@@ -79,11 +79,26 @@ class ChatServiceRecordServices extends BaseServices
         $make = app()->make(ChatServiceDialogueRecordServices::class);
         /** @var ChatUserServices $userMake */
         $userMake = app()->make(ChatUserServices::class);
+
+        // 准备统计条件
+        $userCountWhere = ['is_tourist' => 0];
+        $touristCountWhere = ['is_tourist' => 1];
+        $recordCountWhere = [];
+        $dialogueCountWhere = [];
+
+        // 如果存在appid，添加到所有统计条件中
+        if (isset($where['appid']) && $where['appid']) {
+            $userCountWhere['appid'] = $where['appid'];
+            $touristCountWhere['appid'] = $where['appid'];
+            $recordCountWhere['appid'] = $where['appid'];
+            $dialogueCountWhere['appid'] = $where['appid'];
+        }
+
         $data = [
-            'user_count' => $userMake->count(['is_tourist' => 0]),
-            'tourist_count' => $userMake->count(['is_tourist' => 1]),
-            'recode_count' => $this->dao->count(),
-            'dialogue_count' => $make->count()
+            'user_count' => $userMake->count($userCountWhere),
+            'tourist_count' => $userMake->count($touristCountWhere),
+            'recode_count' => $this->dao->count($recordCountWhere),
+            'dialogue_count' => $make->count($dialogueCountWhere)
         ];
         return compact('list', 'count', 'data');
     }

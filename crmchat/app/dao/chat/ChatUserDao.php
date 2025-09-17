@@ -160,6 +160,8 @@ class ChatUserDao extends BaseDao
             $query->where('type', $where['user_type']);
         })->when(isset($where['is_tourist']) && $where['is_tourist'] !== '', function ($query) use ($where) {
             $query->where('is_tourist', $where['is_tourist'] == 2 ? 0 : $where['is_tourist']);
+        })->when(isset($where['appid']) && $where['appid'], function ($query) use ($where) {
+            $query->where('appid', $where['appid']);
         });
     }
 }

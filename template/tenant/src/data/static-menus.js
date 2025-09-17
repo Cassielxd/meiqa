@@ -179,7 +179,7 @@ function getMenuIcon(menuName) {
     '用户分组': 'ios-folder',
     '用户标签': 'ios-pricetag',
     '客服管理': 'ios-headset',
-    '站点统计': 'ios-analytics',
+
     '客服二维码': 'ios-qr-scanner',
     '聊天记录': 'ios-chatbubbles',
     '客服列表': 'ios-contacts',
@@ -204,7 +204,7 @@ function getMenuIcon(menuName) {
     '安全维护': 'ios-shield',
     '系统日志': 'ios-document'
   };
-  return iconMap[menuName] || 'ios-folder-outline';
+  return iconMap[menuName];
 }
 
 // 转换菜单数据结构，添加组件需要的字段
@@ -232,13 +232,13 @@ function buildMenuTree(flatMenus) {
       children: []
     };
   });
-  
+
   const result = [];
-  
+
   // 构建父子关系
   flatMenus.forEach(menu => {
     const menuItem = menuMap[menu.id];
-    
+
     if (menu.pid === 0) {
       // 根菜单
       result.push(menuItem);
@@ -250,7 +250,7 @@ function buildMenuTree(flatMenus) {
       }
     }
   });
-  
+
   // 对每个层级的菜单进行排序
   function sortMenus(menus) {
     menus.sort((a, b) => (b.sort || 0) - (a.sort || 0));
@@ -260,9 +260,9 @@ function buildMenuTree(flatMenus) {
       }
     });
   }
-  
+
   sortMenus(result);
-  
+
   // 调试：输出构建结果
   console.log('构建的菜单树形结构:', result);
   result.forEach((menu, index) => {
@@ -273,7 +273,7 @@ function buildMenuTree(flatMenus) {
       });
     }
   });
-  
+
   return result;
 }
 

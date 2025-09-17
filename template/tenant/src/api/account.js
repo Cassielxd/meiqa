@@ -73,7 +73,7 @@ export function menusListApi() {
  */
 export function AccountRegister(data) {
     return request({
-        url: '/tenant/register',
+        url: '/register',
         method: 'post',
         data
     })

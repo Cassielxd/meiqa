@@ -8,6 +8,7 @@ use app\services\tenant\TenantLoginServices;
 use app\services\tenant\TenantServices;
 use app\validates\tenant\TenantLoginValidate;
 use app\validates\tenant\TenantRegisterValidate;
+use crmeb\utils\Captcha;
 use think\Response;
 
 /**
@@ -59,6 +60,31 @@ class Login
 
         return app('json')->success($this->services->login($account, $password));
     }
+    public function captcha()
+    {
+        return app('json')->success(app()->make(Captcha::class)->create([], true));
+    }
+
+    public function ajcaptcha()
+    {
+        $captchaType = $this->request->get('captchaType', 'blockPuzzle');
+        return app('json')->success(aj_captcha_create($captchaType));
+    }
+
+    public function ajcheck()
+    {
+        [$token, $pointJson, $captchaType] = $this->request->postMore([
+            ['token', ''],
+            ['pointJson', ''],
+            ['captchaType', ''],
+        ], true);
+        try {
+            aj_captcha_check_one($captchaType, $token, $pointJson);
+            return app('json')->success();
+        } catch (\Throwable $e) {
+            return app('json')->fail('滑块验证失败');
+        }
+    }
 
     /**
      * 获取租户信息
@@ -66,31 +92,7 @@ class Login
      */
     public function info()
     {
-        $tenantInfo = $this->request->tenantInfo();
-        if (!$tenantInfo) {
-            return app('json')->fail('请先登录');
-        }
-
-        return app('json')->success([
-            'tenant_info' => [
-                'id' => $tenantInfo['id'],
-                'appid' => $tenantInfo['appid'],
-                'tenant_name' => $tenantInfo['tenant_name'],
-                'tenant_code' => $tenantInfo['tenant_code'],
-                'account' => $tenantInfo['account'],
-                'domain' => $tenantInfo['domain'],
-                'logo' => $tenantInfo['logo'],
-                'contact_name' => $tenantInfo['contact_name'],
-                'contact_phone' => $tenantInfo['contact_phone'],
-                'contact_email' => $tenantInfo['contact_email'],
-                'status' => $tenantInfo['status'],
-                'max_users' => $tenantInfo['max_users'],
-                'max_services' => $tenantInfo['max_services'],
-                'expire_at' => $tenantInfo['expire_at'],
-                'is_expired' => $tenantInfo['is_expired'] ?? false,
-                'remaining_days' => $tenantInfo['remaining_days'] ?? 0,
-            ]
-        ]);
+        return app('json')->success($this->services->getLoginInfo());
     }
 
     /**
@@ -176,7 +178,7 @@ class Login
         } catch (\Exception $e) {
             return app('json')->fail($e->getMessage());
         }
-
+        $data["contact_email"]=$data["account"];
         try {
             $result = $this->tenantServices->register($data);
             return app('json')->success($result['message'], [
@@ -188,4 +190,5 @@ class Login
             return app('json')->fail($e->getMessage());
         }
     }
+
 }

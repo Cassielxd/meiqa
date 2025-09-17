@@ -69,6 +69,15 @@
               size="large"
             />
           </FormItem>
+          <FormItem prop="contact_phone">
+            <Input
+                type="text"
+                v-model="registerForm.contact_phone"
+                prefix="ios-contact-outline"
+                placeholder="请输入联系方式"
+                size="large"
+            />
+          </FormItem>
           <FormItem prop="password">
             <Input
               type="password"
@@ -81,7 +90,7 @@
           <FormItem prop="confirmPassword">
             <Input
               type="password"
-              v-model="registerForm.confirmPassword"
+              v-model="registerForm.confirm_pwd"
               prefix="ios-lock-outline"
               placeholder="请确认密码"
               size="large"
@@ -113,7 +122,7 @@
         </Form>
       </div>
     </div>
-    
+
     <!-- <Modal
       v-model="modals"
       scrollable
@@ -179,8 +188,9 @@ export default {
       // 注册表单数据
       registerForm: {
         email: '',
+        contact_phone:"",
         password: '',
-        confirmPassword: '',
+        confirm_pwd: '',
         code: '',
         key: '',
       },
@@ -190,11 +200,14 @@ export default {
           { required: true, message: '请输入邮箱', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
         ],
+        contact_phone: [
+          { required: true, message: '请输入联系方式', trigger: 'blur' },
+        ],
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
         ],
-        confirmPassword: [
+        confirm_pwd: [
           { required: true, message: '请确认密码', trigger: 'blur' },
           { validator: this.validateConfirmPassword, trigger: 'blur' }
         ],
@@ -277,7 +290,7 @@ export default {
           this.swiperList = [{ slide: this.defaultSwiperList }];
         });
     },
-    success(params){ 
+    success(params){
       console.log('Success callback called with params:', params);
       if (this.isRegister) {
         this.closeRegisterModel(params);
@@ -294,7 +307,7 @@ export default {
         duration: 0,
       });
       this.loading = true;
-      
+
       const loginData = {
         account: this.formInline.username,
         pwd: this.formInline.password,
@@ -303,7 +316,7 @@ export default {
         captchaType: 'blockPuzzle',
         captchaVerification: params.captchaVerification,
       };
-      
+
       console.log('Calling AccountLogin with data:', loginData);
       AccountLogin(loginData)
         .then(async (res) => {
@@ -311,12 +324,12 @@ export default {
           let data = res.data;
           let expires = this.getExpiresTime(data.expires_time);
           // 记录用户登陆信息
-          setCookies('uuid', data.user_info.id, expires);
+          setCookies('uuid', data.tenant_info.id, expires);
           setCookies('token', data.token, expires);
           setCookies('expires_time', data.expires_time, expires);
 
-          this.$store.commit('userInfo/uniqueAuth', data.unique_auth);
-          this.$store.commit('userInfo/userInfo', data.user_info);
+          this.$store.commit('userInfo/uniqueAuth', data.unique_auth||"");
+          this.$store.commit('userInfo/userInfo', data.tenant_info);
           // 保存菜单信息 - 使用树形菜单数据
           this.$store.commit('menus/setopenMenus', []);
           // 直接使用已构建的树形菜单数据
@@ -325,13 +338,13 @@ export default {
           localStorage.setItem('menuList', JSON.stringify(transformedMenus));
 
           // 记录用户信息
-          this.$store.commit('userInfo/name', data.user_info.account);
-          this.$store.commit('userInfo/avatar', data.user_info.head_pic);
-          this.$store.commit('userInfo/access', data.unique_auth);
-          this.$store.commit('userInfo/logo', data.logo);
-          this.$store.commit('userInfo/logoSmall', data.logo_square);
-          this.$store.commit('userInfo/version', data.version);
-          this.$store.commit('userInfo/newOrderAudioLink', data.newOrderAudioLink);
+          this.$store.commit('userInfo/name', data.tenant_info.account);
+          this.$store.commit('userInfo/avatar', data.tenant_info.head_pic);
+          this.$store.commit('userInfo/access', data.unique_auth||"");
+          this.$store.commit('userInfo/logo', data.logo||"");
+          this.$store.commit('userInfo/logoSmall', data.logo_square||"");
+          this.$store.commit('userInfo/version', data.version||"1.0.0");
+          this.$store.commit('userInfo/newOrderAudioLink', data.newOrderAudioLink||"");
 
           // if (this.jigsaw) this.jigsaw.reset();
 
@@ -411,10 +424,12 @@ export default {
         duration: 0,
       });
       this.registerLoading = true;
-      
+
       AccountRegister({
         account: this.registerForm.email,
         pwd: this.registerForm.password,
+        confirm_pwd: this.registerForm.confirm_pwd,
+        contact_phone: this.registerForm.contact_phone,
         imgcode: this.registerForm.code,
         key: this.registerForm.key,
         captchaType: 'blockPuzzle',
