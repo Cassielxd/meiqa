@@ -274,15 +274,7 @@ Route::group('api', function () {
         })->middleware([
             TenantAuthTokenMiddleware::class,
         ]);*/
-        Route::miss(function () {
-            if (app()->request->isOptions()) {
-                $header = Config::get('cookie.header');
-                $header['Access-Control-Allow-Origin'] = app()->request->header('origin');
-                return Response::create('ok')->code(200)->header($header);
-            } else
-                return Response::create()->code(404);
-        });
-        
+
     })->prefix('tenant.');
     
 })->middleware([
