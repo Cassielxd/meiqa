@@ -268,6 +268,7 @@ export default {
     // }
   },
    created() {
+
     this.upload = Setting.apiBaseURL.replace('admin', 'kefu') + '/upload'
     console.log(Setting.apiBaseURL, this.upload);
     serviceInfo().then(res => {
@@ -424,6 +425,7 @@ export default {
       })
     },
     wsRestart() {
+        debugger
       this.bus.pageWs = Socket(true);
       this.wsOpen = true
       this.wsAgain();

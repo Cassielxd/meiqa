@@ -16,6 +16,11 @@ require __DIR__ . '/tenant.php';
 
 Route::group('/', function () {
     Route::miss(function () {
-        return view(app()->getRootPath() . 'public' . DS . 'admin' . DS . 'index.html');
+      $name=  app()->request->pathinfo();
+            if(str_starts_with($name,"tenant")){
+                return view(app()->getRootPath() . 'public' . DS . 'tenant' . DS . 'index.html');
+            }else{
+                return view(app()->getRootPath() . 'public' . DS . 'admin' . DS . 'index.html');
+            }
     });
 })->middleware(InstallMiddleware::class);
