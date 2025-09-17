@@ -244,9 +244,9 @@ export default {
           this.connentServer(); // 建立socket 链接
 
       }).catch(rej => {
-        console.log(rej);
+
         if(rej.status == 400) {
-          /*this.$router.replace({ name: 'customerOutLine', query: this.$route.query });*/
+          this.$router.replace({ name: 'customerOutLine', query: this.$route.query });
         }
       })
     },
@@ -270,10 +270,10 @@ export default {
           console.log(data);
           debugger
           if(data.online == 0){
-            /*this.$router.replace({
+            this.$router.replace({
               name: 'customerOutLine',
               query: this.$route.query
-            });*/
+            });
           }
         })
 
