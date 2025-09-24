@@ -325,7 +325,7 @@ export default {
           let expires = this.getExpiresTime(data.expires_time);
           // 记录用户登陆信息
           setCookies('uuid', data.tenant_info.id, expires);
-          setCookies('token', data.token, expires);
+          setCookies('tenant_token', data.token, expires);
           setCookies('expires_time', data.expires_time, expires);
 
           this.$store.commit('userInfo/uniqueAuth', data.unique_auth||"");

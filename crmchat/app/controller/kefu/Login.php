@@ -48,7 +48,6 @@ class Login extends AuthController
         validate(LoginValidate::class)->check(['account' => $account, 'password' => $password]);
 
         $token = $this->services->authLogin($account, $password, (int)$isApp, $clientId);
-
         return $this->success('登录成功', $token);
     }
 

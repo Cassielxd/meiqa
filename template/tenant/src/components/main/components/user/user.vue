@@ -70,7 +70,7 @@
                             that.$Message.success('您已成功退出')
                             that.$router.replace('/tenant/login')
                             localStorage.clear()
-                            removeCookies('token')
+                            removeCookies('tenant_token')
                             removeCookies('expires_time')
                             removeCookies('uuid')
                             // window.location.reload()

@@ -15,8 +15,7 @@ axios.defaults.withCredentials = true// 携带cookie
 service.interceptors.request.use(
     config => {
         config.baseURL = Setting.apiBaseURL
-        const token = getCookies('token')
-
+        const token = getCookies('tenant_token')
         if(token) {
             config.headers['Authori-zation'] = 'Bearer ' + token;
         }
@@ -44,7 +43,7 @@ service.interceptors.response.use(
             case 410002:
                 console.log(code);
                 localStorage.clear()
-                removeCookies('token')
+                removeCookies('tenant_token')
                 removeCookies('expires_time')
                 removeCookies('uuid')
                 router.replace({ path: '/tenant/login' })

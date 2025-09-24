@@ -28,7 +28,8 @@ router.beforeEach(async (to, from, next) => {
     // 判断是否需要登录才可以进入
     if(to.matched.some(_ => _.meta.auth)) {
         // 这里依据 token 判断是否登录，可视情况修改
-        const token = getCookies('token') || getCookies('kefu_token');
+        const token = getCookies('tenant_token');
+        debugger
         if(token && token !== 'undefined') {
             const access = store.state.userInfo.uniqueAuth
             const isPermission = includeArray(to.meta.auth, access)
@@ -43,7 +44,7 @@ router.beforeEach(async (to, from, next) => {
                         }
                     })
                     localStorage.clear()
-                    removeCookies('token')
+                    removeCookies('tenant_token')
                     removeCookies('expires_time')
                     removeCookies('uuid')
                 } else {
@@ -63,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
                 }
             })
             localStorage.clear()
-            removeCookies('token')
+            removeCookies('tenant_token')
             removeCookies('expires_time')
             removeCookies('uuid')
         }

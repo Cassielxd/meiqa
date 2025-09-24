@@ -174,8 +174,18 @@ class Admin extends AuthController
      */
     public function logout()
     {
-        $key = trim(ltrim($this->request->header(Config::get('cookie.token_name')), 'Bearer'));
-        CacheService::redisHandler()->delete($key);
+        $token = $this->request->header(Config::get('cookie.token_name', 'Authori-zation'));
+        echo $token;
+        if ($token && is_string($token)) {
+            // 移除Bearer前缀
+            $cleanToken = ltrim($token, 'Bearer ');
+            $cleanToken = trim($cleanToken);
+            if ($cleanToken) {
+                // 租户token使用md5作为缓存key
+                $cacheKey = md5($cleanToken);
+                CacheService::redisHandler()->delete($cacheKey);
+            }
+        }
         return $this->success();
     }
 }
