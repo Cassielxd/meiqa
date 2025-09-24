@@ -35,7 +35,9 @@ export default {
   redirect: {
     name: `${pre}index`
   },
-  meta,
+  meta: {
+    auth: true  // 父路由需要认证
+  },
   component: BasicLayout,
   children: [
     {
@@ -43,7 +45,8 @@ export default {
       name: `${pre}index`,
       header: 'home',
       meta: {
-        title: '主页'
+        title: '主页',
+        auth: true  // 子路由也需要认证
       },
       component: () => import('@/pages/index/index')
     }

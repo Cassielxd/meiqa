@@ -21,6 +21,7 @@ const router = new Router({
  */
 
 router.beforeEach(async (to, from, next) => {
+    debugger
     if(to.fullPath.indexOf('kefu') != -1) {
         return next()
     }
