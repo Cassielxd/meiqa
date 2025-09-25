@@ -3,12 +3,12 @@
 /**
  * 布局菜单配置
  * */
-import { getStaticMenusData, staticMenusData, transformedMenus } from '@/data/static-menus'
+import { getStaticMenusAPI, getTransformedMenus } from '@/data/static-menus'
 
 function getMenusName () {
     // 直接使用static-menus.js中已经构建好的树形菜单数据
-    // 避免重复构建
-    return transformedMenus
+    // 避免重复构建，支持i18n国际化
+    return getTransformedMenus()
 }
 export default {
     namespaced: true,
@@ -30,7 +30,7 @@ export default {
     actions: {
         getMenusNavList ({ commit }) {
             return new Promise((resolve, reject) => {
-                getStaticMenusData().then(async res => {
+                getStaticMenusAPI().then(async res => {
                     resolve(res)
                     commit('getmenusNav', res.data)
                 }).catch(res => {

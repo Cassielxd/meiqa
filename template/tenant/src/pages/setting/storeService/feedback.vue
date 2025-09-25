@@ -2,35 +2,35 @@
   <div>
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">{{$route.meta.title}}</span>
+        <span class="ivu-page-header-title">{{ $t($route.meta.title)}}</span>
       </div>
     </div>
     <Card :bordered="false" dis-hover class="ivu-mt">
       <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
         <Row :gutter="24" type="flex" justify="end">
           <Col span="24" class="ivu-text-left">
-          <FormItem label="留言信息：">
-            <Input search enter-button @on-search="selChange" placeholder="请输入用户昵称/电话/留言内容搜索" element-id="name" v-model="formValidate.title" style="width: 30%;display: inline-table;" class="mr" />
+          <FormItem :label="$t('kefu.messageInfo') + '：'">
+            <Input search enter-button @on-search="selChange" :placeholder="$t('kefu.enterUserNicknamePhoneMessageSearch')" element-id="name" v-model="formValidate.title" style="width: 30%;display: inline-table;" class="mr" />
           </FormItem>
           </Col>
           <Col span="24" class="ivu-text-left">
-          <FormItem label="留言时间：">
+          <FormItem :label="$t('kefu.messageTime') + '：'">
             <RadioGroup v-model="formValidate.time" type="button" @on-change="selectChange(formValidate.time)" class="mr">
               <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
             </RadioGroup>
-            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" :placeholder="$t('kefu.customTime')" style="width: 200px;"></DatePicker>
           </FormItem>
           </Col>
         </Row>
       </Form>
-      <Table :columns="columns1" :data="list" :loading="loading" no-userFrom-text="暂无数据" no-filtered-userFrom-text="暂无筛选结果">
+      <Table :columns="columns1" :data="list" :loading="loading" :no-userFrom-text="$t('kefu.noData')" :no-filtered-userFrom-text="$t('kefu.noFilteredData')">>
         <template slot-scope="{ row, index }" slot="status">
-          <div>{{row.status===1?'已处理':'未处理'}}</div>
+          <div>{{row.status===1 ? $t('kefu.processed') : $t('kefu.unprocessed')}}</div>
         </template>
         <template slot-scope="{ row, index }" slot="action">
-          <a @click="remarks(row.id)">{{row.status===1?'备注':'处理'}}</a>
+          <a @click="remarks(row.id)">{{row.status===1 ? $t('kefu.remark') : $t('kefu.process')}}</a>
           <Divider type="vertical" />
-          <a @click="del(row,'删除反馈',index)">删除</a>
+          <a @click="del(row,$t('kefu.deleteFeedback'),index)">{{ $t('kefu.delete') }}</a>
         </template>
       </Table>
       <div class="acea-row row-right page">
@@ -56,16 +56,16 @@ export default {
         title: ''
       },
       fromList: {
-        title: '选择时间',
+        title: this.$t('kefu.selectTime'),
         custom: true,
         fromTxt: [
-          { text: '全部', val: '' },
-          { text: '今天', val: 'today' },
-          { text: '昨天', val: 'yesterday' },
-          { text: '最近7天', val: 'lately7' },
-          { text: '最近30天', val: 'lately30' },
-          { text: '本月', val: 'month' },
-          { text: '本年', val: 'year' }
+          { text: this.$t('kefu.all'), val: '' },
+          { text: this.$t('kefu.today'), val: 'today' },
+          { text: this.$t('kefu.yesterday'), val: 'yesterday' },
+          { text: this.$t('kefu.latest7Days'), val: 'lately7' },
+          { text: this.$t('kefu.latest30Days'), val: 'lately30' },
+          { text: this.$t('kefu.thisMonth'), val: 'month' },
+          { text: this.$t('kefu.thisYear'), val: 'year' }
         ]
       },
       timeVal: [],
@@ -77,32 +77,32 @@ export default {
           width: 80
         },
         {
-          title: '昵称',
+          title: this.$t('kefu.nickname'),
           key: 'rela_name',
           minWidth: 120
         },
         {
-          title: '电话',
+          title: this.$t('kefu.phone'),
           key: 'phone',
           minWidth: 120
         },
         {
-          title: '内容',
+          title: this.$t('kefu.content'),
           key: 'content',
           minWidth: 320
         },
         {
-          title: '状态',
+          title: this.$t('kefu.status'),
           slot: 'status',
           minWidth: 120
         },
         {
-          title: '时间',
+          title: this.$t('kefu.time'),
           key: 'add_time',
           minWidth: 120
         },
         {
-          title: '操作',
+          title: this.$t('kefu.actions'),
           slot: 'action',
           fixed: 'right',
           minWidth: 150

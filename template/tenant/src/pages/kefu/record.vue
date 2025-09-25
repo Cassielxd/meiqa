@@ -2,7 +2,7 @@
     <div class="record">
         <div class="i-layout-page-header">
             <div class="i-layout-page-header">
-                <span class="ivu-page-header-title">{{ $route.meta.title }}</span>
+                <span class="ivu-page-header-title">{{ $t($route.meta.title) }}</span>
             </div>
         </div>
 
@@ -12,23 +12,23 @@
             <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                 <Row :gutter="24">
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="时间：">
+                        <FormItem :label="$t('kefu.time') + '：'">
                             <RadioGroup v-model="formValidate.time" type="button" @on-change="selectChange(formValidate.time)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" :placeholder="$t('kefu.customTime')" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col span="10" class="ivu-text-left">
-                        <FormItem label="搜索：">
-                            <Input v-model="searchValue" placeholder="请输入" clearable search enter-button @on-search="selChange"></Input>
+                        <FormItem :label="$t('kefu.search') + '：'">
+                            <Input v-model="searchValue" :placeholder="$t('kefu.pleaseInput')" clearable search enter-button @on-search="selChange"></Input>
                         </FormItem>
                     </Col>
                 </Row>
             </Form>
-            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row no-userFrom-text="暂无数据" class="ivu-mt">
+            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" class="ivu-mt">
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="lock(row)">查看聊天记录</a>
+                    <a @click="lock(row)">{{ $t('kefu.viewChatRecord') }}</a>
                 </template>
                 <template slot-scope="{row,index}" slot="avatar">
                     <img class="avatar" :src="row.user.avatar" alt="">
@@ -58,16 +58,16 @@
                 <Form ref="formValidate" :model="formValidate3" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                     <Row :gutter="24">
                         <Col span="24" class="ivu-text-left">
-                            <FormItem label="时间：">
+                            <FormItem :label="$t('kefu.time') + '：'">
                                 <RadioGroup v-model="formValidate3.time" type="button" @on-change="onchangeMsgTime" class="mr">
                                     <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                                 </RadioGroup>
-                                <DatePicker :editable="false" @on-change="onchangeMsgTime" :value="formValidate3.time" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                                <DatePicker :editable="false" @on-change="onchangeMsgTime" :value="formValidate3.time" format="yyyy/MM/dd" type="daterange" placement="bottom-end" :placeholder="$t('kefu.customTime')" style="width: 200px;"></DatePicker>
                             </FormItem>
                         </Col>
                         <Col span="10" class="ivu-text-left">
-                            <FormItem label="搜索：">
-                                <Input v-model="formValidate3.msn" placeholder="请输入聊天内容" clearable search enter-button @on-search="onchangeMsgTime"></Input>
+                            <FormItem :label="$t('kefu.search') + '：'">
+                                <Input v-model="formValidate3.msn" :placeholder="$t('kefu.enterChatContent')" clearable search enter-button @on-search="onchangeMsgTime"></Input>
                             </FormItem>
                         </Col>
                     </Row>
@@ -75,8 +75,8 @@
                 <Table
                         :loading="loading3"
                         highlight-row
-                        no-userFrom-text="暂无数据"
-                        no-filtered-userFrom-text="暂无筛选结果"
+                        :no-userFrom-text="$t('kefu.noData')"
+                        :no-filtered-userFrom-text="$t('kefu.noFilteredData')"
                         :columns="columns3"
                         :data="tableList3"
                 >
@@ -97,7 +97,7 @@
                         <span>{{row.msn}}</span>
                     </template>
                     <template slot-scope="{ row, index }" slot="action">
-                        <a @click="look(row)">查看对话</a>
+                        <a @click="look(row)">{{ $t('kefu.viewConversation') }}</a>
                     </template>
                 </Table>
                 <div class="acea-row row-right page">
@@ -133,20 +133,20 @@ export default {
             cardLists:[],
             columns3: [
                 {
-                    title: "用户名称",
+                    title: this.$t('kefu.userName'),
                     slot: "nickname",
                     width: 200,
                 },
                 {
-                    title: "用户头像",
+                    title: this.$t('kefu.userAvatar'),
                     slot: "avatar",
                 },
                 {
-                    title: "对话人昵称",
+                    title: this.$t('kefu.conversationNickname'),
                     slot: "to_nickname",
                 },
                 {
-                    title: "聊天内容",
+                    title: this.$t('kefu.chatContent'),
                     slot: "msn",
                 },
             ],
@@ -167,16 +167,16 @@ export default {
             searchType: '',
             searchValue: '',
             fromList: {
-                title: '选择时间',
+                title: this.$t('kefu.selectTime'),
                 custom: true,
                 fromTxt: [
-                { text: '全部', val: '' },
-                { text: '今天', val: 'today' },
-                { text: '昨天', val: 'yesterday' },
-                { text: '最近7天', val: 'lately7' },
-                { text: '最近30天', val: 'lately30' },
-                { text: '本月', val: 'month' },
-                { text: '本年', val: 'year' }
+                { text: this.$t('kefu.all'), val: '' },
+                { text: this.$t('kefu.today'), val: 'today' },
+                { text: this.$t('kefu.yesterday'), val: 'yesterday' },
+                { text: this.$t('kefu.latest7Days'), val: 'lately7' },
+                { text: this.$t('kefu.latest30Days'), val: 'lately30' },
+                { text: this.$t('kefu.thisMonth'), val: 'month' },
+                { text: this.$t('kefu.thisYear'), val: 'year' }
                 ]
             },
             timeVal: [],
@@ -187,26 +187,26 @@ export default {
                     width: 80
                 },
                 {
-                    title: '用户昵称',
+                    title: this.$t('kefu.userNickname'),
                     slot: 'nickname',
                     minWidth: 120
                 },
                 {
-                    title: '用户头像',
+                    title: this.$t('kefu.userAvatar'),
                     slot: 'avatar',
                     minWidth: 150,
                 },
                 {
-                    title: '对话人昵称',
+                    title: this.$t('kefu.conversationNickname'),
                     slot: 'nickname1',
                 },
                 {
-                    title: '时间',
+                    title: this.$t('kefu.time'),
                     key: '_add_time',
                     minWidth: 120
                 },
                 {
-                    title: '操作',
+                    title: this.$t('kefu.actions'),
                     slot: 'action',
                     minWidth: 150,
                     fixed: 'right'
@@ -263,7 +263,7 @@ export default {
         },
         lock(row){
             this.modals3 = true;
-            this.modalTitle = row.nickname+' - 聊天记录';
+            this.modalTitle = row.nickname+' - '+ this.$t('kefu.chatRecord');
             this.formValidate3.user_id = row.user_id;
             this.formValidate3.page = 1;
             this.getChatRecordList()
@@ -277,25 +277,25 @@ export default {
                         className:'ios-contact',
                         col:6,
                         count:res.data.data.user_count,
-                        name:'用户总数'
+                        name: this.$t('kefu.totalUsers')
                     },
                     {
                         className:'ios-contact',
                         col:6,
                         count:res.data.data.tourist_count,
-                        name:'游客总数'
+                        name: this.$t('kefu.totalVisitors')
                     },
                     {
                         className:'ios-contact',
                         col:6,
                         count:res.data.data.dialogue_count,
-                        name:'聊天记录总数'
+                        name: this.$t('kefu.totalChatRecords')
                     },
                     {
                         className: '',
                         col: 6,
                         count: res.data.data.recode_count,
-                        name: '聊天用户总数'
+                        name: this.$t('kefu.totalChatUsers')
                     }
                 ];
             })

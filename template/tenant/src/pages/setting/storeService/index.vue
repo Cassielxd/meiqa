@@ -3,7 +3,7 @@
 
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">{{$route.meta.title}}</span>
+        <span class="ivu-page-header-title">{{ $t($route.meta.title)}}</span>
       </div>
     </div>
 
@@ -19,24 +19,24 @@
                     :key="index"
                     @click.native="bindMenuItem(item, index)"
             >
-              {{ item.name || '未命名' }}
+              {{ item.name || $t('kefu.unnamed') }}
               <div class="icon-box" v-if="index != 0">
                 <Icon type="ios-more" size="24" @click.stop="showMenu(item,index)" />
               </div>
               <div class="right-menu ivu-poptip-inner" v-show="item.status">
                 <div class="ivu-poptip-body" @click="editGroup(item)">
                   <div class="ivu-poptip-body-content">
-                    <div class="ivu-poptip-body-content-inner">编辑</div>
+                    <div class="ivu-poptip-body-content-inner">{{ $t('kefu.edit') }}</div>
                   </div>
                 </div>
-                <div class="ivu-poptip-body" @click="deleteGroup(item, '删除分组', index)">
+                <div class="ivu-poptip-body" @click="deleteGroup(item, $t('kefu.deleteGroup'), index)">
                   <div class="ivu-poptip-body-content">
-                    <div class="ivu-poptip-body-content-inner">删除</div>
+                    <div class="ivu-poptip-body-content-inner">{{ $t('kefu.delete') }}</div>
                   </div>
                 </div>
                 <div class="ivu-poptip-body" @click="lockGroup(item)">
                   <div class="ivu-poptip-body-content">
-                    <div class="ivu-poptip-body-content-inner">查看二维码</div>
+                    <div class="ivu-poptip-body-content-inner">{{ $t('kefu.viewQrcode') }}</div>
                   </div>
                 </div>
               </div>
@@ -49,12 +49,12 @@
 
           <Row type="flex" class="mb20">
             <Col span="24">
-              <Button  type="primary" style="margin-right: 10px" icon="md-add" @click="editGroup({id:0})">添加标签</Button>
-              <Button v-auth="['setting-store_service-add']" type="success" icon="md-add" @click="add" class="mr10">添加客服</Button>
+              <Button  type="primary" style="margin-right: 10px" icon="md-add" @click="editGroup({id:0})">{{ $t('kefu.addLabel') }}</Button>
+              <Button v-auth="['setting-store_service-add']" type="success" icon="md-add" @click="add" class="mr10">{{ $t('kefu.addCustomerService') }}</Button>
             </Col>
           </Row>
 
-          <Table :columns="columns1" :data="tableList" :loading="loading" highlight-row no-userFrom-text="暂无数据" no-filtered-userFrom-text="暂无筛选结果">
+          <Table :columns="columns1" :data="tableList" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" :no-filtered-userFrom-text="$t('kefu.noFilteredData')">
             <template slot-scope="{ row, index }" slot="avatar">
               <div class="tabBox_img" v-viewer>
                 <img v-lazy="row.avatar">
@@ -62,31 +62,31 @@
             </template>
             <template slot-scope="{ row, index }" slot="status">
               <i-switch v-model="row.status" :value="row.status" :true-value="1" :false-value="0" @on-change="onchangeIsShow(row)" size="large">
-                <span slot="open">开启</span>
-                <span slot="close">关闭</span>
+                <span slot="open">{{ $t('kefu.enable') }}</span>
+                <span slot="close">{{ $t('kefu.disable') }}</span>
               </i-switch>
             </template>
             <template slot-scope="{ row, index }" slot="online">
-              <Tag color="success" v-if="row.online">在线</Tag>
-              <Tag color="default" v-else>下线</Tag>
+              <Tag color="success" v-if="row.online">{{ $t('kefu.online') }}</Tag>
+              <Tag color="default" v-else>{{ $t('kefu.offline') }}</Tag>
             </template>
             <template slot-scope="{row,index}" slot="group_name">
-                <span>{{row.chatgroup && row.chatgroup.name ? row.chatgroup.name : '未分组'}}</span>
+                <span>{{row.chatgroup && row.chatgroup.name ? row.chatgroup.name : $t('kefu.ungrouped')}}</span>
             </template>
             <template slot-scope="{ row, index }" slot="action">
-              <a @click="edit(row)">编辑</a>
+              <a @click="edit(row)">{{ $t('kefu.edit') }}</a>
               <Divider type="vertical" v-if="row.status" />
-              <a @click="goChat(row)" v-if="row.status">进入工作台</a>
+              <a @click="goChat(row)" v-if="row.status">{{ $t('kefu.enterWorkbench') }}</a>
               <Divider type="vertical"  />
               <Dropdown @on-click="changeMenu(row,$event,index)">
                 <a href="javascript:void(0)">
-                  更多
+                  {{ $t('kefu.more') }}
                   <Icon type="ios-arrow-down"></Icon>
                 </a>
                 <DropdownMenu slot="list">
-                  <DropdownItem name="1">查看二维码</DropdownItem>
-                  <DropdownItem name="2">自动回复</DropdownItem>
-                  <DropdownItem name="3">删除客服</DropdownItem>
+                  <DropdownItem name="1">{{ $t('kefu.viewQrcode') }}</DropdownItem>
+                  <DropdownItem name="2">{{ $t('kefu.autoReply') }}</DropdownItem>
+                  <DropdownItem name="3">{{ $t('kefu.deleteCustomerService') }}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
 
@@ -106,7 +106,7 @@
         <div ref="qrcode" class="qrcode-wrap"></div>
         <div class="qrcode-text">{{ qrcodeText }}</div>
         <div class="button-wrap">
-            <Button type="primary" v-clipboard="{ value: qrcodeText, success: handleCopySuccess }">点击复制连接</Button>
+            <Button type="primary" v-clipboard="{ value: qrcodeText, success: handleCopySuccess }">{{ $t('kefu.clickCopyLink') }}</Button>
         </div>
     </Modal>
   </div>
@@ -251,36 +251,36 @@ export default {
           width: 80
         },
         {
-          title: '客服名称',
+          title: this.$t('kefu.customerServiceName'),
           key: 'nickname',
           minWidth: 60
         },
         {
-          title: '客服账号',
+          title: this.$t('kefu.customerServiceAccount'),
           key: 'account',
           minWidth: 60
         },
         {
-          title: '客服分组',
+          title: this.$t('kefu.customerServiceGroup'),
           slot: 'group_name',
         },
         {
-          title: '客服状态',
+          title: this.$t('kefu.customerServiceStatus'),
           slot: 'status',
           minWidth: 60
         },
         {
-          title: '是否上线',
+          title: this.$t('kefu.isOnline'),
           slot: 'online',
           minWidth: 120
         },
         {
-          title: '添加时间',
+          title: this.$t('kefu.addTime'),
           key: 'add_time',
           minWidth: 120
         },
         {
-          title: '操作',
+          title: this.$t('kefu.actions'),
           slot: 'action',
           fixed: 'right',
           minWidth: 150
@@ -356,7 +356,7 @@ export default {
   },
   methods: {
     lockGroup(row){
-      this.modalTitle = (row.name || '未命名') + ' 组二维码';
+      this.modalTitle = (row.name || this.$t('kefu.unnamed')) + ' ' + this.$t('kefu.groupQrcode');
       this.qrcodeText = `${this.qrcodeTextStart}&group_id=${row.id}`;
       if (this.qrcode) {
         this.qrcode.makeCode(this.qrcodeText);
@@ -407,7 +407,7 @@ export default {
     getGroupList(){
       kefuGroupListApi().then(res=>{
         let obj = {
-          name: "全部",
+          name: this.$t('kefu.all'),
           id: "",
         };
         res.data.unshift(obj);
@@ -440,14 +440,14 @@ export default {
          this.auth(row);
           break;
         case '3':
-          this.del(row,'删除客服',index);
+          this.del(row, this.$t('kefu.deleteCustomerService'), index);
           break
       }
     },
     // 复制成功
     handleCopySuccess() {
         this.$Message.success({
-            content: '复制成功',
+            content: this.$t('kefu.copySuccess'),
             onClose: () => {
                 this.modal = false;
             }
@@ -455,7 +455,7 @@ export default {
     },
     // 点击列表的复制
     handleCopy(row) {
-        this.modalTitle = '客服'+row.nickname+'个人二维码';
+        this.modalTitle = this.$t('kefu.customerService') + row.nickname + this.$t('kefu.personalQrcode');
         this.qrcodeText = `${this.qrcodeTextStart}&kefu_id=${row.id}`;
         if (this.qrcode) {
             this.qrcode.makeCode(this.qrcodeText);
@@ -703,7 +703,7 @@ export default {
     // 添加客服
     putRemark() {
       if(this.addFrom.uids.length === 0) {
-        return this.$Message.warning('请选择要添加的客服')
+        return this.$Message.warning(this.$t('kefu.pleaseSelectCustomerService'))
       }
       kefuAddApi(this.addFrom).then(async res => {
         this.$Message.success(res.msg)

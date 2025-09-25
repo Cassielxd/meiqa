@@ -22,12 +22,10 @@ export default {
     return {
       langList: {
         'zh-CN': '语言',
-        'zh-TW': '語言',
         'en-US': 'Lang'
       },
       localList: {
         'zh-CN': '中文简体',
-        'zh-TW': '中文繁体',
         'en-US': 'English'
       }
     }
@@ -44,7 +42,10 @@ export default {
   },
   methods: {
     selectLang (name) {
-      this.$emit('on-lang-change', name)
+      // 更新URL参数并刷新页面
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', name);
+      window.location.href = url.toString();
     }
   }
 }

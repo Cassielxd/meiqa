@@ -3,7 +3,7 @@
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
         <Button icon="ios-arrow-back" size="small" @click="back" class="mr20" v-if="$route.meta.auth[0] === 'system-config-system_config-list'">返回</Button>
-        <span class="ivu-page-header-title mr20" v-text="$route.meta.title"></span>
+        <span class="ivu-page-header-title mr20" v-text=" $t($route.meta.title)"></span>
       </div>
     </div>
     <Card :bordered="false" dis-hover class="ivu-mt">

@@ -20,7 +20,7 @@
               type="text"
               v-model="formInline.username"
               prefix="ios-contact-outline"
-              placeholder="请输入用户名"
+              :placeholder="$t('login.username')"
               size="large"
             />
           </FormItem>
@@ -29,7 +29,7 @@
               type="password"
               v-model="formInline.password"
               prefix="ios-lock-outline"
-              placeholder="请输入密码"
+              :placeholder="$t('login.password')"
               size="large"
             />
           </FormItem>
@@ -39,7 +39,7 @@
                 type="text"
                 v-model="formInline.code"
                 prefix="ios-keypad-outline"
-                placeholder="请输入验证码"
+                :placeholder="$t('login.captcha')"
                 size="large"
               />
               <img :src="imgcode" class="pictrue" @click="captchas" />
@@ -47,13 +47,13 @@
           </FormItem>
           <FormItem>
             <Button type="primary" long :loading="loading" size="large" @click="handleSubmit('formInline')" class="btn"
-              >登录</Button
+              >{{ $t('login.loginBtn') }}</Button
             >
           </FormItem>
           <FormItem>
             <div class="switch-mode">
-              <span>还没有账号？</span>
-              <a @click="switchToRegister">立即注册</a>
+              <span>{{ $t('login.noAccount') }}</span>
+              <a @click="switchToRegister">{{ $t('login.goRegister') }}</a>
             </div>
           </FormItem>
         </Form>
@@ -65,7 +65,7 @@
               type="text"
               v-model="registerForm.email"
               prefix="ios-mail-outline"
-              placeholder="请输入邮箱（作为登录账号）"
+              :placeholder="$t('login.email')"
               size="large"
             />
           </FormItem>
@@ -74,7 +74,7 @@
                 type="text"
                 v-model="registerForm.contact_phone"
                 prefix="ios-contact-outline"
-                placeholder="请输入联系方式"
+                :placeholder="$t('login.phone')"
                 size="large"
             />
           </FormItem>
@@ -83,7 +83,7 @@
               type="password"
               v-model="registerForm.password"
               prefix="ios-lock-outline"
-              placeholder="请输入密码"
+              :placeholder="$t('login.password')"
               size="large"
             />
           </FormItem>
@@ -92,7 +92,7 @@
               type="password"
               v-model="registerForm.confirm_pwd"
               prefix="ios-lock-outline"
-              placeholder="请确认密码"
+              :placeholder="$t('login.confirmPassword')"
               size="large"
             />
           </FormItem>
@@ -102,7 +102,7 @@
                 type="text"
                 v-model="registerForm.code"
                 prefix="ios-keypad-outline"
-                placeholder="请输入验证码"
+                :placeholder="$t('login.captcha')"
                 size="large"
               />
               <img :src="imgcode" class="pictrue" @click="captchas" />
@@ -110,13 +110,13 @@
           </FormItem>
           <FormItem>
             <Button type="primary" long :loading="registerLoading" size="large" @click="handleRegister('registerForm')" class="btn"
-              >注册</Button
+              >{{ $t('login.registerBtn') }}</Button
             >
           </FormItem>
           <FormItem>
             <div class="switch-mode">
-              <span>已有账号？</span>
-              <a @click="switchToLogin">立即登录</a>
+              <span>{{ $t('login.hasAccount') }}</span>
+              <a @click="switchToLogin">{{ $t('login.goLogin') }}</a>
             </div>
           </FormItem>
         </Form>
@@ -128,7 +128,7 @@
       scrollable
       footer-hide
       closable
-      title="请完成安全校验"
+      :title="$t('login.securityVerify')"
       :mask-closable="false"
       :z-index="2"
       width="342"
@@ -149,7 +149,7 @@
 <script>
 import { AccountLogin, AccountRegister, loginInfoApi, captcha_pro } from '@/api/account';
 import { getWorkermanUrl } from '@/api/kefu';
-import { staticMenusData, getStaticMenusData, transformedMenus } from '@/data/static-menus';
+import { getStaticMenusAPI, getTransformedMenus } from '@/data/static-menus';
 // import mixins from '../mixins'
 import Setting from '@/setting';
 import { setCookies } from '@/libs/util';
@@ -332,10 +332,11 @@ export default {
           this.$store.commit('userInfo/userInfo', data.tenant_info);
           // 保存菜单信息 - 使用树形菜单数据
           this.$store.commit('menus/setopenMenus', []);
-          // 直接使用已构建的树形菜单数据
-          this.$store.commit('menus/getmenusNav', transformedMenus);
+          // 直接使用已构建的树形菜单数据（支持i18n国际化）
+          const menuData = getTransformedMenus();
+          this.$store.commit('menus/getmenusNav', menuData);
           // 更新localStorage缓存
-          localStorage.setItem('menuList', JSON.stringify(transformedMenus));
+          localStorage.setItem('menuList', JSON.stringify(menuData));
 
           // 记录用户信息
           this.$store.commit('userInfo/name', data.tenant_info.account);

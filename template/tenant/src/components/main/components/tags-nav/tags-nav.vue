@@ -6,8 +6,8 @@
           <Icon :size="18" type="ios-close-circle-outline" />
         </Button>
         <DropdownMenu slot="list" class="close">
-          <DropdownItem name="close-all">关闭所有</DropdownItem>
-          <DropdownItem name="close-others">关闭其他</DropdownItem>
+          <DropdownItem name="close-all">{{ $t('tagsNav.closeAll') }}</DropdownItem>
+          <DropdownItem name="close-others">{{ $t('tagsNav.closeOthers') }}</DropdownItem>
         </DropdownMenu>
       </Dropdown>
     </div>
@@ -67,17 +67,19 @@ export default {
       outerPadding: 4,
       contextMenuLeft: 0,
       contextMenuTop: 0,
-      visible: false,
-      menuList: {
-        others: '关闭其他',
-        all: '关闭所有'
-      }
+      visible: false
     }
   },
   computed: {
     currentRouteObj () {
       const { name, params, query } = this.value
       return { name, params, query }
+    },
+    menuList () {
+      return {
+        others: this.$t('tagsNav.closeOthers'),
+        all: this.$t('tagsNav.closeAll')
+      }
     }
   },
   methods: {
@@ -139,7 +141,7 @@ export default {
       this.$emit('input', item)
     },
     showTitleInside (item) {
-      return showTitle(item, this)
+      return this.$t(item.meta.title)
     },
     isCurrentTag (item) {
       return routeEqual(this.currentRouteObj, item)

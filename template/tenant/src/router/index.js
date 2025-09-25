@@ -21,7 +21,6 @@ const router = new Router({
  */
 
 router.beforeEach(async (to, from, next) => {
-    debugger
     if(to.fullPath.indexOf('kefu') != -1) {
         return next()
     }
@@ -30,7 +29,6 @@ router.beforeEach(async (to, from, next) => {
     if(to.matched.some(_ => _.meta.auth)) {
         // 这里依据 token 判断是否登录，可视情况修改
         const token = getCookies('tenant_token');
-        debugger
         if(token && token !== 'undefined') {
             const access = store.state.userInfo.uniqueAuth
             const isPermission = includeArray(to.meta.auth, access)

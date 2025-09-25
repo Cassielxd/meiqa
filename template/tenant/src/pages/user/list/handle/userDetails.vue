@@ -1,6 +1,6 @@
 <template>
     <div style="width: 100%">
-        <Modal v-model="modals" scrollable footer-hide closable title="用户详情" :mask-closable="false"
+        <Modal v-model="modals" scrollable footer-hide closable :title="$t('user.details')" :mask-closable="false"
                width="900">
             <Spin size="large" fix v-if="spinShow"></Spin>
             <div class="acea-row">
@@ -24,8 +24,8 @@
                     <Table :columns="columns" :data="userLists" max-height="400"
                            ref="table"
                            :loading="loading"
-                           no-userFrom-text="暂无数据"
-                           no-filtered-userFrom-text="暂无筛选结果"
+                           :no-userFrom-text="$t('user.noData')"
+                           :no-filtered-userFrom-text="$t('user.noFilteredData')"
                     >
                         <template slot-scope="{ row }" slot="number">
                             <div :class="row.pm?'plusColor':'reduceColor'">{{row.pm?'+'+row.number: '-'+row.number}}</div>

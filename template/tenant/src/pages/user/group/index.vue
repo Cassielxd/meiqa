@@ -2,28 +2,28 @@
     <div>
         <div class="i-layout-page-header">
           <div class="i-layout-page-header">
-            <span class="ivu-page-header-title">{{$route.meta.title}}</span>
+            <span class="ivu-page-header-title">{{$t($route.meta.title)}}</span>
           </div>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Row type="flex">
                 <Col v-bind="grid">
-                    <Button v-auth="['admin-user-group']" type="primary"  icon="md-add" @click="add">添加分组</Button>
+                    <Button v-auth="['admin-user-group']" type="primary"  icon="md-add" @click="add">{{ $t('user.addGroup') }}</Button>
                 </Col>
             </Row>
             <Table :columns="columns1" :data="groupLists" ref="table" class="mt25"
                    :loading="loading" highlight-row
-                   no-userFrom-text="暂无数据"
-                   no-filtered-userFrom-text="暂无筛选结果">
+                   :no-userFrom-text="$t('user.noData')"
+                   :no-filtered-userFrom-text="$t('user.noFilteredData')">
                 <template slot-scope="{ row, index }" slot="icons">
                     <div class="tabBox_img" v-viewer>
                         <img v-lazy="row.icon">
                     </div>
                 </template>
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="edit(row.id)">修改</a>
+                    <a @click="edit(row.id)">{{ $t('user.editGroup') }}</a>
                     <Divider type="vertical" />
-                    <a @click="del(row,'删除分组',index)">删除</a>
+                    <a @click="del(row,$t('user.deleteGroupConfirm'),index)">{{ $t('user.deleteGroup') }}</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
@@ -56,12 +56,12 @@
                         width: 80
                     },
                     {
-                        title: '分组名称',
+                        title: this.$t('user.groupName'),
                         key: 'group_name',
                         minWidth: 600
                     },
                     {
-                        title: '操作',
+                        title: this.$t('user.actions'),
                         slot: 'action',
                         fixed: 'right',
                         minWidth: 120

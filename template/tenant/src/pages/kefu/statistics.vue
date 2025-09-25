@@ -2,35 +2,35 @@
     <div>
         <div class="i-layout-page-header">
             <div class="i-layout-page-header">
-                <span class="ivu-page-header-title">{{ $route.meta.title }}</span>
+                <span class="ivu-page-header-title">{{  $t($route.meta.title) }}</span>
             </div>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                 <Row :gutter="24" type="flex" justify="end">
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="地区：" label-for="province">
-                            <Input search enter-button @on-search="onSearch" placeholder="请输入地区搜索" element-id="province" v-model="formValidate.province" style="width: 30%;display: inline-table;" class="mr" />
+                        <FormItem :label="$t('kefu.region') + '：'" label-for="province">
+                            <Input search enter-button @on-search="onSearch" :placeholder="$t('kefu.enterRegionSearch')" element-id="province" v-model="formValidate.province" style="width: 30%;display: inline-table;" class="mr" />
                         </FormItem>
                     </Col>
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="时间：">
+                        <FormItem :label="$t('kefu.time') + '：'">
                             <RadioGroup v-model="formValidate.time" type="button" @on-change="selectChange(formValidate.time)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" :placeholder="$t('kefu.customTime')" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                 </Row>
             </Form>
-            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row no-userFrom-text="暂无数据" class="ivu-mt">
+            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" class="ivu-mt">
                 <template slot-scope="{ row, index }" slot="picture">
                     <img src="" v-viewer>
                 </template>
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="onEdit(row)">编辑</a>
+                    <a @click="onEdit(row)">{{ $t('kefu.edit') }}</a>
                     <Divider type="vertical" />
-                    <a @click="onDelete(row, '删除反馈', index)">删除</a>
+                    <a @click="onDelete(row, $t('kefu.deleteFeedback'), index)">{{ $t('kefu.delete') }}</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
@@ -53,16 +53,16 @@ export default {
                 time:'',
             },
             fromList: {
-                title: '选择时间',
+                title: this.$t('kefu.selectTime'),
                 custom: true,
                 fromTxt: [
-                    { text: '全部', val: '' },
-                    { text: '今天', val: 'today' },
-                    { text: '昨天', val: 'yesterday' },
-                    { text: '最近7天', val: 'lately7' },
-                    { text: '最近30天', val: 'lately30' },
-                    { text: '本月', val: 'month' },
-                    { text: '本年', val: 'year' }
+                    { text: this.$t('kefu.all'), val: '' },
+                    { text: this.$t('kefu.today'), val: 'today' },
+                    { text: this.$t('kefu.yesterday'), val: 'yesterday' },
+                    { text: this.$t('kefu.latest7Days'), val: 'lately7' },
+                    { text: this.$t('kefu.latest30Days'), val: 'lately30' },
+                    { text: this.$t('kefu.thisMonth'), val: 'month' },
+                    { text: this.$t('kefu.thisYear'), val: 'year' }
                 ]
             },
             columns: [
@@ -77,22 +77,22 @@ export default {
                     minWidth: 80
                 },
                 {
-                    title: '网址',
+                    title: this.$t('kefu.website'),
                     key: 'path',
                     minWidth: 120
                 },
                 {
-                    title: '浏览器',
+                    title: this.$t('kefu.browser'),
                     key: 'browser',
                     minWidth: 80
                 },
                 {
-                    title: '时间',
+                    title: this.$t('kefu.time'),
                     key: 'create_time',
                     minWidth: 80
                 },
                 {
-                    title: '地区',
+                    title: this.$t('kefu.region'),
                     key: 'region',
                     minWidth: 80,
                     render: (h, params) => {

@@ -45,7 +45,7 @@ export default {
       name: `${pre}index`,
       header: 'home',
       meta: {
-        title: '主页',
+        title: 'menu.home',
         auth: true  // 子路由也需要认证
       },
       component: () => import('@/pages/index/index')

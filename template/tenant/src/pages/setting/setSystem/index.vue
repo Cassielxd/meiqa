@@ -2,7 +2,7 @@
   <div class="article-manager">
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">{{title}}</span>
+        <span class="ivu-page-header-title">{{ $t(title)}}</span>
         <div>
           <Tabs v-model="currentTab" @on-click="changeTab">
             <TabPane :icon="item.icon" :label="item.label" :name="item.value.toString()" v-for="(item,index) in headerList" :key="index" />

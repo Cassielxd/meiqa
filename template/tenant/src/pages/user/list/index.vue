@@ -2,7 +2,7 @@
   <div>
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">用户管理</span>
+        <span class="ivu-page-header-title">{{ $t('user.management') }}</span>
         <div>
           <Tabs @on-click="onClickTab">
             <TabPane :label="item.name" :name="item.type" v-for="(item,index) in headeNum" :key="index" />
@@ -16,13 +16,13 @@
           <Col span="18">
           <Col span="24">
           <Col v-bind="grid">
-          <FormItem label="用户搜索：" label-for="nickname">
-            <Input v-model="userFrom.nickname" placeholder="请输入" element-id="nickname" clearable>
+          <FormItem :label="$t('user.userSearch')" label-for="nickname">
+            <Input v-model="userFrom.nickname" :placeholder="$t('user.pleaseInput')" element-id="nickname" clearable>
             <Select v-model="field_key" slot="prepend" style="width: 80px">
-              <Option value="all">全部</Option>
-              <Option value="id">ID</Option>
-              <Option value="phone">手机号</Option>
-              <Option value="nickname">用户昵称</Option>
+              <Option value="all">{{ $t('user.all') }}</Option>
+              <Option value="id">{{ $t('user.id') }}</Option>
+              <Option value="phone">{{ $t('user.phoneNumber') }}</Option>
+              <Option value="nickname">{{ $t('user.userNickname') }}</Option>
             </Select>
             </Input>
           </FormItem>
@@ -32,16 +32,16 @@
           <template v-if="collapse">
             <Col span="24">
             <Col v-bind="grid">
-            <FormItem label="用户分组：" label-for="group_id">
-              <Select v-model="group_id" placeholder="请选择" element-id="group_id" clearable>
-                <Option value="all">全部</Option>
+            <FormItem :label="$t('user.userGroup')" label-for="group_id">
+              <Select v-model="group_id" :placeholder="$t('user.pleaseSelect')" element-id="group_id" clearable>
+                <Option value="all">{{ $t('user.all') }}</Option>
                 <Option :value="item.id" v-for="(item, index) in groupList" :key="index">{{item.group_name}}</Option>
               </Select>
             </FormItem>
             </Col>
             <Col v-bind="grid">
-            <FormItem label="用户标签：" label-for="label_id">
-              <Select multiple @on-change="changeLabel" v-model="label_id" placeholder="请选择" element-id="label_id" clearable>
+            <FormItem :label="$t('user.userLabel')" label-for="label_id">
+              <Select multiple @on-change="changeLabel" v-model="label_id" :placeholder="$t('user.pleaseSelect')" element-id="label_id" clearable>
                 <OptionGroup :label="item.label" v-for="(item,index) in selectLabel" :key="index">
                   <Option :value="v.id" v-for="(v,k) in item.options" :key="k">{{v.label}}</Option>
                 </OptionGroup>
@@ -49,19 +49,19 @@
             </FormItem>
             </Col>
             <Col v-bind="grid">
-            <FormItem label="性别：" label-for="sex">
+            <FormItem :label="$t('user.gender') + ':'" label-for="sex">
               <RadioGroup v-model="userFrom.sex" type="button">
                 <Radio label="">
-                  <span>全部</span>
+                  <span>{{ $t('user.all') }}</span>
                 </Radio>
                 <Radio label="1">
-                  <span>男</span>
+                  <span>{{ $t('user.male') }}</span>
                 </Radio>
                 <Radio label="2">
-                  <span>女</span>
+                  <span>{{ $t('user.female') }}</span>
                 </Radio>
                 <Radio label="0">
-                  <span>保密</span>
+                  <span>{{ $t('user.secret') }}</span>
                 </Radio>
               </RadioGroup>
             </FormItem>
@@ -69,15 +69,15 @@
             </Col>
             <Col span="18">
                 <Col v-bind="grid">
-                <FormItem label="选择时间：" label-for="user_time">
-                  <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="datetimerange" placement="bottom-start" placeholder="自定义时间" style="width: 300px;" class="mr20" :options="options"></DatePicker>
+                <FormItem :label="$t('user.selectTime')" label-for="user_time">
+                  <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="datetimerange" placement="bottom-start" :placeholder="$t('user.customTime')" style="width: 300px;" class="mr20" :options="options"></DatePicker>
                 </FormItem>
 
                 </Col>
                 <Col v-bind="grid">
-                  <FormItem label="用户来源：" label-for="group_id">
-                    <Select v-model="user_type" placeholder="请选择" element-id="user_type" clearable>
-                      <Option value="all">全部</Option>
+                  <FormItem :label="$t('user.userSource')" label-for="group_id">
+                    <Select v-model="user_type" :placeholder="$t('user.pleaseSelect')" element-id="user_type" clearable>
+                      <Option value="all">{{ $t('user.all') }}</Option>
                       <Option :value="item.value" v-for="(item, index) in selectType" :key="index">{{item.label}}</Option>
                     </Select>
                   </FormItem>
@@ -87,15 +87,15 @@
           </template>
           <Col span="6" class="ivu-text-right userFrom">
           <FormItem>
-            <Button type="primary" icon="ios-search" label="default" class="mr15" @click="userSearchs">搜索</Button>
-            <Button class="ResetSearch" @click="reset('userFrom')">重置</Button>
+            <Button type="primary" icon="ios-search" label="default" class="mr15" @click="userSearchs">{{ $t('user.searchBtn') }}</Button>
+            <Button class="ResetSearch" @click="reset('userFrom')">{{ $t('user.resetBtn') }}</Button>
             <a class="ivu-ml-8 font14 ml10" @click="collapse = !collapse">
               <template v-if="!collapse">
-                展开
+                {{ $t('user.expand') }}
                 <Icon type="ios-arrow-down" />
               </template>
               <template v-else>
-                收起
+                {{ $t('user.collapse') }}
                 <Icon type="ios-arrow-up" />
               </template>
             </a>
@@ -106,14 +106,14 @@
       <Divider dashed />
       <Row type="flex" justify="space-between" class="mt20">
         <Col span="24">
-        <Button v-auth="['admin-user-group_set']" class="mr20" @click="setGroup">批量设置分组</Button>
-        <Button v-auth="['admin-user-set_label']" class="mr20" @click="setLabel">批量设置标签</Button>
+        <Button v-auth="['admin-user-group_set']" class="mr20" @click="setGroup">{{ $t('user.batchSetGroup') }}</Button>
+        <Button v-auth="['admin-user-set_label']" class="mr20" @click="setLabel">{{ $t('user.batchSetLabel') }}</Button>
         </Col>
         <Col span="24" class="userAlert" v-if="selectionList.length">
-        <Alert show-icon> 已选择<i class="userI"> {{selectionList.length}} </i>项</Alert>
+        <Alert show-icon> {{ $t('user.selectedItems') }}<i class="userI"> {{selectionList.length}} </i>{{ $t('user.items') }}</Alert>
         </Col>
       </Row>
-      <Table :columns="columns" :data="userLists" class="mt25" ref="table" highlight-row :loading="loading" no-userFrom-text="暂无数据" no-filtered-userFrom-text="暂无筛选结果" @on-selection-change="onSelectTab" @on-sort-change="sortChanged">
+      <Table :columns="columns" :data="userLists" class="mt25" ref="table" highlight-row :loading="loading" :no-userFrom-text="$t('user.noData')" :no-filtered-userFrom-text="$t('user.noFilteredData')" @on-selection-change="onSelectTab" @on-sort-change="sortChanged">
 
         <template slot-scope="{ row, index }" slot="avatars">
           <div class="tabBox_img" v-viewer>
@@ -123,8 +123,8 @@
 
         <template slot-scope="{ row, index }" slot="nickname">
           <div class="acea-row">
-            <Icon type="md-male" v-show="row.sex==='男'" color="#2db7f5" size="15" class="mr5" />
-            <Icon type="md-female" v-show="row.sex==='女'" color="#ed4014" size="15" class="mr5" />
+            <Icon type="md-male" v-show="row.sex==='男' || row.sex==='Male'" color="#2db7f5" size="15" class="mr5" />
+            <Icon type="md-female" v-show="row.sex==='女' || row.sex==='Female'" color="#ed4014" size="15" class="mr5" />
             <div v-text="row.nickname"></div>
           </div>
         </template>
@@ -137,7 +137,7 @@
 
         <template slot-scope="{ row, index }" slot="is_tourist">
           <div>
-            {{row.is_tourist ? '游客': '客户'}}
+            {{row.is_tourist ? $t('user.visitor') : $t('user.customer')}}
           </div>
         </template>
 
@@ -148,17 +148,17 @@
         </template>
 
         <template slot-scope="{ row, index }" slot="action">
-          <a @click="edit(row)">编辑</a>
+          <a @click="edit(row)">{{ $t('user.edit') }}</a>
           <Divider type="vertical" />
           <template>
             <Dropdown @on-click="changeMenu(row,$event,index)">
               <a href="javascript:void(0)">
-                更多
+                {{ $t('user.more') }}
                 <Icon type="ios-arrow-down"></Icon>
               </a>
               <DropdownMenu slot="list">
-                <DropdownItem name="1">设置标签</DropdownItem>
-                <DropdownItem name="2">设置分组</DropdownItem>
+                <DropdownItem name="1">{{ $t('user.setLabel') }}</DropdownItem>
+                <DropdownItem name="2">{{ $t('user.moveGroup') }}</DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </template>
@@ -230,71 +230,7 @@ export default {
         spread_uid: 0,
         image: ''
       },
-      options: {
-        shortcuts: [
-          {
-            text: '今天',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
-              return [start, end];
-            }
-          },
-          {
-            text: '昨天',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1)));
-              end.setTime(end.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1)));
-              return [start, end];
-            }
-          },
-          {
-            text: '最近7天',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 6)));
-              return [start, end];
-            }
-          },
-          {
-            text: '最近30天',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 29)));
-              return [start, end];
-            }
-          },
-          {
-            text: '本月',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
-              return [start, end];
-            }
-          },
-          {
-            text: '本年',
-            value() {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.setTime(new Date(new Date().getFullYear(), 0, 1)));
-              return [start, end];
-            }
-          }
-        ]
-      },
       collapse: false,
-      headeNum: [
-        { 'type': 'all', 'name': '全部' },
-        { 'type': '1', 'name': '游客' },
-        { 'type': '0', 'name': '用户' },
-      ],
       address: [],
       addresData: city,
       isShowSend: true,
@@ -430,6 +366,74 @@ export default {
     },
     labelPosition() {
       return this.isMobile ? 'top' : 'right';
+    },
+    headeNum() {
+      return [
+        { 'type': 'all', 'name': this.$t('menu.allUsers') },
+        { 'type': '1', 'name': this.$t('menu.visitors') },
+        { 'type': '0', 'name': this.$t('menu.users') },
+      ];
+    },
+    options() {
+      return {
+        shortcuts: [
+          {
+            text: this.$t('menu.today'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+              return [start, end];
+            }
+          },
+          {
+            text: this.$t('menu.yesterday'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1)));
+              end.setTime(end.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1)));
+              return [start, end];
+            }
+          },
+          {
+            text: this.$t('menu.latest7Days'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 6)));
+              return [start, end];
+            }
+          },
+          {
+            text: this.$t('menu.latest30Days'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 29)));
+              return [start, end];
+            }
+          },
+          {
+            text: this.$t('menu.thisMonth'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.setTime(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+              return [start, end];
+            }
+          },
+          {
+            text: this.$t('menu.thisYear'),
+            value() {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.setTime(new Date(new Date().getFullYear(), 0, 1)));
+              return [start, end];
+            }
+          }
+        ]
+      };
     }
   },
   created() {

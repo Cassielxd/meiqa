@@ -2,7 +2,7 @@
   <div>
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">{{$route.meta.title}}</span>
+        <span class="ivu-page-header-title">{{$t($route.meta.title)}}</span>
       </div>
     </div>
     <Row class="ivu-mt box-wrapper">
@@ -20,12 +20,12 @@
           <div class="right-menu ivu-poptip-inner" v-show="item.status" v-if="index!=0">
             <div class="ivu-poptip-body" @click="labelEdit(item)">
               <div class="ivu-poptip-body-content">
-                <div class="ivu-poptip-body-content-inner">编辑标签</div>
+                <div class="ivu-poptip-body-content-inner">{{ $t('user.editLabel') }}</div>
               </div>
             </div>
-            <div class="ivu-poptip-body" @click="deleteSort(item,'删除分类',index)">
+            <div class="ivu-poptip-body" @click="deleteSort(item,$t('user.deleteCategory'),index)">
               <div class="ivu-poptip-body-content">
-                <div class="ivu-poptip-body-content-inner">删除标签</div>
+                <div class="ivu-poptip-body-content-inner">{{ $t('user.deleteLabel') }}</div>
               </div>
             </div>
           </div>
@@ -37,20 +37,20 @@
       <Card :bordered="false" dis-hover>
         <Row type="flex">
           <Col v-bind="grid">
-          <Button v-auth="['admin-user-label_add']" type="primary" icon="md-add" @click="add">添加标签</Button>
-          <Button v-auth="['admin-user-label_add']" type="success" icon="md-add" @click="addSort" style="margin-left: 10px">添加分类</Button>
+          <Button v-auth="['admin-user-label_add']" type="primary" icon="md-add" @click="add">{{ $t('user.addLabel') }}</Button>
+          <Button v-auth="['admin-user-label_add']" type="success" icon="md-add" @click="addSort" style="margin-left: 10px">{{ $t('user.addCategory') }}</Button>
           </Col>
         </Row>
-        <Table :columns="columns1" :data="labelLists" ref="table" class="mt25" :loading="loading" highlight-row no-userFrom-text="暂无数据" no-filtered-userFrom-text="暂无筛选结果">
+        <Table :columns="columns1" :data="labelLists" ref="table" class="mt25" :loading="loading" highlight-row :no-userFrom-text="$t('user.noData')" :no-filtered-userFrom-text="$t('user.noFilteredData')">>
           <template slot-scope="{ row, index }" slot="icons">
             <div class="tabBox_img" v-viewer>
               <img v-lazy="row.icon">
             </div>
           </template>
           <template slot-scope="{ row, index }" slot="action">
-            <a @click="edit(row.id)">修改</a>
+            <a @click="edit(row.id)">{{ $t('user.edit') }}</a>
             <Divider type="vertical" />
-            <a @click="del(row,'删除分组',index)">删除</a>
+            <a @click="del(row,$t('user.deleteLabel'),index)">{{ $t('user.delete') }}</a>
           </template>
         </Table>
         <div class="acea-row row-right page">
@@ -101,12 +101,12 @@ export default {
           minWidth: 120
         },
         {
-          title: '标签名称',
+          title: this.$t('user.labelName'),
           key: 'label',
           minWidth: 200
         },
         {
-          title: '操作',
+          title: this.$t('user.actions'),
           slot: 'action',
           fixed: 'right',
           minWidth: 120
@@ -250,7 +250,7 @@ export default {
     getUserLabelAll(key) {
       userLabelAll().then(res => {
         let obj = {
-          name: '全部',
+          name: this.$t('user.all'),
           id: ''
         }
         res.data.data.unshift(obj)

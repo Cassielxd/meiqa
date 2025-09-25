@@ -3,14 +3,14 @@
     <Col class="ivu-mb" span="6">
     <Card :bordered="false" dis-hover :padding="12">
       <p slot="title">
-        <span>全部客户</span>
+        <span>{{ $t('dashboard.allCustomers') }}</span>
       </p>
-      <Tag slot="extra" color="green">全部</Tag>
+      <Tag slot="extra" color="green">{{ $t('dashboard.all') }}</Tag>
       <div>
         <div class="number">{{statisticsList.all}}</div>
         <Divider style="margin: 8px 0" />
         <div class="ivu-pt-8" style="height: 22px;">
-          累计客户数量<span class="renshu">{{statisticsList.all}}</span>人
+          {{ $t('dashboard.totalCustomers') }}<span class="renshu">{{statisticsList.all}}</span>{{ $t('dashboard.people') }}
         </div>
       </div>
     </Card>
@@ -18,14 +18,14 @@
     <Col class="ivu-mb" span="6">
     <Card :bordered="false" dis-hover :padding="12">
       <p slot="title">
-        <span>新增客户</span>
+        <span>{{ $t('dashboard.newCustomers') }}</span>
       </p>
-      <Tag slot="extra" color="green">今日</Tag>
+      <Tag slot="extra" color="green">{{ $t('dashboard.today') }}</Tag>
       <div>
         <div class="number">{{statisticsList.toDayKefu}}</div>
         <Divider style="margin: 8px 0" />
         <div class="ivu-pt-8" style="height: 22px;">
-          今日新增客户<span class="renshu">{{statisticsList.toDayKefu}}</span>人
+          {{ $t('dashboard.todayNewCustomers') }}<span class="renshu">{{statisticsList.toDayKefu}}</span>{{ $t('dashboard.people') }}
         </div>
 
       </div>
@@ -34,14 +34,14 @@
     <Col class="ivu-mb" span="6">
     <Card :bordered="false" dis-hover :padding="12">
       <p slot="title">
-        <span>新增游客</span>
+        <span>{{ $t('dashboard.newVisitors') }}</span>
       </p>
-      <Tag slot="extra" color="green">今日</Tag>
+      <Tag slot="extra" color="green">{{ $t('dashboard.today') }}</Tag>
       <div>
         <div class="number">{{statisticsList.toDayTourist}}</div>
         <Divider style="margin: 8px 0" />
         <div class="ivu-pt-8" style="height: 22px;">
-          今日新增游客<span class="renshu">{{statisticsList.toDayTourist}}</span>人
+          {{ $t('dashboard.todayNewVisitors') }}<span class="renshu">{{statisticsList.toDayTourist}}</span>{{ $t('dashboard.people') }}
         </div>
 
       </div>
@@ -50,14 +50,14 @@
     <Col class="ivu-mb" span="6">
     <Card :bordered="false" dis-hover :padding="12">
       <p slot="title">
-        <span>新增客户</span>
+        <span>{{ $t('dashboard.newCustomers') }}</span>
       </p>
-      <Tag slot="extra" color="green">本月</Tag>
+      <Tag slot="extra" color="green">{{ $t('dashboard.thisMonth') }}</Tag>
       <div>
         <div class="number">{{statisticsList.month}}</div>
         <Divider style="margin: 8px 0" />
         <div class="ivu-pt-8" style="height: 22px;">
-          本月新增客户<span class="renshu">{{statisticsList.month}}</span>人
+          {{ $t('dashboard.monthNewCustomers') }}<span class="renshu">{{statisticsList.month}}</span>{{ $t('dashboard.people') }}
         </div>
 
       </div>

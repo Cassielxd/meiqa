@@ -2,30 +2,30 @@
     <div>
         <div class="i-layout-page-header">
             <div class="i-layout-page-header">
-                <span class="ivu-page-header-title">{{ $route.meta.title }}</span>
+                <span class="ivu-page-header-title">{{ $t($route.meta.title) }}</span>
             </div>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                 <Row :gutter="24" type="flex" justify="end">
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="二维码搜索：" label-for="name">
-                            <Input search enter-button @on-search="onSearch" placeholder="请输入二维码名称搜索" element-id="name" v-model="formValidate.name" style="width: 30%;display: inline-table;" class="mr" />
+                        <FormItem :label="$t('kefu.qrcodeSearch') + '：'" label-for="name">
+                            <Input search enter-button @on-search="onSearch" :placeholder="$t('kefu.enterQrcodeNameSearch')" element-id="name" v-model="formValidate.name" style="width: 30%;display: inline-table;" class="mr" />
                         </FormItem>
                     </Col>
                     <Col span="24" class="ivu-text-left">
-                        <Button type="primary" icon="md-add" @click="add" class="mr10">添加客服二维码</Button>
+                        <Button type="primary" icon="md-add" @click="add" class="mr10">{{ $t('kefu.addServiceQrcode') }}</Button>
                     </Col>
                 </Row>
             </Form>
-            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row no-userFrom-text="暂无数据" class="ivu-mt">
+            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" class="ivu-mt">
                 <template slot-scope="{ row, index }" slot="picture">
                     <img :src="row.qrcode" width="61" height="61" v-viewer>
                 </template>
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="onEdit(row)">编辑</a>
+                    <a @click="onEdit(row)">{{ $t('kefu.edit') }}</a>
                     <Divider type="vertical" />
-                    <a @click="onDelete(row, '删除反馈', index)">删除</a>
+                    <a @click="onDelete(row, $t('kefu.deleteFeedback'), index)">{{ $t('kefu.delete') }}</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
@@ -58,12 +58,12 @@ export default {
                     width: 80
                 },
                 {
-                    title: '二维码名称',
+                    title: this.$t('kefu.qrcodeName'),
                     key: 'name',
                     minWidth: 80
                 },
                 {
-                    title: '客服',
+                    title: this.$t('kefu.customerService'),
                     key: 'user_account',
                     minWidth: 120,
                     render: (h, params) => {
@@ -71,12 +71,12 @@ export default {
                     }
                 },
                 {
-                    title: '二维码图片',
+                    title: this.$t('kefu.qrcodeImage'),
                     slot: 'picture',
                     minWidth: 120
                 },
                 {
-                    title: '操作',
+                    title: this.$t('kefu.actions'),
                     slot: 'action',
                     minWidth: 150,
                     fixed: 'right'

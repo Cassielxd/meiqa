@@ -5,11 +5,11 @@
       <template v-for="item in menuList">
         <template v-if="item.children && item.children.length === 1">
           <side-menu-item v-if="showChildren(item)" :key="`menu-${item.path}`" :parent-item="item"></side-menu-item>
-          <menu-item v-else :name="item.path" :key="`menu-${item.children[0].path}`"><common-icon :type="item.children[0].icon || ''"/><span>{{ item.children[0].title }}</span></menu-item>
+          <menu-item v-else :name="item.path" :key="`menu-${item.children[0].path}`"><common-icon :type="item.children[0].icon || ''"/><span>{{ $t(item.children[0].title) }}</span></menu-item>
         </template>
         <template v-else>
           <side-menu-item v-if="showChildren(item)" :key="`menu${item.path}`" :parent-item="item"></side-menu-item>
-          <menu-item v-else :name="item.path" :key="`menu${item.path}`"><common-icon :type="item.icon || ''"/><span>{{ item.title }}</span></menu-item>
+          <menu-item v-else :name="item.path" :key="`menu${item.path}`"><common-icon :type="item.icon || ''"/><span>{{ $t(item.title) }}</span></menu-item>
         </template>
       </template>
     </Menu>
@@ -17,7 +17,7 @@
     <div class="menu-collapsed" v-show="collapsed" :list="menuList">
       <template v-for="(item, index) in menuList">
         <collapsed-menu v-if="item.children && item.children.length > 0" @on-click="handleSelect" hide-title :root-icon-size="rootIconSize" :icon-size="iconSize" :theme="theme" :parent-item="item" :key="`drop-menu-${item.path || item.name || index}`"></collapsed-menu>
-        <Tooltip transfer v-else :content="item.title" placement="right" :key="`drop-tooltip-${item.path || item.name || index}`">
+        <Tooltip transfer v-else :content="$t(item.title)" placement="right" :key="`drop-tooltip-${item.path || item.name || index}`">
           <a @click="handleSelect(getNameOrHref(item, true))" class="drop-menu-a" :style="{textAlign: 'center'}"><common-icon :size="rootIconSize" :color="textColor" :type="item.icon || (item.children && item.children[0].icon)"/></a>
         </Tooltip>
       </template>

@@ -2,7 +2,7 @@
   <div>
     <div class="i-layout-page-header">
       <div class="i-layout-page-header">
-        <span class="ivu-page-header-title">{{$route.meta.title}}</span>
+        <span class="ivu-page-header-title">{{ $t($route.meta.title)}}</span>
       </div>
     </div>
     <Row class="ivu-mt box-wrapper">
@@ -17,12 +17,12 @@
           <div class="right-menu ivu-poptip-inner" v-show="item.status" v-if="index!=0">
             <div class="ivu-poptip-body" @click="labelEdit(item)">
               <div class="ivu-poptip-body-content">
-                <div class="ivu-poptip-body-content-inner">编辑小组</div>
+                <div class="ivu-poptip-body-content-inner">{{ $t('kefu.editGroup') }}</div>
               </div>
             </div>
-            <div class="ivu-poptip-body" @click="deleteSort(item,'删除小组',index)">
+            <div class="ivu-poptip-body" @click="deleteSort(item,$t('kefu.deleteGroup'),index)">
               <div class="ivu-poptip-body-content">
-                <div class="ivu-poptip-body-content-inner">删除小组</div>
+                <div class="ivu-poptip-body-content-inner">{{ $t('kefu.deleteGroup') }}</div>
               </div>
             </div>
           </div>
@@ -34,11 +34,11 @@
       <Card :bordered="false" dis-hover>
         <Row type="flex" class="mb20">
           <Col span="24">
-          <Button v-auth="['setting-store_service-add']" type="primary" icon="md-add" @click="add" class="mr10">添加话术</Button>
-          <Button v-auth="['setting-store_service-add']" type="success" icon="md-add" @click="addSort" style="margin-left: 10px">添加分类</Button>
+          <Button v-auth="['setting-store_service-add']" type="primary" icon="md-add" @click="add" class="mr10">{{ $t('kefu.addSpeechcraft') }}</Button>
+          <Button v-auth="['setting-store_service-add']" type="success" icon="md-add" @click="addSort" style="margin-left: 10px">{{ $t('kefu.addCategory') }}</Button>
           </Col>
         </Row>
-        <Table :columns="columns1" :data="tableList" :loading="loading" highlight-row no-userFrom-text="暂无数据" no-filtered-userFrom-text="暂无筛选结果">
+        <Table :columns="columns1" :data="tableList" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" :no-filtered-userFrom-text="$t('kefu.noFilteredData')">>
           <template slot-scope="{ row, index }" slot="avatar">
             <div class="tabBox_img" v-viewer>
               <img v-lazy="row.avatar">
@@ -49,9 +49,9 @@
           </template>
 
           <template slot-scope="{ row, index }" slot="action">
-            <a @click="edit(row)">编辑</a>
+            <a @click="edit(row)">{{ $t('kefu.edit') }}</a>
             <Divider type="vertical" />
-            <a @click="del(row,'删除客服',index)">删除</a>
+            <a @click="del(row,$t('kefu.deleteCustomerService'),index)">{{ $t('kefu.delete') }}</a>
           </template>
         </Table>
         <div class="acea-row row-right page">
@@ -167,27 +167,27 @@ export default {
           width: 80
         },
         {
-          title: '标题',
+          title: this.$t('kefu.title'),
           key: 'title',
           minWidth: 120
         },
         {
-          title: '详情',
+          title: this.$t('kefu.details'),
           key: 'message',
           minWidth: 320
         },
         {
-          title: '排序',
+          title: this.$t('kefu.sort'),
           key: 'sort',
           minWidth: 60
         },
         {
-          title: '添加时间',
+          title: this.$t('kefu.addTime'),
           slot: 'add_time',
           minWidth: 120
         },
         {
-          title: '操作',
+          title: this.$t('kefu.actions'),
           slot: 'action',
           fixed: 'right',
           minWidth: 150
@@ -259,7 +259,7 @@ export default {
       speechcraftcate().then(res => {
         let data = res.data.data;
         let obj = {
-          name: '全部',
+          name: this.$t('kefu.all'),
           id: ''
         }
         data.unshift(obj);
@@ -513,7 +513,7 @@ export default {
     // 添加客服
     putRemark() {
       if(this.addFrom.uids.length === 0) {
-        return this.$Message.warning('请选择要添加的客服');
+        return this.$Message.warning(this.$t('kefu.pleaseSelectCustomerService'));
       }
       kefuAddApi(this.addFrom).then(async res => {
         this.$Message.success(res.msg);

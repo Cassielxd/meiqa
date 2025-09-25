@@ -1,16 +1,16 @@
 <template>
     <div class="content">
-        <p class="font-w">使用简介</p>
-        <p class="text-i">token重置后，需要更新用户端的token，旧token将无法访问</p>
+        <p class="font-w">{{ $t('system.usageInstructions') }}</p>
+        <p class="text-i">{{ $t('system.tokenResetDescription') }}</p>
         <div class="fenlei">
             <div class="code-content-wrap">
                <textarea id="NormalCodeTextareatoken3" class="code textarea" rows="5">
 {{tokeninfo.token_md5}}
       </textarea>
                 <div class="other-wrap">
-                    <a @click="getCopy('NormalCodeTextareatoken3')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
+                    <a @click="getCopy('NormalCodeTextareatoken3')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
                     &nbsp;
-                    <div @click="resetToken()" class="btn btn-blue btn-large" href="javascript:void(0);"><span>重置token</span></div>
+                    <div @click="resetToken()" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.resetToken') }}</span></div>
                 </div>
             </div>
         </div>

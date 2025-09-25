@@ -1,11 +1,11 @@
 <template>
   <div class="chart-content">
     <div class="chart-title">
-      <p class="chart-left">趋势图</p>
+      <p class="chart-left">{{ $t('dashboard.trendChart') }}</p>
       <p class="chart-right">
         <RadioGroup v-model="visitDate" type="button" class="ivu-mr-8" @on-change="handleChangeVisitType">
-          <Radio label="1">年</Radio>
-          <Radio label="0">月</Radio>
+          <Radio label="1">{{ $t('dashboard.year') }}</Radio>
+          <Radio label="0">{{ $t('dashboard.month') }}</Radio>
         </RadioGroup>
       </p>
     </div>
@@ -35,7 +35,7 @@ export default {
           trigger: 'axis'
         },
         legend: {
-          data: ['客户', '游客'],
+          data: [this.$t('dashboard.customers'), this.$t('dashboard.visitors')],
           icon: 'rect',
           right: 20,
           top: 20
@@ -65,7 +65,7 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: '每日新增(人)',
+          name: this.$t('dashboard.dailyNewPeople'),
           nameTextStyle: {
             color: '#CCCCCC'
           },
@@ -86,7 +86,7 @@ export default {
         },
         series: [
           {
-            name: '客户',
+            name: this.$t('dashboard.customers'),
             type: 'line',
             itemStyle: {
               normal: {
@@ -99,7 +99,7 @@ export default {
             data: []
           },
           {
-            name: '游客',
+            name: this.$t('dashboard.visitors'),
             type: 'line',
             itemStyle: {
               normal: {

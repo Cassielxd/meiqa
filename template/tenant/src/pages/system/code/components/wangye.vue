@@ -1,9 +1,9 @@
 <template>
   <div class="content">
-    <p class="font-w">使用简介</p>
-    <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
+    <p class="font-w">{{ $t('system.usageInstructions') }}</p>
+    <p class="text-i">{{ $t('system.webEmbedDescription') }}</p>
     <Divider />
-    <p class="typetitle">获取代码</p>
+    <p class="typetitle">{{ $t('system.getCode') }}</p>
 
     <div class="fenlei">
       <div class="code-content-wrap">
@@ -31,8 +31,8 @@
 </script>
             </textarea>
         <div class="other-wrap">
-          <a class="btn btn-blue btn-large mr10" @click="jiazai" href="javascript:void(0);">点击体验</a>
-          <a @click="getCopy('NormalCodeTextarea1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
+          <a class="btn btn-blue btn-large mr10" @click="jiazai" href="javascript:void(0);">{{ $t('system.clickToExperience') }}</a>
+          <a @click="getCopy('NormalCodeTextarea1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
         </div>
       </div>
 
@@ -40,9 +40,9 @@
 
 
     <div class="fenlei">
-      <p class="font-w">小贴士</p>
-      <p class="text-i">如果点击体验，提示客服不在线，请进入客服点击进入客服登录一个账号再试。</p>
-      <p class="text-i">如需更换token，请在设置中重新获取。</p>
+      <p class="font-w">{{ $t('system.tips') }}</p>
+      <p class="text-i">{{ $t('system.experienceTip') }}</p>
+      <p class="text-i">{{ $t('system.tokenChangeTip') }}</p>
     </div>
   </div>
 </template>

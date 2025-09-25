@@ -41,6 +41,23 @@ class HttpRequest {
         // Spin.show() // 不建议开启，因为界面不友好
       }
       this.queue[url] = true
+
+      // 添加默认语言参数到请求头
+      const getUrlParam = (name) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      };
+
+      const urlLang = getUrlParam('lang');
+      const lang = urlLang && ['zh-CN', 'en-US'].includes(urlLang)
+        ? urlLang
+        : localStorage.getItem('local') || 'zh-CN';
+
+      // 添加语言参数到请求头
+      config.headers = config.headers || {};
+      config.headers['lang'] = lang;
+      console.log(config.headers)
+
       return config
     }, error => {
       return Promise.reject(error)

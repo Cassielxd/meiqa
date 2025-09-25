@@ -2,25 +2,25 @@
   <div class="getCode_container">
     <div class="content">
       <Tabs value="name1">
-        <TabPane label="网页内嵌" name="name1">
+        <TabPane :label="$t('system.webEmbed')" name="name1">
           <wangye :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy'></wangye>
         </TabPane>
-        <TabPane label="超链接" name="name2">
+        <TabPane :label="$t('system.hyperlink')" name="name2">
           <alink :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy'></alink>
         </TabPane>
-        <TabPane label="定制开发" name="name3">
+        <TabPane :label="$t('system.customDevelopment')" name="name3">
           <kaifa :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy'></kaifa>
         </TabPane>
-        <TabPane label="重置token" name="name4">
+        <TabPane :label="$t('system.resetToken')" name="name4">
           <setting :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy' @cresetToken="resetToken"></setting>
         </TabPane>
       </Tabs>
     </div>
-    <Modal v-model="canfrime" title="提示" @on-ok="confirme" @on-cancel="cancel">
+    <Modal v-model="canfrime" :title="$t('system.prompt')" @on-ok="confirme" @on-cancel="cancel">
       <div class="ivu-modal-confirm">
         <img class="modimg" src="@/assets/images/warring.png" alt="">
         <div>
-          token重置后，数据将全部更新，历史数据将会失效，请问是否确定？
+          {{ $t('system.tokenResetWarning') }}
         </div>
       </div>
     </Modal>
@@ -154,7 +154,7 @@ export default {
         target.textContent = "";
       }
 
-      this.$Message.success('已成功复制到粘贴板');
+      this.$Message.success(this.$t('system.copySuccess'));
 
       return succeed;
     }

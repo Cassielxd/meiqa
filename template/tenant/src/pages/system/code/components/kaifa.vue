@@ -1,24 +1,24 @@
 <template>
     <div class="content">
-        <p class="font-w">使用简介</p>
-        <p class="text-i">程序内定制接入客服，深度定制开发说明，省去VUE说明。</p>
+        <p class="font-w">{{ $t('system.usageInstructions') }}</p>
+        <p class="text-i">{{ $t('system.customDevelopmentDescription') }}</p>
         <Divider />
-        <p class="typetitle">第一步，引入js</p>
+        <p class="typetitle">{{ $t('system.stepOneImportJs') }}</p>
         <div class="fenlei">
                 <div class="fenlei">
-                <p class="font-w">1、一般网页中引入一下代码</p>
+                <p class="font-w">{{ $t('system.generalWebpageImport') }}</p>
                 <div class="code-content-wrap">
                     <textarea id="NormalCodeTextareakaifa1" class="code" rows="1">
 <script src="{{siteUrl}}/customerServer.js"></script>
                     </textarea>
                     <div class="other-wrap">
-                        <a @click="getCopy('NormalCodeTextareakaifa1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
+                        <a @click="getCopy('NormalCodeTextareakaifa1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
                     </div>
                 </div>
                 </div>
 
             <div class="fenlei">
-            <p class="font-w">2、如果您的项目是基于webpack或其他工具构建的，并且您不想通过操作html文件来引入js，则推荐您在入口文件中写下以下代码</p>
+            <p class="font-w">{{ $t('system.webpackProjectImport') }}</p>
                 <div class="code-content-wrap">
                     <textarea id="NormalCodeTextarea2" class="code" rows="9">
 <script>
@@ -31,14 +31,14 @@
 </script>
                     </textarea>
                     <div class="other-wrap">
-                    <a @click="getCopy('NormalCodeTextarea2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
+                    <a @click="getCopy('NormalCodeTextarea2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
                     </div>
                 </div>
             </div>
         </div>
-        <p class="typetitle">第二步，设置参数并初始化</p>
+        <p class="typetitle">{{ $t('system.stepTwoSetParams') }}</p>
         <div  class="fenlei">
-            <p class="font-w">在所需使用crmChat服务的文件中，实例化 initCustomerServer 对象, 调用对象的 init 方法，开始加载crmChat服务</p>
+            <p class="font-w">{{ $t('system.initializeDescription') }}</p>
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa2" class="code" rows="45">
 var option = {
@@ -88,16 +88,16 @@ canCustomerServer.getCustomeServer();
 
 
                 <div class="other-wrap">
-                    <a class="btn btn-blue btn-large mr10" @click="jiazai" href="javascript:void(0);">加载客服窗口</a>
-                    <a class="btn btn-blue btn-large mr10" @click="tanchuang" href="javascript:void(0);">弹开聊天框</a>
-                    <a @click="getCopy('NormalCodeTextareakaifa2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
+                    <a class="btn btn-blue btn-large mr10" @click="jiazai" href="javascript:void(0);">{{ $t('system.loadCustomerServiceWindow') }}</a>
+                    <a class="btn btn-blue btn-large mr10" @click="tanchuang" href="javascript:void(0);">{{ $t('system.openChatWindow') }}</a>
+                    <a @click="getCopy('NormalCodeTextareakaifa2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
                 </div>
             </div>
 
         </div>
-        <p class="typetitle">事件说明</p>
+        <p class="typetitle">{{ $t('system.eventDescription') }}</p>
         <div  class="fenlei">
-            <p class="font-w">只有使用js引入的形式才能使用事件</p>
+            <p class="font-w">{{ $t('system.jsEventsOnly') }}</p>
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa3" class="code" rows="45">
 
@@ -147,10 +147,10 @@ canCustomerServer.getCustomeServer();
             </div>
         </div>
         <div class="fenlei">
-            <p class="font-w">小贴士</p>
-            <p class="text-i">如果点击体验，提示客服不在线，请进入客服点击进入客服登录一个账号再试。</p>
-            <p class="text-i">如需更换token，请在设置中重新获取。</p>
-            <p class="text-i">更多设置请自己参考引入js代码修改，例如修改悬浮客服图片。</p>
+            <p class="font-w">{{ $t('system.tips') }}</p>
+            <p class="text-i">{{ $t('system.experienceTip') }}</p>
+            <p class="text-i">{{ $t('system.tokenChangeTip') }}</p>
+            <p class="text-i">{{ $t('system.moreSettingsTip') }}</p>
         </div>
     </div>
 </template>

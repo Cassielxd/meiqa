@@ -1,11 +1,14 @@
 // 静态菜单数据 - 所有菜单都可访问，无权限限制
-export const staticMenusData = [
-  {
-    "id": 7,
-    "pid": 0,
-    "title": "统计",
-    "path": "/tenant/home/",
-    "menu_name": "统计",
+
+// 获取翻译后的菜单数据
+export function getStaticMenusData() {
+  return [
+    {
+      "id": 7,
+      "pid": 0,
+      "title": "menu.statistics",
+      "path": "/tenant/home/",
+      "menu_name": "menu.statistics",
     "menu_path": "/tenant/home/",
     "unique_auth": "tenant-index-index",
     "sort": 127,
@@ -15,9 +18,9 @@ export const staticMenusData = [
   {
     "id": 9,
     "pid": 0,
-    "title": "用户管理",
+    "title": "menu.userManagement",
     "path": "/tenant/user",
-    "menu_name": "用户管理",
+    "menu_name": "menu.userManagement",
     "menu_path": "/tenant/user",
     "unique_auth": "tenant-user",
     "sort": 100,
@@ -27,9 +30,9 @@ export const staticMenusData = [
   {
     "id": 10,
     "pid": 9,
-    "title": "用户列表",
+    "title": "menu.userList",
     "path": "/tenant/user/list",
-    "menu_name": "用户列表",
+    "menu_name": "menu.userList",
     "menu_path": "/tenant/user/list",
     "unique_auth": "tenant-user-user-index",
     "sort": 10,
@@ -39,9 +42,9 @@ export const staticMenusData = [
   {
     "id": 227,
     "pid": 9,
-    "title": "用户分组",
+    "title": "menu.userGroup",
     "path": "/tenant/user/group",
-    "menu_name": "用户分组",
+    "menu_name": "menu.userGroup",
     "menu_path": "/tenant/user/group",
     "unique_auth": "user-user-group",
     "sort": 9,
@@ -51,9 +54,9 @@ export const staticMenusData = [
   {
     "id": 1008,
     "pid": 9,
-    "title": "用户标签",
+    "title": "menu.userLabel",
     "path": "/tenant/user/label",
-    "menu_name": "用户标签",
+    "menu_name": "menu.userLabel",
     "menu_path": "/tenant/user/label",
     "unique_auth": "user-user-label",
     "sort": 0,
@@ -63,9 +66,9 @@ export const staticMenusData = [
   {
     "id": 165,
     "pid": 0,
-    "title": "客服管理",
+    "title": "menu.customerService",
     "path": "/tenant/kefu",
-    "menu_name": "客服管理",
+    "menu_name": "menu.customerService",
     "menu_path": "/tenant/kefu",
     "unique_auth": "setting-store-service",
     "sort": 2,
@@ -75,9 +78,9 @@ export const staticMenusData = [
   {
     "id": 1104,
     "pid": 165,
-    "title": "站点统计",
+    "title": "menu.statistics",
     "path": "/tenant/kefu/statistics",
-    "menu_name": "站点统计",
+    "menu_name": "menu.statistics",
     "menu_path": "/tenant/kefu/statistics",
     "unique_auth": "tenant-kefu-statistics",
     "sort": 0,
@@ -87,9 +90,9 @@ export const staticMenusData = [
   {
     "id": 1105,
     "pid": 165,
-    "title": "客服二维码",
+    "title": "menu.qrcode",
     "path": "/tenant/kefu/qrcode",
-    "menu_name": "客服二维码",
+    "menu_name": "menu.qrcode",
     "menu_path": "/tenant/kefu/qrcode",
     "unique_auth": "tenant-kefu-qrcode",
     "sort": 0,
@@ -99,9 +102,9 @@ export const staticMenusData = [
   {
     "id": 1106,
     "pid": 165,
-    "title": "聊天记录",
+    "title": "menu.record",
     "path": "/tenant/kefu/record",
-    "menu_name": "聊天记录",
+    "menu_name": "menu.record",
     "menu_path": "/tenant/kefu/record",
     "unique_auth": "tenant-kefu-record",
     "sort": 0,
@@ -111,9 +114,9 @@ export const staticMenusData = [
   {
     "id": 678,
     "pid": 165,
-    "title": "客服列表",
+    "title": "menu.serviceList",
     "path": "/tenant/setting/store_service/index",
-    "menu_name": "客服列表",
+    "menu_name": "menu.serviceList",
     "menu_path": "/tenant/setting/store_service/index",
     "unique_auth": "tenant-setting-store_service-index",
     "sort": 0,
@@ -123,9 +126,9 @@ export const staticMenusData = [
   {
     "id": 679,
     "pid": 165,
-    "title": "客服话术",
+    "title": "menu.serviceSpeechcraft",
     "path": "/tenant/setting/store_service/speechcraft",
-    "menu_name": "客服话术",
+    "menu_name": "menu.serviceSpeechcraft",
     "menu_path": "/tenant/setting/store_service/speechcraft",
     "unique_auth": "tenant-setting-store_service-speechcraft",
     "sort": 0,
@@ -135,9 +138,9 @@ export const staticMenusData = [
   {
     "id": 738,
     "pid": 165,
-    "title": "用户留言",
+    "title": "menu.userFeedback",
     "path": "/tenant/setting/store_service/feedback",
-    "menu_name": "用户留言",
+    "menu_name": "menu.userFeedback",
     "menu_path": "/tenant/setting/store_service/feedback",
     "unique_auth": "tenant-setting-store_service-feedback",
     "sort": 0,
@@ -147,9 +150,9 @@ export const staticMenusData = [
   {
     "id": 12,
     "pid": 0,
-    "title": "设置管理",
+    "title": "menu.settingsManagement",
     "path": "/tenant/setting",
-    "menu_name": "设置管理",
+    "menu_name": "menu.settingsManagement",
     "menu_path": "/tenant/setting",
     "unique_auth": "tenant-setting",
     "sort": 0,
@@ -159,27 +162,28 @@ export const staticMenusData = [
   {
     "id": 1011,
     "pid": 12,
-    "title": "代码获取",
+    "title": "menu.systemCode",
     "path": "/tenant/system/code",
-    "menu_name": "代码获取",
+    "menu_name": "menu.systemCode",
     "menu_path": "/tenant/system/code",
     "unique_auth": "tenant-system-code",
     "sort": 0,
     "type": 0,
     "html": "|-----|-----"
   },
-];
+  ];
+}
 
-// 根据菜单名称获取对应的图标
+// 根据菜单名称获取对应的图标（支持中英文菜单名）
 function getMenuIcon(menuName) {
   const iconMap = {
+    // 中文菜单名映射
     '统计': 'ios-stats',
     '用户管理': 'ios-people',
     '用户列表': 'ios-list',
     '用户分组': 'ios-folder',
     '用户标签': 'ios-pricetag',
     '客服管理': 'ios-headset',
-
     '客服二维码': 'ios-qr-scanner',
     '聊天记录': 'ios-chatbubbles',
     '客服列表': 'ios-contacts',
@@ -187,24 +191,24 @@ function getMenuIcon(menuName) {
     '用户留言': 'ios-mail',
     '设置管理': 'ios-settings',
     '系统设置': 'ios-cog',
-    '页面管理': 'ios-document',
-    '客服图标': 'ios-image',
-    '隐私协议': 'ios-lock',
-    '客服页面广告': 'ios-bulb',
-    '管理权限': 'ios-key',
-    '角色管理': 'ios-person',
-    '管理员列表': 'ios-people',
-    '权限规则': 'ios-list-box',
-    'APP在线升级': 'ios-cloud-upload',
     '代码获取': 'ios-code',
-    '维护管理': 'ios-construct',
-    '开发配置': 'ios-hammer',
-    '配置分类': 'ios-folder',
-    '组合数据': 'ios-grid',
-    '安全维护': 'ios-shield',
-    '系统日志': 'ios-document'
+    // 英文菜单名映射
+    'Statistics': 'ios-stats',
+    'User Management': 'ios-people',
+    'User List': 'ios-list',
+    'User Group': 'ios-folder',
+    'User Label': 'ios-pricetag',
+    'Customer Service': 'ios-headset',
+    'QR Code': 'ios-qr-scanner',
+    'Chat Record': 'ios-chatbubbles',
+    'Service List': 'ios-contacts',
+    'Service Speechcraft': 'ios-chatboxes',
+    'User Feedback': 'ios-mail',
+    'Settings Management': 'ios-settings',
+    'System Settings': 'ios-cog',
+    'System Code': 'ios-code'
   };
-  return iconMap[menuName];
+  return iconMap[menuName] || 'ios-document';
 }
 
 // 转换菜单数据结构，添加组件需要的字段
@@ -277,20 +281,22 @@ function buildMenuTree(flatMenus) {
   return result;
 }
 
-// 转换后的菜单数据
-const transformedMenus = transformMenuData(buildMenuTree(staticMenusData));
+// 获取转换后的菜单数据
+export function getTransformedMenus() {
+  const menuData = getStaticMenusData();
+  const transformedMenus = transformMenuData(buildMenuTree(menuData));
 
-// 调试：输出菜单结构
-console.log('构建的菜单树形结构:', transformedMenus);
-console.log('根菜单数量:', transformedMenus.length);
+  // 调试：输出菜单结构
+  console.log('构建的菜单树形结构:', transformedMenus);
+  console.log('根菜单数量:', transformedMenus.length);
 
-// 导出树形菜单数据
-export { transformedMenus }
+  return transformedMenus;
+}
 
 // 模拟API返回的数据结构
-export function getStaticMenusData() {
+export function getStaticMenusAPI() {
   return Promise.resolve({
-    data: transformedMenus,
+    data: getTransformedMenus(),
     status: 200,
     msg: "获取菜单数据成功"
   });

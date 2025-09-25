@@ -19,7 +19,7 @@ export default {
             path: "list",
             name: `${pre}list`,
             meta: {
-                title: "用户管理"
+                title: "menu.userList"
             },
             component: () => import("@/pages/user/list/index")
         },
@@ -28,7 +28,7 @@ export default {
             name: `${pre}group`,
             meta: {
                 footer: true,
-                title: "用户分组"
+                title: "menu.userGroup"
             },
             component: () => import("@/pages/user/group/index")
         },
@@ -37,7 +37,7 @@ export default {
             name: `${pre}label`,
             meta: {
                 footer: true,
-                title: "用户标签"
+                title: "menu.userLabel"
             },
             component: () => import("@/pages/user/label/index")
         },

@@ -16,7 +16,7 @@ export default {
             path: 'qrcode',
             name: `${pre}qrcode`,
             meta: {
-                title: '客服二维码'
+                title: 'menu.qrcode'
             },
             component: () => import('@/pages/kefu/qrcode')
         },
@@ -24,7 +24,7 @@ export default {
             path: 'record',
             name: `${pre}record`,
             meta: {
-                title: '聊天记录'
+                title: 'menu.record'
             },
             component: () => import('@/pages/kefu/record')
         },
@@ -32,7 +32,7 @@ export default {
             path: 'statistics',
             name: `${pre}statistics`,
             meta: {
-                title: '站点统计'
+                title: 'menu.statistics'
             },
             component: () => import('@/pages/kefu/statistics')
         }

@@ -17,7 +17,7 @@ export default {
       path: 'code',
       name: `${pre}code`,
       meta: {
-        title: '代码获取'
+        title: 'menu.systemCode'
       },
       component: () => import('@/pages/system/code/index')
     },
@@ -25,7 +25,7 @@ export default {
       path: 'config/system_config_tab/index',
       name: `${pre}configTab`,
       meta: {
-        title: '配置分类'
+        title: 'menu.configTab'
       },
       component: () => import('@/pages/system/configTab/index')
     },
@@ -33,7 +33,7 @@ export default {
       path: 'config/system_config_tab/list/:id?',
       name: `${pre}configTabList`,
       meta: {
-        title: '配置列表'
+        title: 'menu.configList'
       },
       component: () => import('@/pages/system/configTab/list')
     },
@@ -41,7 +41,7 @@ export default {
       path: 'config/system_group/index',
       name: `${pre}group`,
       meta: {
-        title: '组合数据'
+        title: 'menu.groupData'
       },
       component: () => import('@/pages/system/group/index')
     },
@@ -49,7 +49,7 @@ export default {
       path: 'maintain/system_log/index',
       name: `${pre}systemLog`,
       meta: {
-        title: '系统日志'
+        title: 'menu.systemLog'
       },
       component: () => import('@/pages/system/maintain/systemLog/index')
     },

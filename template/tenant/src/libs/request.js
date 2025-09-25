@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { Message } from 'iview'
 import { getCookies, removeCookies, getSen, getLoc } from '@/libs/util'
+
 import Setting from '@/setting'
 import router from '@/router';
 const service = axios.create({
@@ -19,6 +20,23 @@ service.interceptors.request.use(
         if(token) {
             config.headers['Authori-zation'] = 'Bearer ' + token;
         }
+
+        // 添加默认语言参数到请求头
+        const getUrlParam = (name) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        };
+
+        const urlLang = getUrlParam('lang');
+        const lang = urlLang && ['zh-CN', 'en-US'].includes(urlLang)
+            ? urlLang
+            : localStorage.getItem('local') || 'zh-CN';
+
+        // 添加语言参数到请求头（使用标准的Accept-Language头）
+        config.headers = config.headers || {};
+        config.headers['Accept-Language'] = lang;
+        console.log('Request headers:', config.headers);
+
         return config
     },
     error => {
