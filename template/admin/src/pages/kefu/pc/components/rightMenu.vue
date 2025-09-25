@@ -6,7 +6,7 @@
           <div class="avatar"><img v-lazy="activeUserInfo.avatar" alt=""></div>
           <div class="name line1">
             <span v-if="editUserNameModel == false" @click="editUserNameModel= true">{{activeUserInfo.remark_nickname?activeUserInfo.remark_nickname: activeUserInfo.nickname}}</span>
-            <Input v-if="editUserNameModel" v-model="activeUserInfo.nickname" placeholder="Enter nickname" @on-blur="editUserData('editUserNameModel')"></Input>
+            <Input v-if="editUserNameModel" v-model="activeUserInfo.nickname" :placeholder="$t('kefu.nickname')" @on-blur="editUserData('editUserNameModel')"></Input>
           </div>
           <div class="label">
            <!--  <template v-if="webType == 2">
@@ -19,15 +19,15 @@
               <span class="label wechat">公众号</span>
             </template> -->
             <template >
-              <span class="label pc">default</span>
+              <span class="label pc">{{$t('kefu.customerInfo')}}</span>
             </template>
           </div>
         </div>
         <div class="user-info">
           <div class="item">
-            <span>Phone</span>
-            <span @click="editUserPhoneModel=true" v-if="!editUserPhoneModel">{{activeUserInfo.phone || 'No phone number'}}</span>
-            <Input v-else v-model="activeUserInfo.phone" @on-blur="editUserData('editUserPhoneModel')" placeholder="No phone number" size="small"></Input>
+            <span>{{$t('kefu.phone')}}</span>
+            <span @click="editUserPhoneModel=true" v-if="!editUserPhoneModel">{{activeUserInfo.phone || $t('kefu.noPhoneNumber')}}</span>
+            <Input v-else v-model="activeUserInfo.phone" @on-blur="editUserData('editUserPhoneModel')" :placeholder="$t('kefu.noPhoneNumber')" size="small"></Input>
           </div>
 
           <!-- <div class="item">
@@ -39,7 +39,7 @@
           </div> -->
 
           <div class="label-list" @click="isUserGroup = true">
-            <span>Group</span>
+            <span>{{$t('kefu.group')}}</span>
             <div class="con">
               <div class="label-item" v-if="activeUserInfo.group_id">{{userGroupList.find(item => item.id == copyGroupId).group_name}}</div>
             </div>
@@ -49,7 +49,7 @@
           </div>
 
           <div class="label-list" @click.stop="isUserLabel = true">
-            <span>Label</span>
+            <span>{{$t('kefu.label')}}</span>
             <div class="con">
               <div class="label-item" v-for="item in activeUserInfo.label">{{item.label}}</div>
             </div>
@@ -59,7 +59,7 @@
           </div>
 
           <div class="label-list" @click.stop="isEditRemark = true;remarkValue = activeUserInfo.remarks;">
-            <span>Remark</span>
+            <span>{{$t('kefu.remark')}}</span>
             <div class="con">
               <div class="">{{activeUserInfo.remarks}}</div>
             </div>
@@ -95,38 +95,38 @@
           </div>
         </div> -->
       </div>
-      <empty v-else status="2" msg="No user information"></empty>
+      <empty v-else status="2" :msg="$t('kefu.noUserInfo')"></empty>
 
     </template>
 
     <!-- 发货弹窗 -->
-    <Modal v-model="isDelivery" title="Order shipping" :footer-hide="true">
+    <Modal v-model="isDelivery" :title="$t('kefu.viewOrder')" :footer-hide="true">
       <delivery v-if="isDelivery" @close="deliveryClose" @ok="deliveryOk" :orderId="orderId"></delivery>
     </Modal>
     <!-- 订单备注 -->
-    <Modal v-model="isRemarks" title="Please modify the content" :footer-hide="true" :mask="true" width="520" :closable="false" class="none-radius">
+    <Modal v-model="isRemarks" :title="$t('kefu.remark')" :footer-hide="true" :mask="true" width="520" :closable="false" class="none-radius">
       <remarks :remarkId="remarkId" v-if="isRemarks" @close="deliveryClose" @remarkSuccess="remarkSuccess"></remarks>
     </Modal>
     <!-- 用户标签 -->
     <Modal v-model="isUserLabel" :footer-hide="true" width="320" class="label-box" :closable="false" :mask="true">
       <p class="label-head" slot="header">
-        <span>Select user label</span>
+        <span>{{$t('kefu.label')}}</span>
       </p>
       <userLabel v-if="isUserLabel" @close="deliveryClose" :uid="uid" @editLabel="editLabel"></userLabel>
     </Modal>
     <!-- 分组 -->
     <Modal v-model="isUserGroup" :footer-hide="true" width="320" class="label-box" :closable="false" :mask="true">
       <p class="label-head" slot="header">
-        <span>Select user group</span>
+        <span>{{$t('kefu.group')}}</span>
       </p>
       <user-group v-if="isUserGroup" @close="usergroupClose" :userGroup="userGroupList" :activeUserInfo="activeUserInfo" @selectGroup="selectGroup" @handleSelectGroup="handleSelectGroup"></user-group>
     </Modal>
 
-    <Modal v-model="isEditRemark" title="Please enter user remark" width="320" class="none-radius">
-      <Input v-model="remarkValue" placeholder="Please enter user remark"></Input>
+    <Modal v-model="isEditRemark" :title="$t('kefu.remark')" width="320" class="none-radius">
+      <Input v-model="remarkValue" :placeholder="$t('kefu.remark')"></Input>
       <div slot="footer">
-        <Button @click="isEditRemark=false">Cancel</Button>
-        <Button type="primary" @click="handlyEditRemark">Confirm</Button>
+        <Button @click="isEditRemark=false">{{$t('kefu.cancel')}}</Button>
+        <Button type="primary" @click="handlyEditRemark">{{$t('kefu.confirm')}}</Button>
       </div>
     </Modal>
   </div>
@@ -178,13 +178,13 @@ export default {
   filters: {
     statusFilters: function(value) {
       const statusMap = {
-        '-1': '申请退款',
-        '-2': '退货成功',
-        '0': '待发货',
-        '1': '待收货',
-        '2': '已收货',
-        '3': '待评价',
-        '-1': '已退款',
+        '-1': this.$t('kefu.applyRefund'),
+        '-2': this.$t('kefu.refundSuccess'),
+        '0': this.$t('kefu.pendingShipment'),
+        '1': this.$t('kefu.pendingReceipt'),
+        '2': this.$t('kefu.received'),
+        '3': this.$t('kefu.pendingReview'),
+        '-1': this.$t('kefu.refunded'),
       }
       return statusMap[value]
     },
@@ -214,24 +214,7 @@ export default {
       userGroupList: [],
       model1: '',
       curMenuIndex: 0,
-      menuList: [
-        {
-          key: '',
-          title: '全部'
-        },
-        {
-          key: 0,
-          title: '未支付'
-        },
-        {
-          key: 1,
-          title: '未发货'
-        },
-        {
-          key: -1,
-          title: '退款中'
-        },
-      ],
+      menuList: [],
       activeUserInfo: '', //用户详情
       // curStatus: this.status,
       limit: 10,
@@ -245,20 +228,7 @@ export default {
       isOrderHidden: true,
       isDelivery: false, // 发货弹窗
       isRemarks: false, // 备注弹窗
-      goodsTab: [
-        {
-          key: 0,
-          title: '购买'
-        },
-        {
-          key: 1,
-          title: '足迹'
-        },
-        {
-          key: 2,
-          title: '热销'
-        },
-      ],
+      goodsTab: [],
       isGoodsScroll: true,
       page: 1,
       goodsConfig: {
@@ -286,7 +256,7 @@ export default {
     },
   },
   mounted() {
-
+    this.initI18nData();
     let self = this
 
     if(this.uid) {
@@ -300,16 +270,50 @@ export default {
 
   },
   methods: {
+    initI18nData() {
+      this.menuList = [
+        {
+          key: '',
+          title: this.$t('kefu.all')
+        },
+        {
+          key: 0,
+          title: this.$t('kefu.unpaid')
+        },
+        {
+          key: 1,
+          title: this.$t('kefu.unshipped')
+        },
+        {
+          key: -1,
+          title: this.$t('kefu.refunding')
+        },
+      ];
+      this.goodsTab = [
+        {
+          key: 0,
+          title: this.$t('kefu.purchase')
+        },
+        {
+          key: 1,
+          title: this.$t('kefu.footprint')
+        },
+        {
+          key: 2,
+          title: this.$t('kefu.hotSales')
+        },
+      ];
+    },
 
     // 修改备注
     handlyEditRemark() {
       console.log(this.activeUserInfo);
       if(!this.remarkValue) {
-        this.$Message.error('请填写用户备注');
+        this.$Message.error(this.$t('kefu.pleaseFillRemark'));
         return;
       }
       updateUserData(this.activeUserInfo.id, { remarks: this.remarkValue }).then(res => {
-        this.$Message.success('修改成功');
+        this.$Message.success(this.$t('kefu.modifySuccess'));
         this.getUserInfo();
         this.remarkValue = '';
         this.isEditRemark = false
@@ -527,7 +531,7 @@ export default {
     },
     putUserData(callback) {
       updateUserData(this.activeUserInfo.id, { ...this.activeUserInfo, remark_nickname: this.activeUserInfo.nickname }).then(res => {
-        this.$Message.success('修改成功');
+        this.$Message.success(this.$t('kefu.modifySuccess'));
         this.getUserInfo();
         this.remarkValue = '';
         this.isEditRemark = false;

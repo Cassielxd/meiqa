@@ -31,7 +31,7 @@
                                 <div class="productMessage_container_content_title">{{productMessage.store_name}}</div>
                                 <div class="productMessage_container_content_priceOrHandle">
                                     <div>￥{{productMessage.price}}</div>
-                                    <div @click="sendProduct"> Send customer</div>
+                                    <div @click="sendProduct"> {{$t('chat.sendCustomer')}}</div>
                                 </div>
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                                 <!-- 滑动到容器顶部时，动画加载 -->
                                 <Spin v-show="isLoad">
                                     <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
-                                    <div>Loading</div>
+                                    <div>{{$t('kefu.loading')}}</div>
                                 </Spin>
                                 <!-- 动画结束 -->
 
@@ -129,7 +129,7 @@
                         <div class="pc_customerServer_container_footer_handle">
 
                             <div class="pc_customerServer_container_footer_handle_send" @click="sendText">
-                                <span>Send</span>
+                                <span>{{$t('kefu.send')}}</span>
                             </div>
 
                         </div>
@@ -208,7 +208,7 @@
                 console.log(321);
             },
             scrollHandler(e) {
-                console.log('滑动到顶部了');
+                console.log('Scrolled to top');
                 this.isLoad = true;
                 setTimeout(() => {
                     this.isLoad = false;

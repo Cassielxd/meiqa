@@ -19,7 +19,7 @@ export default {
             name: `${pre}qrcode`,
             meta: {
                 auth: ['admin-kefu-qrcode'],
-                title: '客服二维码'
+                title: 'kefu.qrcode'
             },
             component: () => import('@/pages/kefu/qrcode')
         },
@@ -28,7 +28,7 @@ export default {
             name: `${pre}record`,
             meta: {
                 auth: ['admin-kefu-record'],
-                title: '聊天记录'
+                title: 'kefu.chatRecord'
             },
             component: () => import('@/pages/kefu/record')
         },
@@ -37,7 +37,7 @@ export default {
             name: `${pre}statistics`,
             meta: {
                 auth: ['admin-kefu-statistics'],
-                title: '站点统计'
+                title: 'kefu.statistics'
             },
             component: () => import('@/pages/kefu/statistics')
         }

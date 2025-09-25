@@ -3,7 +3,7 @@
         <div class="head">
             <div class="search-box">
                 <div class="caption">
-                    <div>Auto reply switch:</div>
+                    <div>{{$t('kefu.settings')}}:</div>
                     <div class="switch">
                         <i-switch v-model="authReply" @on-change="changeSwitch" ></i-switch>
                     </div>
@@ -17,18 +17,18 @@
                 <Scroll :on-reach-bottom="handleReachBottom" class="right-scroll" height="360">
                     <div class="msg-item add-box" v-if="tabCur" style="margin-top: 0">
                         <div class="box2">
-                            <Input class="input-box" v-model="addMsg.keyword" placeholder="Enter keywords, multiple keywords separated by commas" style="width: 100%" @on-focus="bindFocus" />
+                            <Input class="input-box" v-model="addMsg.keyword" :placeholder="$t('kefu.pleaseEnterContent')" style="width: 100%" @on-focus="bindFocus" />
                             <div class="conBox" :class="{active:addMsg.isEdit}">
                                 <div class="content">
-                                    <Input v-model="addMsg.content" type="textarea" :rows="4" placeholder="Enter content" />
+                                    <Input v-model="addMsg.content" type="textarea" :rows="4" :placeholder="$t('kefu.pleaseEnterContent')" />
                                 </div>
                                 <div class="bom">
                                     <div class="select">
-                                        <Input v-model="addMsg.sort" type="number" placeholder="Enter sort" />
+                                        <Input v-model="addMsg.sort" type="number" :placeholder="$t('kefu.pleaseEnterContent')" />
                                     </div>
                                     <div class="btns-box">
-                                        <Button @click.stop="addMsg.isEdit = false">Cancel</Button>
-                                        <Button type="primary" @click.stop="bindAdd">Save</Button>
+                                        <Button @click.stop="addMsg.isEdit = false">{{$t('kefu.cancel')}}</Button>
+                                        <Button type="primary" @click.stop="bindAdd">{{$t('kefu.save')}}</Button>
                                     </div>
                                 </div>
                             </div>
@@ -43,21 +43,21 @@
                             </div>
                             <div class="edit-box" v-if="tabCur">
                                 <span class="iconfont iconbianji" @click.stop="editMsg(item)"></span>
-                                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'Delete reply',index)"></span>
+                                <span class="iconfont iconshanchu" @click.stop="delMsg(item,$t('kefu.delete'),index)"></span>
                             </div>
                         </div>
                         <div class="box2" v-else>
-                            <Input class="input-box" v-model="item.keyword" placeholder="Enter keywords, multiple keywords separated by commas" style="width: 100%" />
+                            <Input class="input-box" v-model="item.keyword" :placeholder="$t('kefu.pleaseEnterContent')" style="width: 100%" />
                             <div class="content">
-                                <Input v-model="item.content" type="textarea" :rows="4" placeholder="Enter content" />
+                                <Input v-model="item.content" type="textarea" :rows="4" :placeholder="$t('kefu.pleaseEnterContent')" />
                             </div>
                             <div class="bom">
                                 <div class="select">
-                                    <Input v-model="item.sort" type="number" placeholder="Enter sort" />
+                                    <Input v-model="item.sort" type="number" :placeholder="$t('kefu.pleaseEnterContent')" />
                                 </div>
                                 <div class="btns-box">
-                                    <Button @click.stop="item.isEdit = false">Cancel</Button>
-                                    <Button type="primary" @click.stop="updataMsg(item)">Save</Button>
+                                    <Button @click.stop="item.isEdit = false">{{$t('kefu.cancel')}}</Button>
+                                    <Button type="primary" @click.stop="updataMsg(item)">{{$t('kefu.save')}}</Button>
                                 </div>
                             </div>
                         </div>

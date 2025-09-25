@@ -21,7 +21,26 @@ const router = new Router({
  */
 
 router.beforeEach(async (to, from, next) => {
+    // Handle language detection for kefu routes
     if(to.fullPath.indexOf('kefu') != -1) {
+        // Check for language parameter in kefu routes
+        const langParam = to.query.lang || to.query.language;
+        if (langParam && langParam !== localStorage.getItem('local')) {
+            const supportedLangs = ['zh-CN', 'en-US', 'zh-TW'];
+            const langMap = {
+                'zh': 'zh-CN', 'cn': 'zh-CN', 'en': 'en-US',
+                'tw': 'zh-TW', 'hk': 'zh-TW'
+            };
+            const normalizedLang = langMap[langParam.toLowerCase()] || langParam;
+
+            if (supportedLangs.includes(normalizedLang)) {
+                localStorage.setItem('local', normalizedLang);
+                // Update i18n locale
+                if (router.app && router.app.$i18n) {
+                    router.app.$i18n.locale = normalizedLang;
+                }
+            }
+        }
         return next()
     }
     // if (Setting.showProgressBar) iView.LoadingBar.start()

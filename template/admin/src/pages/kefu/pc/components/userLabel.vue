@@ -7,8 +7,8 @@
       </div>
     </div>
     <div class="footer">
-      <Button type="primary" class="btns" ghost @click="cancel"> Cancel</Button>
-      <Button type="primary" class="btns" @click="subBtn"> Confirm</Button>
+      <Button type="primary" class="btns" ghost @click="cancel">{{$t('kefu.cancel')}}</Button>
+      <Button type="primary" class="btns" @click="subBtn">{{$t('kefu.confirm')}}</Button>
     </div>
   </div>
 </template>

@@ -1,51 +1,51 @@
 <template>
     <div class="order_detail" v-if="orderDetail.userInfo">
         <div class="msg-box">
-            <div class="box-title">收货信息</div>
+            <div class="box-title">{{$t('kefu.receiptInfo')}}</div>
             <div class="msg-wrapper">
                 <div class="msg-item">
                     <div class="item">
-                        <span>用户昵称：</span>{{orderDetail.userInfo.nickname}}
+                        <span>{{$t('kefu.userNickname')}}</span>{{orderDetail.userInfo.nickname}}
                     </div>
                     <div class="item">
-                        <span>收货人：</span>{{orderDetail.orderInfo.real_name}}
+                        <span>{{$t('kefu.recipient')}}</span>{{orderDetail.orderInfo.real_name}}
                     </div>
                 </div>
                 <div class="msg-item">
                     <div class="item">
-                        <span>联系电话：</span>{{orderDetail.orderInfo.user_phone}}
+                        <span>{{$t('kefu.contactPhone')}}</span>{{orderDetail.orderInfo.user_phone}}
                     </div>
                     <div class="item">
-                        <span>收货地址：</span>{{orderDetail.orderInfo.user_address}}
+                        <span>{{$t('kefu.receiptAddress')}}</span>{{orderDetail.orderInfo.user_address}}
                     </div>
                 </div>
             </div>
         </div>
         <div class="msg-box" style="border: none;">
-            <div class="box-title">订单信息</div>
+            <div class="box-title">{{$t('kefu.orderInfo')}}</div>
             <div class="msg-wrapper">
                 <div class="msg-item">
                     <div class="item">
-                        <span>订单ID：</span>{{orderDetail.orderInfo.order_id}}
+                        <span>{{$t('kefu.orderID')}}:</span>{{orderDetail.orderInfo.order_id}}
                     </div>
                     <div class="item" style="color: red">
-                        <span style="color: red">订单状态：</span>{{orderDetail.orderInfo._status._title}}
+                        <span style="color: red">{{$t('kefu.orderStatus')}}</span>{{orderDetail.orderInfo._status._title}}
                     </div>
                 </div>
                 <div class="msg-item">
                     <div class="item">
-                        <span>商品总数：</span>{{orderDetail.orderInfo.total_num}}
+                        <span>{{$t('kefu.totalQuantity')}}</span>{{orderDetail.orderInfo.total_num}}
                     </div>
                     <div class="item">
-                        <span>商品总价：</span>{{parseFloat(orderDetail.orderInfo.total_price)+parseFloat(orderDetail.orderInfo.vip_true_price || 0)}}
+                        <span>{{$t('kefu.totalPrice')}}</span>{{parseFloat(orderDetail.orderInfo.total_price)+parseFloat(orderDetail.orderInfo.vip_true_price || 0)}}
                     </div>
                 </div>
                 <div class="msg-item">
                     <div class="item">
-                        <span>交付邮费：</span>{{orderDetail.orderInfo.pay_postage}}
+                        <span>{{$t('kefu.postage')}}</span>{{orderDetail.orderInfo.pay_postage}}
                     </div>
                     <div class="item">
-                        <span>优惠券金额：</span>{{orderDetail.orderInfo.coupon_price}}
+                        <span>{{$t('kefu.couponAmount')}}</span>{{orderDetail.orderInfo.coupon_price}}
                     </div>
                 </div>
                 <div class="msg-item">

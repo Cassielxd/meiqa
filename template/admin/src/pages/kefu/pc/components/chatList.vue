@@ -1,12 +1,12 @@
 <template>
   <div class="chatList">
     <div class="search_box">
-      <Input prefix="ios-search" placeholder="Search user name" @on-enter="bindSearch" @on-change="inputChange">
+      <Input prefix="ios-search" :placeholder="$t('kefu.search')" @on-enter="bindSearch" @on-change="inputChange">
       <Icon slot="prepend" type="ios-search" />
       <Poptip v-model="visible" slot="append" placement="right-start" width="350" @on-popper-show="onPopperShow">
           <Icon type="ios-funnel-outline" />
           <Tabs v-model="tabOn" slot="content">
-              <TabPane label="Tag filter" name="1">
+              <TabPane :label="$t('kefu.search')" name="1">
                   <div class="item-group">
                       <div v-for="item in labelList" :key="item.id" class="item">
                         <div class="item-title">{{ item.name }}</div>
@@ -16,11 +16,11 @@
                     </div>
                   </div>
                   <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">Cancel</Button>
-                      <Button type="primary" @click="onFilter">Confirm</Button>
+                      <Button type="primary" ghost @click="visible = false">{{$t('kefu.cancel')}}</Button>
+                      <Button type="primary" @click="onFilter">{{$t('kefu.confirm')}}</Button>
                   </div>
               </TabPane>
-              <TabPane label="Group filter" name="2">
+              <TabPane :label="$t('kefu.search')" name="2">
                   <div class="item-group">
                       <div class="item">
                         <div class="cell-group">
@@ -29,8 +29,8 @@
                     </div>
                   </div>
                   <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">Cancel</Button>
-                      <Button type="primary" @click="onFilter">Confirm</Button>
+                      <Button type="primary" ghost @click="visible = false">{{$t('kefu.cancel')}}</Button>
+                      <Button type="primary" @click="onFilter">{{$t('kefu.confirm')}}</Button>
                   </div>
               </TabPane>
           </Tabs>
@@ -122,8 +122,8 @@ export default {
               el.online = nVal.online
               if(nVal.online == 1) {
                 this.$Notice.info({
-                  title: '上线通知',
-                  desc: `${el.nickname}上线`
+                  title: this.$t('kefu.online'),
+                  desc: `${el.nickname} ${this.$t('kefu.online')}`
                 });
               }
 
@@ -159,17 +159,7 @@ export default {
   data() {
     return {
       hdTabCur: 1,
-      hdTab: [
-        {
-          key: 1,
-          title: 'Conversation list'
-        },
-        {
-          key: 0,
-          title: 'User list'
-        }
-
-      ],
+      hdTab: [],
       userList: [],
       curId: '',
       page: 1,
@@ -217,9 +207,12 @@ export default {
   filters: {
     toDay: function(value) {
       if(!value) return ''
-      return dayjs.unix(value).format('M月D日 HH:mm')
+      return dayjs.unix(value).format('MM-DD HH:mm')
 
     }
+  },
+  created() {
+    this.initI18nData();
   },
   mounted() {
 
@@ -248,6 +241,18 @@ export default {
     });
   },
   methods: {
+      initI18nData() {
+        this.hdTab = [
+          {
+            key: 1,
+            title: this.$t('kefu.chatRecord')
+          },
+          {
+            key: 0,
+            title: this.$t('kefu.visitor')
+          }
+        ];
+      },
       onPopperShow() {
           this.labelId = '';
           this.groupId = '';
@@ -331,7 +336,7 @@ export default {
               arr.unshift(oldVal)
 
               this.$Notice.info({
-                title: '您有一条转接消息！'
+                title: this.$t('kefu.transferSuccess')
               });
             }
           })
@@ -374,7 +379,7 @@ export default {
 
           if(data.recored.is_tourist != this.hdTabCur && data.recored.id) {
             this.$Notice.info({
-              title: this.hdTabCur ? '用户发来消息啦！' : '游客发来消息啦！'
+              title: this.$t('kefu.sendMessage')
             });
           }
 

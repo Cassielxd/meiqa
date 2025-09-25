@@ -5,7 +5,7 @@
         <a href="javascript:;" class="tab-item" :class="{on:item.key == tabCur}" v-for="(item,index) in tabList" :key="index" @click="bindTab(item)">{{item.title}}</a>
       </div>
       <div class="search-box">
-        <Input placeholder="Search quick reply" style="width: 100%" v-model="searchTxt" @on-enter="bindSearch">
+        <Input :placeholder="$t('kefu.searchQuickReply')" style="width: 100%" v-model="searchTxt" @on-enter="bindSearch">
         <Icon type="ios-search" slot="suffix" />
         </Input>
       </div>
@@ -15,7 +15,7 @@
       <div class="left-box">
         <vue-scroll :ops="ops">
           <div class="left-item" v-if="tabCur">
-            <p>Group</p>
+            <p>{{$t('kefu.group')}}</p>
             <span class="iconfont iconaddto" @click="openAddSort"></span>
           </div>
           <div class="left-item" v-for="(item,index) in sortList" :key="index" :class="{on:cateId == item.id}" @click="selectSort(item)">
@@ -25,8 +25,8 @@
 
               <div class="edit-wrapper" v-show="item.isEdit">
 
-                <div class="edit-item" @click="editSort(item)">Edit</div>
-                <div class="edit-item" @click="delSort(item,'Delete category',index)">Delete</div>
+                <div class="edit-item" @click="editSort(item)">{{$t('kefu.edit')}}</div>
+                <div class="edit-item" @click="delSort(item,$t('kefu.deleteCategory'),index)">{{$t('kefu.delete')}}</div>
               </div>
               <div class="edit-bg" v-show="item.isEdit" @click.stop="item.isEdit = false"></div>
             </template>
@@ -38,10 +38,10 @@
         <Scroll :on-reach-bottom="handleReachBottom" class="right-scroll" height="360">
           <div class="msg-item add-box" v-if="tabCur" style="margin-top: 0">
             <div class="box2">
-              <Input class="input-box" v-model="addMsg.title" placeholder="Enter title (optional)" style="width: 100%" @on-focus="bindFocus" />
+              <Input class="input-box" v-model="addMsg.title" :placeholder="$t('kefu.enterTitleOptional')" style="width: 100%" @on-focus="bindFocus" />
               <div class="conBox" :class="{active:addMsg.isEdit}">
                 <div class="content">
-                  <Input v-model="addMsg.message" type="textarea" :rows="4" placeholder="Enter content" />
+                  <Input v-model="addMsg.message" type="textarea" :rows="4" :placeholder="$t('kefu.enterContent')" />
                 </div>
                 <div class="bom">
                   <div class="select">
@@ -51,8 +51,8 @@
                     </Select>
                   </div>
                   <div class="btns-box">
-                    <Button @click.stop="addMsg.isEdit = false">Cancel</Button>
-                    <Button type="primary" @click.stop="bindAdd">Save</Button>
+                    <Button @click.stop="addMsg.isEdit = false">{{$t('kefu.cancel')}}</Button>
+                    <Button type="primary" @click.stop="bindAdd">{{$t('kefu.save')}}</Button>
                   </div>
                 </div>
               </div>
@@ -67,13 +67,13 @@
               </div>
               <div class="edit-box" v-if="tabCur">
                 <span class="iconfont iconbianji" @click.stop="editMsg(item)"></span>
-                <span class="iconfont iconshanchu" @click.stop="delMsg(item,'Delete reply',index)"></span>
+                <span class="iconfont iconshanchu" @click.stop="delMsg(item,$t('kefu.deleteReply'),index)"></span>
               </div>
             </div>
             <div class="box2" v-else>
-              <Input class="input-box" v-model="item.title" placeholder="Enter title (optional)" style="width: 100%" />
+              <Input class="input-box" v-model="item.title" :placeholder="$t('kefu.enterTitleOptional')" style="width: 100%" />
               <div class="content">
-                <Input v-model="item.message" type="textarea" :rows="4" placeholder="Enter content" />
+                <Input v-model="item.message" type="textarea" :rows="4" :placeholder="$t('kefu.enterContent')" />
               </div>
               <div class="bom">
                 <div class="select">
@@ -84,8 +84,8 @@
                   </Select>
                 </div>
                 <div class="btns-box">
-                  <Button @click.stop="item.isEdit = false">Cancel</Button>
-                  <Button type="primary" @click.stop="updataMsg(item)">Save</Button>
+                  <Button @click.stop="item.isEdit = false">{{$t('kefu.cancel')}}</Button>
+                  <Button type="primary" @click.stop="updataMsg(item)">{{$t('kefu.save')}}</Button>
                 </div>
               </div>
             </div>
@@ -96,15 +96,15 @@
     </div>
     <Modal v-model="isAddSort" :title="maskTitle" width="304" :mask="false" class="class-box" :footer-hide="true">
       <div class="item">
-        <span>Group name：</span>
-        <Input v-model="classTitle" placeholder="Group name" />
+        <span>{{$t('kefu.groupName')}}</span>
+        <Input v-model="classTitle" :placeholder="$t('kefu.groupNamePlaceholder')" />
       </div>
       <div class="item">
-        <span>Group sort：</span>
-        <Input v-model="classSort" placeholder="Enter sort" />
+        <span>{{$t('kefu.groupSort')}}</span>
+        <Input v-model="classSort" :placeholder="$t('kefu.enterSort')" />
       </div>
       <div class="btn">
-        <Button type="primary" style="background: #1890FF;width: 100%;" @click="addServiceCate">Confirm</Button>
+        <Button type="primary" style="background: #1890FF;width: 100%;" @click="addServiceCate">{{$t('kefu.confirm')}}</Button>
       </div>
     </Modal>
   </div>
@@ -147,16 +147,7 @@ export default {
       page: 1,
       limit: 10,
       tabCur: 1,
-      tabList: [
-        {
-          title: 'Personal library',
-          key: 1
-        },
-        {
-          title: 'Public library',
-          key: 0
-        },
-      ],
+      tabList: [],
       searchTxt: '', // 搜索
       list: [
         {
@@ -202,6 +193,7 @@ export default {
   },
   mounted() {
     let self = this
+    this.initI18nData();
     this.serviceCate()
     this.$nextTick(() => {
       // this.scroll = new BScroll(this.$refs.wrapper, {
@@ -217,6 +209,24 @@ export default {
     })
   },
   methods: {
+    initI18nData() {
+      this.ops.vuescroll.tips = {
+        deactive: this.$t('kefu.pushToLoad'),
+        active: this.$t('kefu.releaseToLoad'),
+        start: this.$t('kefu.loadingTips'),
+        beforeDeactive: this.$t('kefu.loadSuccessfully')
+      };
+      this.tabList = [
+        {
+          title: this.$t('kefu.personalLibrary'),
+          key: 1
+        },
+        {
+          title: this.$t('kefu.publicLibrary'),
+          key: 0
+        },
+      ];
+    },
     // 打开编辑
     editMsg(item) {
       item.isEdit = true
@@ -293,7 +303,7 @@ export default {
       }).then(res => {
         let obj = {
           id: '',
-          name: "全部"
+          name: this.$t('kefu.all')
         }
         res.data.data.forEach((el, index) => {
           el.isEdit = false
@@ -331,7 +341,7 @@ export default {
         cate_id: this.cateId,
         message: item.message
       }).then(res => {
-        this.$Message.success('修改成功')
+        this.$Message.success(this.$t('kefu.modifySuccess'))
         item.isEdit = false
       }).catch(error => {
         this.$Message.error(error.msg)
@@ -349,7 +359,7 @@ export default {
     // 打开添加窗口
     openAddSort() {
       this.isAddSort = true
-      this.maskTitle = '添加分组'
+      this.maskTitle = this.$t('kefu.addGroup')
       this.editObj.id = 0
     },
     // 添加话术
@@ -437,7 +447,7 @@ export default {
       this.classSort = item.sort
       this.classTitle = item.name
       this.isAddSort = true
-      this.maskTitle = '编辑分组'
+      this.maskTitle = this.$t('kefu.editGroup')
       this.editObj = item
     },
     handleReachBottom() {

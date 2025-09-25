@@ -11,7 +11,7 @@
               <div style="width: 600px; padding:20px;" id="chat_scroll" ref="scrollBox">
                 <Spin v-show="isLoad">
                   <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
-                  <div>Loading</div>
+                  <div>{{$t('kefu.loading')}}</div>
                 </Spin>
                 <div class="chat-item" v-for="(item,index) in records" :key="index" :class="[{'right-box':kefuInfo.user_ids.indexOf(item.user_id) !== -1},{'gary':item.msn_type==5}]" :id="`chat_${item.id}`">
                   <div class="time" v-show="item.show">{{item.time }}</div>
@@ -37,7 +37,7 @@
                           <div class="img-box"><img :src="item.other.image" alt=""></div>
                           <div class="order-info">
                             <div class="name line1">{{item.other.store_name}}</div>
-                            <div class="sku">Inventory：{{item.other.stock}} Sales：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
+                            <div class="sku">{{$t('kefu.inventory')}}：{{item.other.stock}} {{$t('kefu.sales')}}：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
                             <div class="price-box">
                               <div class="num">¥ {{item.other.price}}</div>
                               <!-- <a herf="javascript:;" class="more" @click.stop="lookGoods(item)">View goods ></a> -->
@@ -52,10 +52,10 @@
                           <div class="img-box"><img :src="item.orderInfo.cartInfo[0].productInfo.image" alt=""></div>
                           <div class="order-info">
                             <div class="name line1">{{item.orderInfo.order_id}}</div>
-                            <div class="sku">Number of goods：{{item.orderInfo.total_num}}</div>
+                            <div class="sku">{{$t('kefu.goodsQuantity')}}：{{item.orderInfo.total_num}}</div>
                             <div class="price-box">
                               <div class="num">¥ {{item.orderInfo.pay_price}}</div>
-                              <a href="javascript:;" class="more" @click.stop="lookOrder(item)">View order ></a>
+                              <a href="javascript:;" class="more" @click.stop="lookOrder(item)">{{$t('kefu.viewOrder')}} ></a>
                             </div>
                           </div>
 
@@ -85,7 +85,7 @@
               <div class="right-wrapper">
                 <div class="icon-item" @click.stop="isTransfer = !isTransfer">
                   <span class="iconfont iconzhuanjie"></span>
-                  <span>Transfer</span>
+                  <span>{{$t('kefu.transfer')}}</span>
                 </div>
                 <div class="transfer-box" v-if="isTransfer">
                   <transfer ref="transfer" @transferSuccess="transferSuccess" @close="msgClose" @transferPeople="transferPeople" :userUid="userActive.to_user_id"></transfer>
@@ -103,7 +103,7 @@
               <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="Please enter text content" @on-enter="sendText" style="font-size:14px" /> -->
               <div ref="editable" class="editable" contenteditable="true" @keydown.enter="sendText" @paste="handlePaste" @input="handleInput"></div>
               <div class="send-btn">
-                <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">send</Button>
+                <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">{{$t('kefu.send')}}</Button>
               </div>
             </div>
           </div>
@@ -111,7 +111,7 @@
         <div class="right_menu">
           <rightMenu :isTourist="tourist" :uid="userActive.to_user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
           <div class="crmchat_link" @click="tolink">
-            <span>CRMChat open source customer service system</span>
+            <span>{{$t('kefu.openSourceCustomerService')}}</span>
           </div>
         </div>
       </div>
@@ -395,7 +395,7 @@ export default {
           mp3.play();
         });
         ws.$on("socket_error", () => {
-          this.$Message.error("连接失败");
+          this.$Message.error(this.$t('kefu.connectionFailed'));
         });
         ws.$on("err_tip", (data) => {
           this.$Message.error(data.msg);
@@ -432,7 +432,7 @@ export default {
     },
 
     handleFormatError(file) {
-      this.$Message.error("上传图片只能是 jpg、jpg、jpeg、gif 格式!");
+      this.$Message.error(this.$t('kefu.uploadImageFormats'));
     },
 
     // 上传成功

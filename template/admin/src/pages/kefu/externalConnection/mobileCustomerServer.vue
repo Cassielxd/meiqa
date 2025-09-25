@@ -22,7 +22,7 @@
           <div class="productMessage_container_content_title">{{productMessage.store_name}}</div>
           <div class="productMessage_container_content_priceOrHandle">
             <div>￥{{productMessage.price}}</div>
-            <div @click="sendProduct"> Send customer</div>
+            <div @click="sendProduct"> {{$t('chat.sendCustomer')}}</div>
           </div>
         </div>
 
@@ -32,7 +32,7 @@
           <!-- 滑动到容器顶部时，动画加载 -->
           <Spin v-show="isLoad">
             <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
-            <div>Loading</div>
+            <div>{{$t('kefu.loading')}}</div>
           </Spin>
           <!-- 动画结束 -->
 
@@ -84,7 +84,7 @@
     <div class="footer_customerServer_container">
       <div class="mobel_customerServer_container_footer">
         <div class="crmchat_link" @click="tolink">
-          <span>CRMChat open source customer service system</span>
+          <span>{{$t('kefu.openSourceCustomerService')}}</span>
         </div>
         <div class="mobel_customerServer_container_footer_uploag_image">
           <span class="iconfont">&#xe6ca;</span>
@@ -92,7 +92,7 @@
         </div>
         <div class="mobel_customerServer_container_footer_input">
           <div class="mobel_customerServer_container_footer_input_con">
-            <textarea @keyup.enter="sendText" @focus="textareaInput" class="font" @input="textareaChange($event)" v-model='userMessage' placeholder="Enter content"></textarea>
+            <textarea @keyup.enter="sendText" @focus="textareaInput" class="font" @input="textareaChange($event)" v-model='userMessage' :placeholder="$t('kefu.enterContentPlaceholder')"></textarea>
             <p class="font" v-html='pCont'></p>
           </div>
           <!-- <div class="mobel_customerServer_container_footer_input_send" @click="sendText">
@@ -106,7 +106,7 @@
         </div>
         <!-- 发送消息 -->
         <div class="sendMessage" :class="{'sendMessage-primary': userMessage}">
-          <div @click="sendText">Send</div>
+          <div @click="sendText">{{$t('kefu.send')}}</div>
         </div>
       </div>
       <!-- 表情及图片容器 -->

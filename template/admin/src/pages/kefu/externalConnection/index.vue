@@ -22,21 +22,24 @@ export default {
       let tokenName = this.$route.query.tokenName || 'token';
       const token = this.$route.query[tokenName];
       setLoc('mobile_token', token);
+
+      // 保留所有查询参数，包括语言参数
+      const queryParams = { ...this.$route.query };
+
       if(this.$route.query.deviceType == "pc" || this.$route.query.deviceType == "Desktop") {
-        this.$router.replace({ name: 'customerServerPc', query: this.$route.query });
+        this.$router.replace({ name: 'customerServerPc', query: queryParams });
         return;
       }
 
       if(this.$route.query.deviceType == "Mobile") {
-        this.$router.replace({ name: 'customerServerMobile', query: this.$route.query })
+        this.$router.replace({ name: 'customerServerMobile', query: queryParams });
         return;
       }
 
-
       if(this.isMobile) {
-        this.$router.replace({ name: 'customerServerMobile', query: this.$route.query })
+        this.$router.replace({ name: 'customerServerMobile', query: queryParams });
       } else {
-        this.$router.replace({ name: 'customerServerPc', query: this.$route.query });
+        this.$router.replace({ name: 'customerServerPc', query: queryParams });
       }
     }
   }

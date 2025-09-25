@@ -18,7 +18,7 @@ export default [
 		name: `${pre}index`,
 		meta: {
 			auth: true,
-			title: '客服管理',
+			title: 'kefu.management',
 			kefu: true
 		},
 		component: () => import('@/pages/kefu/index')
@@ -30,7 +30,7 @@ export default [
 		name: `${pre}pc_list`,
 		meta: {
 			auth: true,
-			title: '客服',
+			title: 'kefu.customerService',
 			kefu: true
 		},
 		component: () => import('@/pages/kefu/pc/index')
@@ -40,7 +40,7 @@ export default [
 		name: `${pre}app-chat`,
 		meta: {
 			auth: true,
-			title: '客服',
+			title: 'kefu.customerService',
 			kefu: true
 		},
 		component: () => import('@/pages/kefu/appChat/index')
@@ -50,7 +50,7 @@ export default [
 		name: `${pre}app-mobile_user_chat`,
 		meta: {
 			auth: true,
-			title: '用户客服',
+			title: 'kefu.userCustomerService',
 			kefu: true
 		},
 		component: () => import('@/pages/kefu/appChat/mobile/index')
@@ -60,7 +60,7 @@ export default [
 		name: `${pre}app-mobile_feedback`,
 		meta: {
 			auth: true,
-			title: '用户反馈',
+			title: 'kefu.userFeedback',
 			kefu: true
 		},
 		component: () => import('@/pages/kefu/appChat/mobile/feedback')
@@ -70,7 +70,7 @@ export default [
 		path: '/chat/index',
 		name: 'customerServerRedirect',
 		meta: {
-			title: '联系客服'
+			title: 'chat.title'
 		},
 		component: () => import('@/pages/kefu/externalConnection/index')
 	},
@@ -78,7 +78,7 @@ export default [
 		path: '/chat/pc',
 		name: 'customerServerPc',
 		meta: {
-			title: '联系客服pc'
+			title: 'chat.pcTitle'
 		},
 		component: () => import('@/pages/kefu/externalConnection/pcCustomerServer')
 	},
@@ -86,7 +86,7 @@ export default [
 		path: '/chat/mobile',
 		name: 'customerServerMobile',
 		meta: {
-			title: '联系客服mobile'
+			title: 'chat.mobileTitle'
 		},
 		component: () => import('@/pages/kefu/externalConnection/mobileCustomerServer')
 	},
@@ -95,7 +95,7 @@ export default [
 		path: '/chat/customerOutLine',
 		name: 'customerOutLine',
 		meta: {
-			title: '提交反馈'
+			title: 'chat.submitFeedback'
 		},
 		component: () => import('@/pages/kefu/externalConnection/customerOutLine')
 	},
@@ -104,7 +104,7 @@ export default [
 		path: '/chat/finishSubmitOutLine',
 		name: 'finishSubmitOutLine',
 		meta: {
-			title: '提交成功'
+			title: 'chat.submitSuccess'
 		},
 		component: () => import('@/pages/kefu/externalConnection/finishSubmitOutLine')
 	}

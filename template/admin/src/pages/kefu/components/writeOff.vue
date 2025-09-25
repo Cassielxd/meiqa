@@ -5,12 +5,12 @@
       <div class="num acea-row row-center-wrapper">
         {{ orderInfo.order_id }}
         <div class="views" @click="toDetail(orderInfo)">
-          查看<span class="iconfont icon-jiantou views-jian"></span>
+          {{$t('kefu.view')}}<span class="iconfont icon-jiantou views-jian"></span>
         </div>
       </div>
-      <div class="tip">确定要核销此订单吗？</div>
-      <div class="sure" @click="confirm">确定核销</div>
-      <div class="sure cancel" @click="cancel">取消</div>
+      <div class="tip">{{$t('kefu.writeOffConfirm')}}</div>
+      <div class="sure" @click="confirm">{{$t('kefu.confirmWriteOff')}}</div>
+      <div class="sure cancel" @click="cancel">{{$t('kefu.cancel')}}</div>
     </div>
     <div class="maskModel" @touchmove.prevent></div>
   </div>

@@ -2,7 +2,7 @@
   <div class="chat-box">
     <div class="head-box">
       <div class="back" @click="goBack"><span class="iconfont iconfanhui"></span></div>
-      <div class="title">{{nickname?nickname+'-':''}}对话详情</div>
+      <div class="title">{{nickname?nickname+'-':''}}{{$t('kefu.chatDetails')}}</div>
     </div>
     <!-- 商品信息 -->
     <div class="broadcast-details_box" v-if="productId && productInfo.id">
@@ -16,21 +16,21 @@
             ￥{{ productInfo.price
                         }}<span class="broadcast_details_pic_num">￥{{ productInfo.ot_price }}</span>
           </div>
-          <div class="broadcast_details_btn" @click="sendProduct">发送客服</div>
+          <div class="broadcast_details_btn" @click="sendProduct">{{$t('kefu.sendToCustomer')}}</div>
         </div>
       </div>
     </div>
     <!-- 订单发送 -->
     <div class="broadcast_box" v-if="orderId && orderInfo.id">
       <div class="broadcast-details_num broadcast_num">
-        <span>订单号：{{ orderInfo.order_id }}</span>
+        <span>{{$t('kefu.orderNumber')}}：{{ orderInfo.order_id }}</span>
         <span>{{ orderInfo.add_time_y }} {{ orderInfo.add_time_h }}</span>
       </div>
       <div class="broadcast-details_box">
         <div class="broadcast_details_img">
           <img :src="cartInfo.productInfo.image" />
           <div class="broadcast_details_model">
-            {{ orderInfo.cartInfo ? orderInfo.cartInfo.length : 0 }}件商品
+            {{ orderInfo.cartInfo ? orderInfo.cartInfo.length : 0 }}{{$t('kefu.itemsCount')}}
           </div>
         </div>
         <div class="broadcast_details_picBox">
@@ -43,7 +43,7 @@
                             }}<text class="broadcast_details_pic_num">￥{{ cartInfo.productInfo.ot_price }}</text>
             </div>
             <div class="broadcast_details_btn" @click="sendOrder">
-              发送客服
+              {{$t('kefu.sendToCustomer')}}
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@
               </div>
               <!-- 订单 -->
               <div class="order-box" v-if="item.msn_type==6" @click="goOrderDetail(item)">
-                <div class="title">订单ID: {{item.orderInfo.order_id}}</div>
+                <div class="title">{{$t('kefu.orderID')}}: {{item.orderInfo.order_id}}</div>
                 <div class="info">
                   <img :src="item.orderInfo.cartInfo[0].productInfo.image">
                   <div class="product-info">
@@ -95,7 +95,7 @@
 
       </div>
       <div class="input-box">
-        <Input v-model="con" placeholder="请输入内容" />
+        <Input v-model="con" :placeholder="$t('kefu.pleaseEnterContent')" />
         <span class="iconfont iconfasong" @click="sendText" :class="{isSend:isSend}"></span>
       </div>
       <div class="emoji" @click="openBox(1)"><span class="iconfont iconbiaoqing2"></span></div>
@@ -146,7 +146,7 @@ export default {
             autoLoadDistance: 0,
             tips: {
               deactive: '',
-              active: '上拉加载更多',
+              active: this.$t('kefu.pullToLoadMore'),
               start: 'Loading...',
               beforeDeactive: ' '
             },
@@ -271,10 +271,10 @@ export default {
         }, 300)
       });
       ws.$on("socket_error", () => {
-        this.$Message.error('连接失败')
+        this.$Message.error(this.$t('kefu.connectionFailed'))
       });
       ws.$on("error", () => {
-        this.$Message.error('连接失败')
+        this.$Message.error(this.$t('kefu.connectionFailed'))
       });
       ws.$on("to_transfer", data => {
         ws.send({
@@ -288,10 +288,10 @@ export default {
 
         if(data.online == 0 && data.uid == that.toUid) {
           that.$Modal.confirm({
-            title: '提示',
-            content: '客服已离线，是否需要反馈？',
-            okText: '确定',
-            cancelText: '取消',
+            title: this.$t('kefu.tip'),
+            content: this.$t('kefu.offlineConfirm'),
+            okText: this.$t('kefu.confirm'),
+            cancelText: this.$t('kefu.cancel'),
             onOk: () => {
               that.$router.replace({
                 path: '/kefu/mobile_feedback'
@@ -309,7 +309,7 @@ export default {
       this.$router.go(-1);
     },
     handleFormatError(file) {
-      this.$Message.error("上传图片只能是 jpg、jpg、jpeg、gif 格式!");
+      this.$Message.error(this.$t('kefu.uploadImageFormats'));
     },
     // 获取商品信息
     getGoodsInfo() {
@@ -374,7 +374,7 @@ export default {
     beforeUpload(file) {
       const isImage = file.type === "image/jpeg" || file.type === "image/png";
       if(!isImage) {
-        this.$Message.error("上传图片只能是 JPG、PNG 格式!");
+        this.$Message.error(this.$t('kefu.uploadImageFormats2'));
       }
       this.uploadData = {
         filename: file,
@@ -519,7 +519,7 @@ export default {
     // 发送消息
     sendText() {
       if(!this.isSend) {
-        this.$Message.error('请输入内容')
+        this.$Message.error(this.$t('kefu.pleaseEnterContent'))
 
       }
       this.sendMsg(this.con, 1);

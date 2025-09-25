@@ -10,13 +10,13 @@
         <div class="status-box">
           <div class="status" :class="online ? 'on':'off'" @click.stop="setOnline">
             <span class="dot"></span>
-            {{online ? 'Online': 'Offline'}}
+            {{online ? $t('kefu.online'): $t('kefu.offline')}}
           </div>
 
           <div class="online-down" v-show="isOnline">
-            <div class="item" @click.stop="changeOnline(1)"><span class="iconfont iconduihao" v-if="online == 1"></span><i class="green"></i>Online</div>
-            <div class="item" @click.stop="changeOnline(0)"><span class="iconfont iconduihao" v-if="online == 0"></span><i></i>Offline</div>
-            <div class="item" @click.stop="changeOnline(3)"><span class="iconfont iconduihao" v-if="online == 3"></span><i class="orange"></i>Logout</div>
+            <div class="item" @click.stop="changeOnline(1)"><span class="iconfont iconduihao" v-if="online == 1"></span><i class="green"></i>{{$t('kefu.online')}}</div>
+            <div class="item" @click.stop="changeOnline(0)"><span class="iconfont iconduihao" v-if="online == 0"></span><i></i>{{$t('kefu.offline')}}</div>
+            <div class="item" @click.stop="changeOnline(3)"><span class="iconfont iconduihao" v-if="online == 3"></span><i class="orange"></i>{{$t('kefu.close')}}</div>
           </div>
         </div>
 
@@ -51,23 +51,13 @@ export default {
   },
   data() {
     return {
-      menuList: [
-        {
-          key: 0,
-          title: '客户信息',
-        },
-        {
-          key: 1,
-          title: '交易订单',
-        },
-        {
-          key: 2,
-          title: '商品信息',
-        },
-      ],
+      menuList: [],
       curIndex: 0,
       isOnline: false
     }
+  },
+  created() {
+    this.initI18nData();
   },
   mounted() {
     document.addEventListener('click', () => {
@@ -79,6 +69,22 @@ export default {
       'logout',
       'logoutKefu'
     ]),
+    initI18nData() {
+      this.menuList = [
+        {
+          key: 0,
+          title: this.$t('kefu.customerInfo'),
+        },
+        {
+          key: 1,
+          title: this.$t('kefu.viewOrder'),
+        },
+        {
+          key: 2,
+          title: this.$t('kefu.viewGoods'),
+        },
+      ];
+    },
     selectTab(item) {
       this.curIndex = item.key
       this.bus.$emit('selectRightMenu', this.curIndex)
@@ -99,8 +105,8 @@ export default {
     outLogin() {
       let self = this
       this.$Modal.confirm({
-        title: '退出登录确认',
-        content: '您确定退出登录当前账户吗？打开的标签页和个人设置将会保存。',
+        title: this.$t('kefu.confirm'),
+        content: this.$t('kefu.leaveConfirm'),
         onOk: () => {
           self.logoutKefu({
             confirm: false,

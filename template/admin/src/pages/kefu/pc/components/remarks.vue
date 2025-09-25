@@ -1,12 +1,12 @@
 <template>
     <div>
         <Form ref="formValidate" :model="formValidate" :rules="ruleInline" inline>
-            <FormItem label="Remark：" prop="con" class="form-item" label-position="right" :label-width="100">
-                <Input v-model="formValidate.con" placeholder="Enter remark" style="width: 100%"  maxlength="200" type="textarea" :rows="5" show-word-limit></Input>
+            <FormItem :label="$t('kefu.remarkLabel')" prop="con" class="form-item" label-position="right" :label-width="100">
+                <Input v-model="formValidate.con" :placeholder="$t('kefu.enterRemark')" style="width: 100%"  maxlength="200" type="textarea" :rows="5" show-word-limit></Input>
             </FormItem>
             <div class="mask-footer">
-                <Button type="primary" @click="handleSubmit('formValidate')">Submit</Button>
-                <Button @click="close">Cancel</Button>
+                <Button type="primary" @click="handleSubmit('formValidate')">{{$t('kefu.submit')}}</Button>
+                <Button @click="close">{{$t('kefu.cancel')}}</Button>
             </div>
         </Form>
     </div>
@@ -29,7 +29,7 @@
                 },
                 ruleInline:{
                     con: [
-                        { required: true, message: 'Enter remark information', trigger: 'change' }
+                        { required: true, message: this.$t('kefu.enterRemarkInfo'), trigger: 'change' }
                     ],
                 },
                 formValidate:{

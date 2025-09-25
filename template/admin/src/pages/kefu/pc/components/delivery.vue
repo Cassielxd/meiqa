@@ -1,43 +1,43 @@
 <template>
     <div>
         <Form ref="formValidate" :model="formValidate" :rules="ruleInline" inline>
-            <FormItem label="选择类型：" class="form-item" label-position="right" :label-width="100">
+            <FormItem :label="$t('kefu.selectType')" class="form-item" label-position="right" :label-width="100">
                 <RadioGroup v-model="formValidate.gender">
                     <Radio :label="item.key" v-for="(item,index) in radioList" :key="index">{{item.title}}</Radio>
                 </RadioGroup>
             </FormItem>
-            <FormItem v-if="formValidate.gender == 1" label="发货类型：" class="form-item" label-position="right" :label-width="100" :key="'test0'">
+            <FormItem v-if="formValidate.gender == 1" :label="$t('kefu.deliveryType')" class="form-item" label-position="right" :label-width="100" :key="'test0'">
                 <RadioGroup v-model="formValidate.shipStatus">
                     <Radio :label="item.key" v-for="(item,index) in shipType" :key="index">{{item.title}}</Radio>
                 </RadioGroup>
             </FormItem>
             <!--  发货手动填写  -->
             <div v-if="formValidate.gender == 1 && formValidate.shipStatus == 1" :key="'test1'">
-                <FormItem label="快递公司：" prop="logisticsCode" class="form-item" label-position="right" :label-width="100"  >
-                    <Select v-model="formValidate.logisticsCode" filterable placeholder="请选择" @on-change="bindChange" :label-in-value="true" style="width: 100%">
+                <FormItem :label="$t('kefu.expressCompany')" prop="logisticsCode" class="form-item" label-position="right" :label-width="100"  >
+                    <Select v-model="formValidate.logisticsCode" filterable :placeholder="$t('kefu.pleaseSelect')" @on-change="bindChange" :label-in-value="true" style="width: 100%">
                         <Option :value="item.code" v-for="(item,index) in logisticsList" :key="index">{{item.value}}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="快递单号：" prop="number" class="form-item" label-position="right" :label-width="100">
-                    <Input v-model="formValidate.number" placeholder="请输入快递单号" style="width: 100%"></Input>
+                <FormItem :label="$t('kefu.trackingNumber')" prop="number" class="form-item" label-position="right" :label-width="100">
+                    <Input v-model="formValidate.number" :placeholder="$t('kefu.enterTrackingNumber')" style="width: 100%"></Input>
                 </FormItem>
                 <FormItem label="" class="form-item" label-position="right" :label-width="100">
-                    <div style="color: #c4c4c4;">顺丰请输入单号：收件人或寄件人手机号后四位,</div>
-                    <div style="color: #c4c4c4;">例如：SF000000000000:3941</div>
+                    <div style="color: #c4c4c4;">{{$t('kefu.sfNote1')}}</div>
+                    <div style="color: #c4c4c4;">{{$t('kefu.sfNote2')}}</div>
                 </FormItem>
             </div>
             <!--  电子面单打印  -->
             <div v-if="formValidate.gender == 1 && formValidate.shipStatus == 2" :key="'test2'">
-                <FormItem label="快递公司：" prop="logisticsCode" class="form-item" label-position="right" :label-width="100">
-                    <Select v-model="formValidate.logisticsCode" placeholder="请选择" style="width: 100%" @on-change="bindChange" filterable :label-in-value="true">
+                <FormItem :label="$t('kefu.expressCompany')" prop="logisticsCode" class="form-item" label-position="right" :label-width="100">
+                    <Select v-model="formValidate.logisticsCode" :placeholder="$t('kefu.pleaseSelect')" style="width: 100%" @on-change="bindChange" filterable :label-in-value="true">
                         <Option :value="item.code" v-for="(item,index) in logisticsList" :key="index">{{item.value}}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="电子面单：" class="form-item" label-position="right" :label-width="100" v-if="orderTempList.length>0">
-                    <Select v-model="formValidate.electronic" placeholder="请选择电子面单" style="width: 80%">
+                <FormItem :label="$t('kefu.electronicWaybill')" class="form-item" label-position="right" :label-width="100" v-if="orderTempList.length>0">
+                    <Select v-model="formValidate.electronic" :placeholder="$t('kefu.selectElectronicWaybill')" style="width: 80%">
                         <Option :value="item.temp_id" v-for="(item,index) in orderTempList" :key="index">{{item.title}}</Option>
                     </Select>
-                    <Button style="flex: 1;margin-left:21px;" @click="lookImg">预览</Button>
+                    <Button style="flex: 1;margin-left:21px;" @click="lookImg">{{$t('kefu.preview')}}</Button>
                     <viewer :images="orderTempList"
                             class="viewer" ref="viewer"
                             @inited="inited"
@@ -46,32 +46,32 @@
                         <img v-for="src in orderTempList" :src="src.pic" :key="src.id" class="image">
                     </viewer>
                 </FormItem>
-                <FormItem label="寄件人姓名：" prop="sendName" class="form-item" label-position="right" :label-width="100">
-                    <Input v-model="formValidate.sendName" placeholder="请输入寄件人姓名" style="width: 100%"></Input>
+                <FormItem :label="$t('kefu.senderName')" prop="sendName" class="form-item" label-position="right" :label-width="100">
+                    <Input v-model="formValidate.sendName" :placeholder="$t('kefu.enterSenderName')" style="width: 100%"></Input>
                 </FormItem>
-                <FormItem label="寄件人电话：" prop="sendPhone" class="form-item" label-position="right" :label-width="100">
-                    <Input v-model="formValidate.sendPhone" placeholder="请输入寄件人电话" style="width: 100%"></Input>
+                <FormItem :label="$t('kefu.senderPhone')" prop="sendPhone" class="form-item" label-position="right" :label-width="100">
+                    <Input v-model="formValidate.sendPhone" :placeholder="$t('kefu.enterSenderPhone')" style="width: 100%"></Input>
                 </FormItem>
-                <FormItem label="寄件人地址：" prop="sendAddress" class="form-item" label-position="right" :label-width="100">
-                    <Input v-model="formValidate.sendAddress" placeholder="请输入寄件人地址" style="width: 100%"></Input>
+                <FormItem :label="$t('kefu.senderAddress')" prop="sendAddress" class="form-item" label-position="right" :label-width="100">
+                    <Input v-model="formValidate.sendAddress" :placeholder="$t('kefu.enterSenderAddress')" style="width: 100%"></Input>
                 </FormItem>
             </div>
             <!--  送货  -->
             <div v-if="formValidate.gender == 2" :key="'test3'">
-                <FormItem label="选择送货人：" class="form-item" label-position="right" :label-width="100">
-                    <Select v-model="formValidate.postPeople" placeholder="选择送货人" style="width: 100%">
+                <FormItem :label="$t('kefu.selectDeliveryPerson')" class="form-item" label-position="right" :label-width="100">
+                    <Select v-model="formValidate.postPeople" :placeholder="$t('kefu.selectDeliveryPersonPlaceholder')" style="width: 100%">
                         <Option :value="item.id" v-for="(item,index) in deliveryList" :key="index">{{item.nickname}}</Option>
                     </Select>
                 </FormItem>
             </div>
             <div v-if="formValidate.gender == 3">
-                <FormItem label="备注：" props="msg" class="form-item" label-position="right" :label-width="100">
-                    <Input placeholder="备注" v-model="formValidate.msg" />
+                <FormItem :label="$t('kefu.remarkColon')" props="msg" class="form-item" label-position="right" :label-width="100">
+                    <Input :placeholder="$t('kefu.remarkPlaceholder')" v-model="formValidate.msg" />
                 </FormItem>
             </div>
             <div class="mask-footer">
-                <Button type="primary" @click="handleSubmit('formValidate')">提交</Button>
-                <Button @click="close">取消</Button>
+                <Button type="primary" @click="handleSubmit('formValidate')">{{$t('kefu.submit')}}</Button>
+                <Button @click="close">{{$t('kefu.cancel')}}</Button>
             </div>
         </Form>
 
@@ -117,51 +117,9 @@
         },
         data(){
             return {
-                shipType:[
-                    {
-                        key:1,
-                        title:'手动填写'
-                    },
-                    {
-                        key:2,
-                        title:'电子面单打印'
-                    },
-                ],
-                radioList:[
-                    {
-                        key:1,
-                        title:'发货'
-                    },
-                    {
-                        key:2,
-                        title:'送货'
-                    },
-                    {
-                        key:3,
-                        title:'虚拟'
-                    }
-                ],
-                ruleInline:{
-                    logisticsCode: [
-                        { required: true, message: '请选择快递公司', trigger: 'change' }
-                    ],
-                    number: [
-                        { required: true, message: '请填写快递单号', trigger: 'change' }
-                    ],
-                    sendName:[
-                        { required: true, message: '请填写寄件人姓名', trigger: 'change' }
-                    ],
-                    sendPhone:[
-                        { required: true, message: '请填写寄件人手机', trigger: 'change' },
-                        { pattern: /^1[3456789]\d{9}$/, message: "手机号码格式不正确", trigger: "blur" }
-                    ],
-                    sendAddress:[
-                        { required: true, message: '请填写寄件人地址', trigger: 'change' }
-                    ],
-                    msg:[
-                        { required: true, message: '请填写备注信息', trigger: 'change' }
-                    ],
-                },
+                shipType: [],
+                radioList: [],
+                ruleInline: {},
                 formValidate:{
                     gender:1,
                     shipStatus:1,
@@ -181,10 +139,58 @@
             }
         },
         mounted() {
+            this.initI18nData();
             this.getOrderExport()
             this.getDelivery()
         },
         methods:{
+            initI18nData() {
+                this.shipType = [
+                    {
+                        key: 1,
+                        title: this.$t('kefu.manualInput')
+                    },
+                    {
+                        key: 2,
+                        title: this.$t('kefu.electronicLabel')
+                    },
+                ];
+                this.radioList = [
+                    {
+                        key: 1,
+                        title: this.$t('kefu.delivery')
+                    },
+                    {
+                        key: 2,
+                        title: this.$t('kefu.homeDelivery')
+                    },
+                    {
+                        key: 3,
+                        title: this.$t('kefu.virtual')
+                    }
+                ];
+                this.ruleInline = {
+                    logisticsCode: [
+                        { required: true, message: this.$t('kefu.selectExpressCompany'), trigger: 'change' }
+                    ],
+                    number: [
+                        { required: true, message: this.$t('kefu.fillTrackingNumber'), trigger: 'change' }
+                    ],
+                    sendName: [
+                        { required: true, message: this.$t('kefu.fillSenderName'), trigger: 'change' }
+                    ],
+                    sendPhone: [
+                        { required: true, message: this.$t('kefu.fillSenderPhone'), trigger: 'change' },
+                        { pattern: /^1[3456789]\d{9}$/, message: this.$t('kefu.phoneFormatError'), trigger: "blur" }
+                    ],
+                    sendAddress: [
+                        { required: true, message: this.$t('kefu.fillSenderAddress'), trigger: 'change' }
+                    ],
+                    msg: [
+                        { required: true, message: this.$t('kefu.fillRemarkInfo'), trigger: 'change' }
+                    ],
+                };
+            },
             // 获取配送人
             getDelivery(){
                 orderDeliveryAll().then(res=>{
@@ -288,7 +294,7 @@
                     })
 
                 }else{
-                    this.$Message.error('请选择电子面单')
+                    this.$Message.error(this.$t('kefu.selectElectronicWaybillError'))
                 }
             }
         }

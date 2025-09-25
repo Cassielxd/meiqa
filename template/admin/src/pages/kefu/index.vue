@@ -5,17 +5,17 @@
         <div class="index_from page-account-container">
           <div :style="{display:!loginType?'block':'none'}">
             <div class="page-account-top">
-              <div class="page-account-top-logo">客服登录</div>
+              <div class="page-account-top-logo">{{$t('kefu.loginTitle')}}</div>
             </div>
             <Form ref="formInline" :model="formInline" :rules="ruleInline" @keyup.enter="handleSubmit('formInline')">
               <FormItem prop="username">
-                <Input type="text" v-model="formInline.username" placeholder="请输入用户名" size="large" />
+                <Input type="text" v-model="formInline.username" :placeholder="$t('kefu.usernameRequired')" size="large" />
               </FormItem>
               <FormItem prop="password">
-                <Input type="password" v-model="formInline.password" placeholder="请输入密码" size="large" />
+                <Input type="password" v-model="formInline.password" :placeholder="$t('kefu.passwordRequired')" size="large" />
               </FormItem>
               <FormItem>
-                <Button type="primary" long size="large" @click="handleSubmit('formInline')" class="btn">登录
+                <Button type="primary" long size="large" @click="handleSubmit('formInline')" class="btn">{{$t('kefu.login')}}
                 </Button>
               </FormItem>
             </Form>
@@ -23,13 +23,13 @@
           </div>
           <div :style="{display:loginType?'block':'none'}">
             <div class="page-account-top">
-              <div class="page-account-top-logo">APP扫码登录</div>
+              <div class="page-account-top-logo">{{$t('kefu.appScanLogin')}}</div>
             </div>
             <div class="code-box">
               <div class="qrcode" ref="qrCodeUrl"></div>
               <div class="rxpired-box" v-show="rxpired">
-                <p>已过期</p>
-                <Button type="primary" @click="bindRefresh">点击刷新</Button>
+                <p>{{$t('kefu.qrcodeExpired')}}</p>
+                <Button type="primary" @click="bindRefresh">{{$t('kefu.refreshQrcode')}}</Button>
               </div>
             </div>
             <div class="qh_box" @click="loginType = 0"><span class="iconfont iconzhanghaomima"></span></div>
@@ -45,7 +45,7 @@
       <!--            </Modal>-->
     </div>
     <div class="foot-box">
-      Copyright © 2025 cassie | {{version}} 客服系统
+      {{$t('kefu.copyrightText')}} {{version}} {{$t('kefu.systemTitle')}}
     </div>
   </div>
 </template>
@@ -75,13 +75,13 @@ export default {
       },
       ruleInline: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+          { required: true, message: this.$t('kefu.usernameRequired'), trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' }
+          { required: true, message: this.$t('kefu.passwordRequired'), trigger: 'blur' }
         ],
         code: [
-          { required: true, message: '请输入验证码', trigger: 'blur' }
+          { required: true, message: this.$t('kefu.verifyCodeRequired'), trigger: 'blur' }
         ]
       },
       errorNum: 0,
@@ -169,7 +169,7 @@ export default {
     // 关闭模态框
     closeModel() {
       let msg = this.$Message.loading({
-        content: '登录中...',
+        content: this.$t('kefu.loginLoading'),
         duration: 0
       });
       AccountLogin({
@@ -198,7 +198,7 @@ export default {
         let data = rej === undefined ? {} : rej;
         this.errorNum++;
         this.captchas();
-        this.$Message.error(data.msg || '登录失败');
+        this.$Message.error(data.msg || this.$t('kefu.loginFailed'));
         if(this.jigsaw) this.jigsaw.reset();
       });
     },
@@ -209,7 +209,7 @@ export default {
     },
     closefail() {
       if(this.jigsaw) this.jigsaw.reset();
-      this.$Message.error('校验错误');
+      this.$Message.error(this.$t('kefu.validationError'));
     },
     handleResize(event) {
       this.fullWidth = document.documentElement.clientWidth
@@ -282,7 +282,7 @@ export default {
         }
       }).catch(error => {
         this.$Modal.error({
-          title: '提示',
+          title: this.$t('kefu.tip'),
           content: error.msg
         });
         this.timeNum = 0

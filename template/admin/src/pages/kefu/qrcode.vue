@@ -9,23 +9,23 @@
             <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                 <Row :gutter="24" type="flex" justify="end">
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="二维码搜索：" label-for="name">
-                            <Input search enter-button @on-search="onSearch" placeholder="请输入二维码名称搜索" element-id="name" v-model="formValidate.name" style="width: 30%;display: inline-table;" class="mr" />
+                        <FormItem :label="$t('kefu.qrcodeSearch') + '：'" label-for="name">
+                            <Input search enter-button @on-search="onSearch" :placeholder="$t('kefu.qrcodeNamePlaceholder')" element-id="name" v-model="formValidate.name" style="width: 30%;display: inline-table;" class="mr" />
                         </FormItem>
                     </Col>
                     <Col span="24" class="ivu-text-left">
-                        <Button type="primary" icon="md-add" @click="add" class="mr10">添加客服二维码</Button>
+                        <Button type="primary" icon="md-add" @click="add" class="mr10">{{$t('kefu.addQrcode')}}</Button>
                     </Col>
                 </Row>
             </Form>
-            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row no-userFrom-text="暂无数据" class="ivu-mt">
+            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" class="ivu-mt">
                 <template slot-scope="{ row, index }" slot="picture">
                     <img :src="row.qrcode" width="61" height="61" v-viewer>
                 </template>
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="onEdit(row)">编辑</a>
+                    <a @click="onEdit(row)">{{$t('kefu.edit')}}</a>
                     <Divider type="vertical" />
-                    <a @click="onDelete(row, '删除反馈', index)">删除</a>
+                    <a @click="onDelete(row, $t('kefu.deleteRecord'), index)">{{$t('kefu.delete')}}</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
@@ -51,37 +51,7 @@ export default {
             page: 1,
             limit: 15,
             total: 0,
-            columns: [
-                {
-                    title: 'ID',
-                    key: 'id',
-                    width: 80
-                },
-                {
-                    title: '二维码名称',
-                    key: 'name',
-                    minWidth: 80
-                },
-                {
-                    title: '客服',
-                    key: 'user_account',
-                    minWidth: 120,
-                    render: (h, params) => {
-                        return h('span', params.row.user_account.join('，'));
-                    }
-                },
-                {
-                    title: '二维码图片',
-                    slot: 'picture',
-                    minWidth: 120
-                },
-                {
-                    title: '操作',
-                    slot: 'action',
-                    minWidth: 150,
-                    fixed: 'right'
-                }
-            ],
+            columns: [],
             tableData: [],
             loading: false,
             id: 0,
@@ -101,6 +71,7 @@ export default {
         }
     },
     created() {
+        this.initI18nData();
         adminAppCustomer().then(res => {
             if (res.status == 200 && res.data.list.length) {
                 this.qrcodeText += `&token=${res.data.list[0].token_md5}`;
@@ -109,6 +80,39 @@ export default {
         this.chatQrcode();
     },
     methods: {
+        initI18nData() {
+            this.columns = [
+                {
+                    title: 'ID',
+                    key: 'id',
+                    width: 80
+                },
+                {
+                    title: this.$t('kefu.qrcodeName'),
+                    key: 'name',
+                    minWidth: 80
+                },
+                {
+                    title: this.$t('kefu.customerService'),
+                    key: 'user_account',
+                    minWidth: 120,
+                    render: (h, params) => {
+                        return h('span', params.row.user_account.join('，'));
+                    }
+                },
+                {
+                    title: this.$t('kefu.qrcodeImage'),
+                    slot: 'picture',
+                    minWidth: 120
+                },
+                {
+                    title: this.$t('kefu.operation'),
+                    slot: 'action',
+                    minWidth: 150,
+                    fixed: 'right'
+                }
+            ];
+        },
         chatQrcode() {
             chatQrcode({
                 page: this.page,

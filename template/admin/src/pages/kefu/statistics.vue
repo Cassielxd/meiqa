@@ -9,28 +9,28 @@
             <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" class="tabform" @submit.native.prevent>
                 <Row :gutter="24" type="flex" justify="end">
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="地区：" label-for="province">
-                            <Input search enter-button @on-search="onSearch" placeholder="请输入地区搜索" element-id="province" v-model="formValidate.province" style="width: 30%;display: inline-table;" class="mr" />
+                        <FormItem :label="$t('kefu.region') + '：'" label-for="province">
+                            <Input search enter-button @on-search="onSearch" :placeholder="$t('kefu.regionSearchPlaceholder')" element-id="province" v-model="formValidate.province" style="width: 30%;display: inline-table;" class="mr" />
                         </FormItem>
                     </Col>
                     <Col span="24" class="ivu-text-left">
-                        <FormItem label="时间：">
+                        <FormItem :label="$t('kefu.time') + '：'">
                             <RadioGroup v-model="formValidate.time" type="button" @on-change="selectChange(formValidate.time)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange" placement="bottom-end" :placeholder="$t('kefu.customTime')" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                 </Row>
             </Form>
-            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row no-userFrom-text="暂无数据" class="ivu-mt">
+            <Table :columns="columns" :data="tableData" :loading="loading" highlight-row :no-userFrom-text="$t('kefu.noData')" class="ivu-mt">
                 <template slot-scope="{ row, index }" slot="picture">
                     <img src="" v-viewer>
                 </template>
                 <template slot-scope="{ row, index }" slot="action">
-                    <a @click="onEdit(row)">编辑</a>
+                    <a @click="onEdit(row)">{{$t('kefu.edit')}}</a>
                     <Divider type="vertical" />
-                    <a @click="onDelete(row, '删除反馈', index)">删除</a>
+                    <a @click="onDelete(row, $t('kefu.deleteRecord'), index)">{{$t('kefu.delete')}}</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
@@ -53,53 +53,11 @@ export default {
                 time:'',
             },
             fromList: {
-                title: '选择时间',
+                title: '',
                 custom: true,
-                fromTxt: [
-                    { text: '全部', val: '' },
-                    { text: '今天', val: 'today' },
-                    { text: '昨天', val: 'yesterday' },
-                    { text: '最近7天', val: 'lately7' },
-                    { text: '最近30天', val: 'lately30' },
-                    { text: '本月', val: 'month' },
-                    { text: '本年', val: 'year' }
-                ]
+                fromTxt: []
             },
-            columns: [
-                {
-                    title: 'ID',
-                    key: 'id',
-                    width: 80
-                },
-                {
-                    title: 'IP',
-                    key: 'ip',
-                    minWidth: 80
-                },
-                {
-                    title: '网址',
-                    key: 'path',
-                    minWidth: 120
-                },
-                {
-                    title: '浏览器',
-                    key: 'browser',
-                    minWidth: 80
-                },
-                {
-                    title: '时间',
-                    key: 'create_time',
-                    minWidth: 80
-                },
-                {
-                    title: '地区',
-                    key: 'region',
-                    minWidth: 80,
-                    render: (h, params) => {
-                        return h('span', `${params.row.province} ${params.row.region}`);
-                    }
-                },
-            ],
+            columns: [],
             tableData: [],
             loading: false,
             total: 0,
@@ -119,9 +77,60 @@ export default {
         }
     },
     created() {
+        this.initI18nData();
         this.chatStatistics();
     },
     methods: {
+        initI18nData() {
+            this.fromList = {
+                title: this.$t('kefu.selectTime'),
+                custom: true,
+                fromTxt: [
+                    { text: this.$t('kefu.all'), val: '' },
+                    { text: this.$t('kefu.today'), val: 'today' },
+                    { text: this.$t('kefu.yesterday'), val: 'yesterday' },
+                    { text: this.$t('kefu.last7Days'), val: 'lately7' },
+                    { text: this.$t('kefu.last30Days'), val: 'lately30' },
+                    { text: this.$t('kefu.thisMonth'), val: 'month' },
+                    { text: this.$t('kefu.thisYear'), val: 'year' }
+                ]
+            };
+            this.columns = [
+                {
+                    title: 'ID',
+                    key: 'id',
+                    width: 80
+                },
+                {
+                    title: 'IP',
+                    key: 'ip',
+                    minWidth: 80
+                },
+                {
+                    title: this.$t('kefu.website'),
+                    key: 'path',
+                    minWidth: 120
+                },
+                {
+                    title: this.$t('kefu.browser'),
+                    key: 'browser',
+                    minWidth: 80
+                },
+                {
+                    title: this.$t('kefu.time'),
+                    key: 'create_time',
+                    minWidth: 80
+                },
+                {
+                    title: this.$t('kefu.region'),
+                    key: 'region',
+                    minWidth: 80,
+                    render: (h, params) => {
+                        return h('span', `${params.row.province} ${params.row.region}`);
+                    }
+                },
+            ];
+        },
         chatStatistics() {
             chatStatistics({
                 page: this.page,
