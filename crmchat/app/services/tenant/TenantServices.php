@@ -736,4 +736,26 @@ class TenantServices extends BaseServices
         }
         return $key;
     }
+    public function updateAdmin(int $id, array $data)
+    {
+        $adminInfo = $this->dao->get($id);
+        if (!$adminInfo)
+            throw new AdminException('管理员信息未查到');
+        if ($data['pwd']) {
+            if (!password_verify($data['pwd'], $adminInfo['pwd']))
+                throw new AdminException('原始密码错误');
+            if (!$data['new_pwd'])
+                throw new AdminException('请输入新密码');
+            if (!$data['conf_pwd'])
+                throw new AdminException('请输入确认密码');
+            if ($data['new_pwd'] != $data['conf_pwd'])
+                throw new AdminException('两次输入的密码不一致');
+            $adminInfo->pwd = $this->passwordHash($data['new_pwd']);
+        }
+
+        if ($adminInfo->save())
+            return true;
+        else
+            return false;
+    }
 }

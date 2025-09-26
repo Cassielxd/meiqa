@@ -251,7 +251,7 @@ Route::group('api', function () {
             TenantCheckRoleMiddleware::class,
         ])->prefix('tenant.file.');
         Route::group('setting', function () {
-
+            Route::put('update_admin', 'system.Admin/update_admin')->name('SystemAdminUpdateAdmin')->option(['real_name' => '修改当前管理员信息']);
             Route::get('admin/logout', 'system.Admin/logout')->name('SystemAdminLogout')->option(['real_name' => '退出登陆']);
 
         })->middleware([

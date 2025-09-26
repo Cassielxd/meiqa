@@ -3,6 +3,7 @@ namespace app\controller\tenant\system;
 
 use app\controller\tenant\AuthController;
 use app\services\system\admin\SystemAdminServices;
+use app\services\tenant\TenantServices;
 use app\validate\system\SystemAdminValidata;
 use crmeb\services\CacheService;
 use think\facade\{Config};
@@ -15,9 +16,9 @@ class Admin extends AuthController
 {
     /**
      * SystemAdmin constructor.
-     * @param SystemAdminServices $services
+     * @param TenantServices $services
      */
-    public function __construct(SystemAdminServices $services)
+    public function __construct(TenantServices $services)
     {
         parent::__construct();
         $this->services = $services;
@@ -162,7 +163,8 @@ class Admin extends AuthController
         if (!preg_match('/^(?![^a-zA-Z]+$)(?!\D+$).{6,}$/', $data['new_pwd'])) {
             return $this->fail('设置的密码过于简单(不小于六位包含数字字母)');
         }
-        if ($this->services->updateAdmin($this->adminId, $data))
+        $tenantId=$this->request->tenantId();
+        if ($this->services->updateAdmin($tenantId, $data))
             return $this->success('修改成功');
         else
             return $this->fail('修改失败');
