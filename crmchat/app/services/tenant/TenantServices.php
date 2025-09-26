@@ -353,12 +353,8 @@ class TenantServices extends BaseServices
      */
     public function getTenantByAppid(string $appid)
     {
-        $cacheKey = 'tenant:appid:' . $appid;
-        
-        return CacheService::redisHandler()->remember($cacheKey, function () use ($appid) {
-            $tenant = $this->dao->getTenantByAppid($appid);
-            return $tenant ? $tenant->toArray() : null;
-        }, 3600); // 缓存1小时
+        $tenant = $this->dao->getTenantByAppid($appid);
+        return $tenant->toArray();
     }
 
     /**

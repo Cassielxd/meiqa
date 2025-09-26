@@ -85,12 +85,12 @@ class Service extends AuthController
             ['group_id', 0]
         ]);
         $appid = $this->request->tenantAppid();
-        $tenant = $this->tenantservices->getTenantByAppid($appid);
+       /* $tenant = $this->tenantservices->getTenantByAppid($appid);
+        echo $tenant;
         $count =$this->services->count(["appid" => $appid]);
         if($count>=$tenant->max_services){
             return $this->fail('客服数量超出限制');
-
-        }
+        }*/
         if ($data['avatar'] == '') {
             return $this->fail('请选择客服头像');
         }
