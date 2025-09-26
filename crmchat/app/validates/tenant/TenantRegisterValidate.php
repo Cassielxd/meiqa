@@ -19,7 +19,7 @@ class TenantRegisterValidate extends Validate
     protected $rule = [
         'account' => 'require|length:2,50|unique:tenants',
         'contact_phone' => 'max:20',
-        'email' => 'require|email|unique:tenants',
+        'email' => 'require|unique:tenants',
         'pwd' => 'require|length:6,32',
     ];
 
