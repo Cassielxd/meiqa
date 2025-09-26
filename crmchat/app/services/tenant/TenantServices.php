@@ -354,6 +354,7 @@ class TenantServices extends BaseServices
     public function getTenantByAppid(string $appid)
     {
         $tenant = $this->dao->getTenantByAppid($appid);
+
         return $tenant->toArray();
     }
 
