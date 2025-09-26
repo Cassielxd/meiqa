@@ -45,7 +45,7 @@
       <!--            </Modal>-->
     </div>
     <div class="foot-box">
-      Copyright © 2025 cassie | {{version}} 客服系统
+      MeiQia
     </div>
   </div>
 </template>

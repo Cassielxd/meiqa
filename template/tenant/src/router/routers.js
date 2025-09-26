@@ -16,7 +16,7 @@ const frameIn = [
     {
         path: '/tenant/',
         meta: {
-            title: 'CASSIE'
+            title: 'MeiQia'
         },
         redirect: {
             name: 'home_index'

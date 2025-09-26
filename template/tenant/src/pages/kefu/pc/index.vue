@@ -110,9 +110,9 @@
         </div>
         <div class="right_menu">
           <rightMenu :isTourist="tourist" :uid="userActive.to_user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
-          <div class="crmchat_link" @click="tolink">
+<!--          <div class="crmchat_link" @click="tolink">
             <span>CRMChat open source customer service system</span>
-          </div>
+          </div>-->
         </div>
       </div>
       <!-- 用户标签 -->
