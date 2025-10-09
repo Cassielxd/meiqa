@@ -252,12 +252,12 @@ export function userLabelPut(id, data) {
 }
 
 /**
- * 客服用户聊天列表
+ * 客服用户聊天消息列表
  * @constructor
  */
 export function serviceList(params) {
     return request({
-        url: `service/list`,
+        url: `service/chat/history`,
         method: 'get',
         params,
         kefu: true

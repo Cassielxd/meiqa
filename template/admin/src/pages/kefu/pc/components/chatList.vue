@@ -50,7 +50,7 @@
           </div>
           <div class="user-info">
             <div class="hd">
-              
+              <span class="name line1">{{ item.nickname }}</span>
               <template >
                 <span class="label pc">default</span>
               </template>

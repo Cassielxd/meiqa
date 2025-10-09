@@ -88,6 +88,9 @@ public class KefuUserService {
     public List<Map<String, Object>> getRecordList(String appid, Integer kefuUserId, String nickname, String isTourist, String labelId, String groupId) {
         // 修复: 应该查询eb_chat_service_record表,使用to_user_id字段
         // 因为客服是消息的接收方,游客是发送方
+        System.out.println("=== SERVICE getRecordList ===");
+        System.out.println("Parameters - appid: " + appid + ", kefuUserId: " + kefuUserId + ", nickname: " + nickname + ", isTourist: " + isTourist);
+
         QueryWrapper<ChatServiceRecordEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("appid", appid);
         wrapper.eq("to_user_id", kefuUserId);  // 修复: 改为to_user_id
@@ -112,7 +115,9 @@ public class KefuUserService {
         }
 
         wrapper.orderByDesc("id");
+        System.out.println("Executing SQL query with to_user_id=" + kefuUserId + " AND appid=" + appid);
         List<ChatServiceRecordEntity> records = chatServiceRecordMapper.selectList(wrapper);
+        System.out.println("Query returned " + (records != null ? records.size() : 0) + " records from database");
 
         // 转换为Map
         return records.stream().map(record -> {

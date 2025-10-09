@@ -80,10 +80,18 @@ public class KefuUserController {
         String appid = UserContext.getAppid();
         Long kefuId = UserContext.getUserId();  // 这是eb_chat_service.id
 
+        System.out.println("=== DEBUG RECORD LIST ===");
+        System.out.println("JWT kefuId (service.id): " + kefuId);
+        System.out.println("JWT appid: " + appid);
+
         // 需要获取eb_chat_service.user_id字段,因为eb_chat_service_record.to_user_id对应的是user_id
         Integer kefuUserId = kefuUserService.getKefuUserIdByServiceId(kefuId != null ? kefuId.intValue() : null, appid);
+        System.out.println("Resolved kefuUserId (service.user_id): " + kefuUserId);
 
         List<Map<String, Object>> result = kefuUserService.getRecordList(appid, kefuUserId, nickname, isTourist, labelId, groupId);
+        System.out.println("Records returned: " + (result != null ? result.size() : 0));
+        System.out.println("=== DEBUG END ===");
+
         return ApiResult.ok(result);
     }
 

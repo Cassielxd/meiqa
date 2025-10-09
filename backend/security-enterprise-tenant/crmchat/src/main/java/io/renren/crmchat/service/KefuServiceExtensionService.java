@@ -388,9 +388,9 @@ public class KefuServiceExtensionService {
      * @param filters      过滤条件（user_id, upperId, limit）
      * @param kefuId       当前客服ID
      * @param currentAppid 当前租户appid
-     * @return 聊天记录列表
+     * @return 聊天记录列表（转换为下划线命名的Map）
      */
-    public List<ChatServiceDialogueRecordEntity> getChatHistory(Map<String, Object> filters, Integer kefuId, String currentAppid) {
+    public List<Map<String, Object>> getChatHistory(Map<String, Object> filters, Integer kefuId, String currentAppid) {
         // 1. 获取客服的user_id
         ChatServiceEntity kefu = chatServiceMapper.selectById(kefuId);
         if (kefu == null || !kefu.getAppid().equals(currentAppid)) {
@@ -439,7 +439,27 @@ public class KefuServiceExtensionService {
 
         autoBadgeService.dispatch(kefuUserId, toUserId, currentAppid);
 
-        return list;
+        // 7. 转换为前端期望的下划线命名格式
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ChatServiceDialogueRecordEntity entity : list) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", entity.getId());
+            map.put("user_id", entity.getUserId());
+            map.put("to_user_id", entity.getToUserId());
+            map.put("msn", entity.getMsn());
+            map.put("type", entity.getType());
+            map.put("other", entity.getOther());
+            map.put("add_time", entity.getAddTime());
+            map.put("appid", entity.getAppid());
+            map.put("is_tourist", entity.getIsTourist());
+            map.put("msn_type", entity.getMsnType());
+            map.put("remind", entity.getRemind());
+            map.put("guid", entity.getGuid());
+            map.put("mer_id", entity.getMerId());
+            result.add(map);
+        }
+
+        return result;
     }
 
     /**

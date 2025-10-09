@@ -1,7 +1,6 @@
 package io.renren.crmchat.controller.kefu;
 
 import io.renren.crmchat.common.result.ApiResult;
-import io.renren.crmchat.entity.ChatServiceDialogueRecordEntity;
 import io.renren.crmchat.security.UserContext;
 import io.renren.crmchat.service.KefuServiceExtensionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -234,7 +233,7 @@ public class KefuServiceExtensionController {
      */
     @GetMapping("/chat/history")
     @Operation(summary = "获取聊天历史记录")
-    public ApiResult<List<ChatServiceDialogueRecordEntity>> getChatHistory(
+    public ApiResult<List<Map<String, Object>>> getChatHistory(
             @RequestParam(required = false) Integer user_id,
             @RequestParam(required = false, defaultValue = "0") Integer upperId,
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
@@ -255,7 +254,7 @@ public class KefuServiceExtensionController {
         }
         filters.put("limit", limit);
 
-        List<ChatServiceDialogueRecordEntity> result = kefuServiceExtensionService.getChatHistory(filters, kefuId, appid);
+        List<Map<String, Object>> result = kefuServiceExtensionService.getChatHistory(filters, kefuId, appid);
         return ApiResult.ok(result);
     }
 

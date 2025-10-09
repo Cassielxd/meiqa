@@ -255,10 +255,35 @@ curl -X GET "http://localhost:20108/api/kefu/service/list?user_id=874&limit=20&u
 │       └── chatList.vue   # 左侧用户列表组件
 ```
 
+## 问题修复记录
+
+### 问题原因
+前端API调用错误：
+- 文件：`template/admin/src/api/kefu.js:258`
+- 问题：`serviceList()` 函数调用 `/service/list` 端点（用于客服转接列表）
+- 应该：调用 `/service/chat/history` 端点（用于聊天消息列表）
+
+### 修复方案
+更新 `template/admin/src/api/kefu.js:260` 的 URL：
+```javascript
+// 修复前
+url: `service/list`,
+
+// 修复后
+url: `service/chat/history`,
+```
+
+### 验证结果
+✅ 修复完成并验证成功
+- 前端成功调用 `/api/kefu/service/chat/history`
+- API返回聊天消息数据：`{status: 200, msg: ok, data: Array(1)}`
+- 聊天消息正常显示在中间面板
+- 截图保存：`/Volumes/ORICO/project/kefu/.playwright-mcp/page-2025-10-09T12-40-27-015Z.png`
+
 ## 下一步行动
 
 1. ✅ 确认API映射关系
-2. ⏳ 检查数据库是否有测试数据
-3. ⏳ 调试 `KefuUserService.getRecordList()` 方法
-4. ⏳ 修复查询逻辑或创建测试数据
-5. ⏳ 验证前端能正常显示用户列表
+2. ✅ 检查前端API调用
+3. ✅ 修复API端点错误
+4. ✅ 验证前端能正常显示聊天消息
+5. ⏳ （可选）创建更多测试数据验证完整功能
