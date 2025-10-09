@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>清除Cookies</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+        h2 { color: #2c3e50; }
+        #status { margin-top: 20px; font-size: 16px; }
+        .success { color: #27ae60; }
+        .info { color: #3498db; }
+    </style>
+</head>
+<body>
+    <h2>🔧 清除客服Cookies</h2>
+    <div id="status">正在清除...</div>
+    <script>
+        const cookiesToClear = ['kefu_token', 'kefu_uuid', 'kefu_expires_time', 'kefuInfo'];
+        let cleared = [];
+
+        cookiesToClear.forEach(cookieName => {
+            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost';
+            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.localhost';
+            cleared.push(cookieName);
+        });
+
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML =
+            '<p class="success">✅ 已清除 ' + cleared.length + ' 个cookies</p>' +
+            '<p class="info">📋 已清除: ' + cleared.join(', ') + '</p>' +
+            '<p class="info">🔍 剩余cookies: ' + (document.cookie || '无') + '</p>' +
+            '<p class="success">🔄 3秒后自动跳转到登录页面...</p>';
+
+        setTimeout(function() {
+            window.location.href = '/admin/#/kefu/login';
+        }, 3000);
+    </script>
+</body>
+</html>

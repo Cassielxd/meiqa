@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.pay.dao.OrderDao">
+    <!-- 支付成功 -->
+    <update id="paySuccess">
+        update tb_order set status = #{status}, pay_at = #{payAt} where order_id = #{orderId}
+    </update>
+
+    <select id="getByOrderId" resultType="io.renren.modules.pay.entity.OrderEntity">
+        select * from tb_order where order_id = #{value}
+    </select>
+</mapper>

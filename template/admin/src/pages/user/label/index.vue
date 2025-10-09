@@ -151,7 +151,9 @@ export default {
   methods: {
     //   拖拽分组排序
       userLabelMoveCate() {
-          new Sortable(document.querySelector('.ivu-menu-item-group ul'), {
+          const menuContainer = document.querySelector('.ivu-menu-item-group ul');
+          if (!menuContainer) return;
+          new Sortable(menuContainer, {
               filter: '.ivu-menu-item-all',
               preventOnFilter: true,
               onEnd: ({ newIndex, oldIndex }) => {
@@ -180,7 +182,9 @@ export default {
       },
     //   拖拽标签排序
       userLabelMove() {
-          new Sortable(document.querySelector('.ivu-table-tbody'), {
+          const tableBody = document.querySelector('.ivu-table-tbody');
+          if (!tableBody) return;
+          new Sortable(tableBody, {
               onEnd: ({ newIndex, oldIndex }) => {
                   let row = this.labelListsArr.splice(oldIndex, 1)[0];
                   this.labelListsArr.splice(newIndex, 0, row);
@@ -211,10 +215,17 @@ export default {
     getList() {
       this.loading = true;
       userLabelApi(this.labelFrom).then(async res => {
-        let data = res.data;
-        this.labelLists = data.list;
-        this.labelListsArr = data.list;
-        this.total = data.count;
+        const raw = res.data;
+        const listData = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.list) ? raw.list : []);
+        const normalised = listData.map(item => ({
+          ...item,
+          cate_id: item.cate_id !== undefined ? item.cate_id : (item.cateId !== undefined ? item.cateId : ''),
+          user_id: item.user_id !== undefined ? item.user_id : (item.userId !== undefined ? item.userId : ''),
+        }));
+        this.labelLists = normalised;
+        this.labelListsArr = [...normalised];
+        const total = Array.isArray(raw) ? raw.length : (raw && raw.count !== undefined ? raw.count : normalised.length);
+        this.total = typeof total === 'number' ? total : parseInt(total, 10) || normalised.length;
         this.loading = false;
       }).catch(res => {
         this.loading = false;
@@ -249,21 +260,28 @@ export default {
     // 标签分类
     getUserLabelAll(key) {
       userLabelAll().then(res => {
-        let obj = {
+        const placeholder = {
           name: '全部',
-          id: ''
+          id: '',
+          status: false
         }
-        res.data.data.unshift(obj)
-        res.data.data.forEach(el => {
-          el.status = false
-        })
+        const raw = res.data && Array.isArray(res.data.data)
+          ? res.data.data
+          : (Array.isArray(res.data) ? res.data : []);
+        const formatted = raw.map(item => ({
+          ...item,
+          id: item.id !== undefined ? item.id : (item.cateId !== undefined ? item.cateId : ''),
+          name: item.name !== undefined ? item.name : (item.label !== undefined ? item.label : ''),
+          status: false
+        }));
+        const dataSource = [placeholder, ...formatted];
         if(!key) {
-          this.sortName = res.data.data[0].id
-          this.labelFrom.cate_id = res.data.data[0].id
+          this.sortName = dataSource[0].id
+          this.labelFrom.cate_id = dataSource[0].id
           this.getList();
         }
-        this.labelSort = res.data.data;
-        this.labelSortArr = res.data.data;
+        this.labelSort = dataSource;
+        this.labelSortArr = [...dataSource];
       })
     },
     // 显示标签小菜单

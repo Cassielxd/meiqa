@@ -28,15 +28,8 @@ export function AccountLogout() {
 }
 
 /*
-* 获取验证码图片
+* 数字验证码已移除，只使用滑块验证码（Verify组件）
 */
-
-export function captcha_pro() {
-    return request({
-        url: '/captcha_pro',
-        method: 'get'
-    })
-}
 
 /**
  * 获取轮播图和logo

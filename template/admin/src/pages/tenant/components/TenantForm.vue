@@ -269,14 +269,14 @@ export default {
       this.$refs.formValidate.resetFields()
       this.form = {
         account: '',
-        real_name: '',
-        email: '',
-        phone: '',
+        tenant_name: '',
+        contact_email: '',
+        contact_phone: '',
         pwd: '',
         status: 1,
         user_limit: 100,
         service_limit: 10,
-        expire_time: '',
+        expire_at: '',
         auto_renew: 0,
         remark: ''
       }

@@ -342,6 +342,12 @@ export default {
       this.isEdit = false
       this.currentTenant = {}
       this.modalVisible = true
+      // 等待弹窗打开后再重置表单
+      this.$nextTick(() => {
+        if (this.$refs.tenantForm) {
+          this.$refs.tenantForm.resetForm()
+        }
+      })
     },
 
     // 显示编辑弹窗

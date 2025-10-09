@@ -30,6 +30,7 @@
         <li><a href="javascript:void(0)" onclick="demo1()" >1、PC端内嵌中间弹窗</a></li>
         <li><a href="javascript:void(0)" onclick="demo2()" >2、自适应展示(电脑端看不出来效果)</a></li>
         <li><a href="javascript:void(0)" onclick="demo3()" >3、移动端展示</a></li>
+        <li><a href="javascript:void(0)" onclick="demoVisitor()" style="color: red; font-weight: bold;">✨ 游客模式测试（使用appid）</a></li>
         <li><a href="kaifa.html" target="_blank">4、演示三自定义模式</a></li>
         <li>超链接</li>
         <li><a class="line-chat" data-href="{http}/chat/pc?token={token}&noCanClose=1" target="_blank">4、Pc和手机超链接访问自动适应</a></li>
@@ -53,7 +54,7 @@
         location.replace(this.href)
     })
     let token = '0c8e1e252430160449fa327d5229f12b',
-        url = 'http://localhost:8080',
+        url = 'http://localhost:9000',  // PHP public directory server
         chat = document.getElementById('chat'),
         lineChat =document.getElementsByClassName('line-chat');
 
@@ -71,6 +72,7 @@
         demo1:false,
         demo2:false,
         demo3:false,
+        demoVisitor:false,
     };
     function demo0() {
         if(demostatus.demo0){
@@ -127,6 +129,28 @@
         var canCustomerServer = new initCustomerServer(option);
         canCustomerServer.init();
         demostatus.demo3 = true;
+    }
+
+    function demoVisitor() {
+        if(window.visitorChatStarted){
+            alert('游客聊天已启动，请查看聊天窗口');
+            return;
+        }
+        console.log('🚀 启动游客模式测试...');
+        var option = {
+            "authInit": true,
+            openUrl: 'http://localhost:20108',  // Java 后端服务器
+            token: '',  // 游客模式：空token触发自动登录
+            appid: '202509251953426878',  // ✅ 租户标识（关键参数！）
+            kefuid: '',  // 自动分配客服
+            isShowTip: true,
+            windowStyle: 'center',
+        };
+        console.log('游客模式配置:', option);
+        var canCustomerServer = new initCustomerServer(option);
+        canCustomerServer.init();
+        window.visitorChatStarted = true;
+        console.log('✅ 游客聊天组件已启动');
     }
 
     //其他全局事件

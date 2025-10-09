@@ -52,6 +52,7 @@ export default {
                 province: '',
                 time:'',
             },
+            timeVal: [],
             fromList: {
                 title: '',
                 custom: true,

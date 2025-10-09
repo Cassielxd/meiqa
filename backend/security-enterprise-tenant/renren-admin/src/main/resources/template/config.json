@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Controller.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/controller/${subModuleName!}/${ClassName}Controller.java"
+  },
+  {
+    "name": "Service.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/service/${subModuleName!}/${ClassName}Service.java"
+  },
+  {
+    "name": "ServiceImpl.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/service/${subModuleName!}/impl/${ClassName}ServiceImpl.java"
+  },
+  {
+    "name": "Excel.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/excel/${subModuleName!}/${ClassName}Excel.java"
+  },
+  {
+    "name": "Entity.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/entity/${subModuleName!}/${ClassName}Entity.java"
+  },
+  {
+    "name": "DTO.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/dto/${subModuleName!}/${ClassName}DTO.java"
+  },
+  {
+    "name": "Dao.java.ftl",
+    "path": "${backendPath}/src/main/java/${packagePath}/modules/${moduleName}/dao/${subModuleName!}/${ClassName}Dao.java"
+  },
+  {
+    "name": "Dao.xml.ftl",
+    "path": "${backendPath}/src/main/resources/mapper/${moduleName}/${ClassName}Dao.xml"
+  },
+  {
+    "name": "list.vue.ftl",
+    "path": "${frontendPath}/src/views/${moduleName}/${classname}.vue"
+  },
+  {
+    "name": "add-or-update.vue.ftl",
+    "path": "${frontendPath}/src/views/${moduleName}/${classname}-add-or-update.vue"
+  }
+]

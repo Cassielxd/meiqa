@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>io.renren</groupId>
+		<artifactId>security-enterprise-tenant</artifactId>
+		<version>4.7.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>crmchat</artifactId>
+	<packaging>jar</packaging>
+	<description>CRM Chat Customer Service System - PHP API Compatible</description>
+
+	<dependencies>
+		<!-- renren-common 公共模块 -->
+		<dependency>
+			<groupId>io.renren</groupId>
+			<artifactId>renren-common</artifactId>
+			<version>4.7.0</version>
+		</dependency>
+
+		<!-- WebSocket Support -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<!-- JWT Token -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>4.4.0</version>
+		</dependency>
+
+		<!-- BCrypt Password Encryption -->
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

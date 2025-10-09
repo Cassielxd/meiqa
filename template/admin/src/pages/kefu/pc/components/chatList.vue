@@ -228,16 +228,18 @@ export default {
     // this.userLabel();
     // this.wsStart();
     userLabel().then(res => {
-        res.data.forEach(item => {
+        let labelData = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
+        labelData.forEach(item => {
             item.labelOn = -1;
         });
-        this.labelList = res.data;
+        this.labelList = labelData;
     });
     userGroupApi().then(res => {
-        res.data.forEach(item => {
+        let groupData = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
+        groupData.forEach(item => {
             item.groupOn = false;
         });
-        this.userGroupList = res.data;
+        this.userGroupList = groupData;
     });
   },
   methods: {
@@ -404,18 +406,21 @@ export default {
         groupId: this.groupId,
         page: this.page,
         limit: this.limit,
-        is_tourist: this.hdTabCur === 1 ? '' : 0
+        is_tourist: this.hdTabCur === 1 ? '' : 1
       }).then(res => {
-        if(res.data.length > 0) {
-          res.data[0].mssage_num = 0
-          this.isScroll = res.data.length >= this.limit
+        // 兼容Java后端返回格式：可能是数组或对象{list: [], total: 0}
+        let dataList = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
 
-          this.userList = this.userList.concat(res.data)
+        if(dataList.length > 0) {
+          dataList[0].mssage_num = 0
+          this.isScroll = dataList.length >= this.limit
 
-          if(this.page == 1 && res.data.length > 0 && !this.isSearch) {
-            this.curId = res.data[0].id
-            res.data[0].index = 0
-            this.$emit('setDataId', res.data[0])
+          this.userList = this.userList.concat(dataList)
+
+          if(this.page == 1 && dataList.length > 0 && !this.isSearch) {
+            this.curId = dataList[0].id
+            dataList[0].index = 0
+            this.$emit('setDataId', dataList[0])
           }
           this.page++
         } else {

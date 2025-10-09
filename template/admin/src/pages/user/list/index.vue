@@ -5,7 +5,7 @@
         <span class="ivu-page-header-title">用户管理</span>
         <div>
           <Tabs @on-click="onClickTab">
-            <TabPane :label="item.name" :name="item.type" v-for="(item,index) in headeNum" :key="index" />
+            <TabPane :label="item.name" :name="String(item.type)" v-for="(item,index) in headeNum" :key="index" />
           </Tabs>
         </div>
       </div>

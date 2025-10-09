@@ -1,0 +1,6 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Mon Oct 06 09:26:20 CST 2025
+@default-central-https\://repo.maven.apache.org/maven2/.lastUpdated=1759713980395
+https\://repo.maven.apache.org/maven2/.error=Could not transfer artifact org.springframework.boot\:spring-boot-starter-parent\:pom\:3.5.4 from/to central (https\://repo.maven.apache.org/maven2)\: repo.maven.apache.org\: nodename nor servname provided, or not known
+@default-public-https\://maven.aliyun.com/repository/public/.lastUpdated=1759713980383
+https\://maven.aliyun.com/repository/public/.error=Could not transfer artifact org.springframework.boot\:spring-boot-starter-parent\:pom\:3.5.4 from/to public (https\://maven.aliyun.com/repository/public/)\: maven.aliyun.com\: nodename nor servname provided, or not known

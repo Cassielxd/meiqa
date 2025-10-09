@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客服集成测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #1890FF;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #e6f7ff;
+            border-left: 4px solid #1890FF;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #1890FF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>客服系统集成测试</h1>
+
+        <div class="info">
+            <h3>测试说明</h3>
+            <p>本页面用于测试客服聊天组件的集成。</p>
+            <p>右下角应该显示一个浮动的客服图标，点击后会打开聊天窗口。</p>
+            <p><strong>租户 APPID:</strong> 202509251953426878</p>
+            <p><strong>客服账号:</strong> 18519223211 (昵称: 111)</p>
+        </div>
+
+        <div class="info">
+            <h3>功能特性</h3>
+            <ul>
+                <li>浮动客服图标（右下角）</li>
+                <li>点击图标打开/关闭聊天窗口</li>
+                <li>支持PC和移动端自适应</li>
+                <li>实时消息通知</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 客服组件初始化脚本 -->
+    <script
+        id="chat"
+        src="/customerServer.js"
+        option='{
+            "authInit": true,
+            "token": "guest_token_test",
+            "appid": "202509251953426878",
+            "openUrl": "http://localhost:20108",
+            "isShowTip": true,
+            "kefuid": 0,
+            "sendUserData": {
+                "nickname": "测试访客",
+                "avatar": ""
+            }
+        }'>
+    </script>
+</body>
+</html>

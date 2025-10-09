@@ -1,0 +1,76 @@
+spring:
+  datasource:
+    druid:
+      #MySQL
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/security_enterprise_tenant?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+      username: renren
+      password: 123456
+      #达梦8
+#      driver-class-name: dm.jdbc.driver.DmDriver
+#      url: jdbc:dm://localhost:5236/security_enterprise_tenant?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&compatibleMode=oracle
+#      username: security_enterprise_tenant
+#      password: dm12345678
+#      #Oracle
+#      driver-class-name: oracle.jdbc.OracleDriver
+#      url: jdbc:oracle:thin:@localhost:1521:xe
+#      username: renren_security
+#      password: 123456
+#      #SQLServer
+#      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#      url: jdbc:sqlserver://localhost:1433;DatabaseName=security_enterprise
+#      username: sa
+#      password: 123456
+#      #postgresql
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:5432/security_enterprise
+#      username: postgres
+#      password: 123456
+#      #openGauss
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:5432/security_enterprise
+#      username: gaussdb
+#      password: openGauss@123
+#      #KingbaseES
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:54321/security_enterprise?currentSchema=public,SYS_CATALOG
+#      username: system
+#      password: Kingbase123
+
+      initial-size: 10
+      max-active: 100
+      min-idle: 10
+      max-wait: 6000
+      pool-prepared-statements: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      #Oracle需要打开注释
+      #validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        #login-username: admin
+        #login-password: admin
+
+
+logging:
+  level:
+    org.flowable.engine.impl.persistence.entity.*: debug
+    org.flowable.task.service.impl.persistence.entity.*: debug
+
+##多数据源的配置，需要引用renren-dynamic-datasource
+#dynamic:
+#  datasource:
+#    slave1:
+#      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#      url: jdbc:sqlserver://123456:1433;DatabaseName=security_enterprise
+#      username: sa
+#      password: 123456
+#    slave2:
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://123456:5432/security_enterprise
+#      username: postgres
+#      password: 123456

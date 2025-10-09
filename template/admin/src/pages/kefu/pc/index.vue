@@ -88,7 +88,7 @@
                   <span>{{$t('kefu.transfer')}}</span>
                 </div>
                 <div class="transfer-box" v-if="isTransfer">
-                  <transfer ref="transfer" @transferSuccess="transferSuccess" @close="msgClose" @transferPeople="transferPeople" :userUid="userActive.to_user_id"></transfer>
+                  <transfer ref="transfer" @transferSuccess="transferSuccess" @close="msgClose" @transferPeople="transferPeople" :userUid="userActive.user_id"></transfer>
                 </div>
                 <div class="transfer-bg" v-if="isTransfer" @click.stop="isTransfer = false"></div>
               </div>
@@ -109,7 +109,7 @@
           </div>
         </div>
         <div class="right_menu">
-          <rightMenu :isTourist="tourist" :uid="userActive.to_user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
+          <rightMenu :isTourist="tourist" :uid="userActive.user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
           <div class="crmchat_link" @click="tolink">
             <span>{{$t('kefu.openSourceCustomerService')}}</span>
           </div>
@@ -345,7 +345,7 @@ export default {
         ws.$on('success',(data)=>{
 
           this.isShow = true;
-          let toChat = this.userActive ? this.userActive.to_user_id : this.userActive;
+          let toChat = this.userActive ? this.userActive.user_id : this.userActive;
           if(!this.toChat && toChat){
             ws.send({
               data: {
@@ -487,7 +487,7 @@ export default {
         this.bus.pageWs.then((ws) => {
           ws.send({
             data: {
-              id: this.userActive ? this.userActive.to_user_id : this.userActive,
+              id: this.userActive ? this.userActive.user_id : this.userActive,
             },
             type: "to_chat",
           });
@@ -499,7 +499,7 @@ export default {
         this.bus.pageWs.then((ws) => {
           ws.send({
             data: {
-              id: this.userActive ? this.userActive.to_user_id : this.userActive,
+              id: this.userActive ? this.userActive.user_id : this.userActive,
             },
             type: "to_chat",
           });
@@ -555,7 +555,7 @@ export default {
       return {
         msn,
         msn_type: type,
-        to_user_id: this.userActive ? this.userActive.to_user_id : this.userActive,
+        to_user_id: this.userActive ? this.userActive.user_id : this.userActive,
         is_send: 0,
         is_tourist: 0,
         avatar: this.kefuInfo.avatar,
@@ -577,11 +577,18 @@ export default {
 
       serviceList({
         limit: this.limit,
-        user_id: this.userActive.to_user_id,
+        user_id: this.userActive.user_id,
         upperId: this.upperId,
         is_tourist: this.tourist
       }).then(res => {
-        res.data.forEach(el => {
+        // 兼容Java后端返回格式：可能是数组或对象{list: [], total: 0}
+        console.log('getChatList response:', res);
+        console.log('res.data type:', Array.isArray(res.data) ? 'array' : typeof res.data);
+        console.log('res.data content:', res.data);
+        let dataList = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
+        console.log('dataList after processing:', dataList);
+
+        dataList.forEach(el => {
           if(el.msn_type == 1) {
             el.msn = this.replace_em(el.msn)
           } else if(el.msn_type == 2) {
@@ -596,13 +603,13 @@ export default {
           selector = `chat_${this.chatList[0].id}`;
         }
 
-        // this.chatList = res.data.concat(this.chatList)
-        this.chatList = [...res.data, ...this.chatList];
-        this.upperId = res.data.length > 0 ? res.data[0].id : 0
+        // this.chatList = dataList.concat(this.chatList)
+        this.chatList = [...dataList, ...this.chatList];
+        this.upperId = dataList.length > 0 ? dataList[0].id : 0
         this.isLoad = false
         this.$nextTick(() => {
           // this.scrollToTop()
-          this.isScroll = res.data.length >= this.limit
+          this.isScroll = dataList.length >= this.limit
           this.setPageScrollTo(selector)
         })
       })

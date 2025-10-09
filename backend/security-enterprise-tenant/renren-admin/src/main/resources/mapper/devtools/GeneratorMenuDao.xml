@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.devtools.dao.GeneratorMenuDao">
+
+    <!-- 菜单初始SQL -->
+    <insert id="generatorMenu">
+        INSERT INTO sys_menu(id, pid, url, permissions, menu_type, open_style, icon, sort, creator, create_date, updater, update_date)
+            VALUES (#{id}, #{pid}, #{url}, #{permissions}, #{menu_type}, 0, #{icon}, #{sort}, 1067246875800000001, #{now}, 1067246875800000001, #{now})
+        </insert>
+
+    <!-- 菜单国际化初始SQL -->
+    <insert id="generatorMenuLanguage">
+        INSERT INTO sys_language(table_name, table_id, field_name, field_value, language)
+            VALUES ('sys_menu', #{id}, 'name', #{name}, #{language})
+    </insert>
+
+</mapper>

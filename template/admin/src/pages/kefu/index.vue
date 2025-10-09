@@ -178,17 +178,34 @@ export default {
         imgcode: this.formInline.code
       }).then(res => {
         msg();
-        let expires = this.getExpiresTime(res.data.exp_time);
-        // 记录用户登陆信息
-        setCookies('kefu_uuid', res.data.kefuInfo.uid, expires);
-        setCookies('kefu_token', res.data.token, expires);
-        setCookies('kefu_expires_time', res.data.exp_time, expires);
-        setCookies('kefuInfo', res.data.kefuInfo, expires);
 
-        console.log(res);
+        // 验证必需字段
+        if (!res.data.token) {
+          this.$Message.error('登录失败：未获取到token');
+          return;
+        }
+
+        let expTime = res.data.exp_time || res.data.expires_time || Math.round(new Date() / 1000) + 7200;
+        let expires = this.getExpiresTime(expTime);
+
+        // 记录用户登陆信息
+        let kefuInfo = res.data.kefuInfo || res.data.kefu_info;
+        let kefuUid = kefuInfo ? kefuInfo.uid : null;
+
+        if (!kefuUid) {
+          this.$Message.error('登录失败：未获取到用户信息');
+          return;
+        }
+
+        setCookies('kefu_uuid', kefuUid, expires);
+        setCookies('kefu_token', res.data.token, expires);
+        setCookies('kefu_expires_time', expTime, expires);
+        setCookies('kefuInfo', kefuInfo, expires);
+
+        console.log('Login success:', res);
 
         // 记录用户信息
-        this.$store.commit('kefu/setInfo', res.data.kefuInfo)
+        this.$store.commit('kefu/setInfo', kefuInfo)
 
         // pc页面
         return this.$router.replace({ path: this.$route.query.redirect || '/kefu/pc_list' });

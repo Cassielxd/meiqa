@@ -2,7 +2,6 @@
 import {wss} from '@/libs/util';
 import {netWorkPing} from '@/api/kefu';
 import Setting from '@/setting';
-import Cookies from "js-cookie";
 import Vue from 'vue';
 
 
@@ -151,7 +150,7 @@ class wsSocket {
             wsUrl = hostUrl + '?type=admin' + '&token=' + util.cookies.get("token")
         }
         if (opt.key == 2) {
-            wsUrl = hostUrl + `?type=kefu` + '&token=' + `${Cookies.get("kefu_token")}`;
+            wsUrl = hostUrl + `?type=kefu` + '&token=' + `${opt.token}`;
         }
         if (opt.key == 3) {
             wsUrl = `${hostUrl}?type=user&form=${opt.form}&token=${opt.token}`;

@@ -1,7 +1,7 @@
 // 请求接口地址 如果没有配置自动获取当前网址路径
 
-const VUE_APP_API_URL = process.env.VUE_APP_API_URL || `${location.origin}/api/admin`
-const VUE_APP_WS_ADMIN_URL = process.env.VUE_APP_WS_ADMIN_URL || `ws:${location.hostname}`
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL || `http://localhost:20108/api/tenant`
+const VUE_APP_WS_ADMIN_URL = process.env.VUE_APP_WS_ADMIN_URL || `ws://localhost:20108`
 
 
 const Setting = {

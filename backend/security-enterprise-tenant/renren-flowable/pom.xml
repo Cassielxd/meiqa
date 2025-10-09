@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>io.renren</groupId>
+		<artifactId>security-enterprise-tenant</artifactId>
+		 <version>4.7.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>renren-flowable</artifactId>
+	<packaging>jar</packaging>
+	<description>renren-flowable</description>
+
+	<properties>
+		<shiro.version>1.12.0</shiro.version>
+		<flowable.version>7.0.1</flowable.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.renren</groupId>
+			<artifactId>renren-common</artifactId>
+			 <version>4.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-core</artifactId>
+			<classifier>jakarta</classifier>
+			<version>${shiro.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- 工作流 -->
+		<dependency>
+			<groupId>org.flowable</groupId>
+			<artifactId>flowable-spring-boot-starter-process</artifactId>
+			<version>${flowable.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
+
+</project>

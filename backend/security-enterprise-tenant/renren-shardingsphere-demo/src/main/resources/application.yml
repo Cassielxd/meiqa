@@ -1,0 +1,12 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: @artifactId@
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-jdbc.yaml
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

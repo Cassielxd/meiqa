@@ -1,15 +1,15 @@
 <template>
   <div class="custom-bread-crumb">
     <Breadcrumb :style="{fontSize: `${fontSize}px`}">
-      <BreadcrumbItem v-for="item in list" :key="`${item.path}`" v-if="listLast[0].path !== '/admin/home/'">
+      <BreadcrumbItem v-for="item in list" :key="`${item.path}`" v-if="listLast.length > 0 && listLast[0].path !== '/admin/home/'">
         <common-icon style="margin-right: 4px;" :type="item.icon || ''"/>
         {{ item.title }}
       </BreadcrumbItem>
-      <BreadcrumbItem v-if="listLast[0].path === '/admin/home/'">
+      <BreadcrumbItem v-if="listLast.length > 0 && listLast[0].path === '/admin/home/'">
         <common-icon style="margin-right: 4px;" :type="listLast[0].icon || ''"/>
         {{listLast[0].title}}
       </BreadcrumbItem>
-      <BreadcrumbItem v-else>
+      <BreadcrumbItem v-else-if="listLast.length > 0">
         <common-icon style="margin-right: 4px;" :type="listLast[0].icon || ''"/>
         {{listLast[0].title}}
       </BreadcrumbItem>

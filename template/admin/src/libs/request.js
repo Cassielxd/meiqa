@@ -59,15 +59,17 @@ service.interceptors.response.use(
                 removeCookies('expires_time')
                 removeCookies('uuid')
                 router.replace({ path: '/admin/login' })
-                break
+                return Promise.reject({ msg: 'Token过期，请重新登录' })
             case 410003:
                 removeCookies('kefuInfo')
                 removeCookies('kefu_token')
                 removeCookies('kefu_expires_time')
                 removeCookies('kefu_uuid')
                 router.replace({ path: '/kefu' })
+                return Promise.reject({ msg: 'Kefu token过期' })
             default:
-                break
+                // 未知状态码，返回原始响应
+                return response.data
         }
     },
     error => {

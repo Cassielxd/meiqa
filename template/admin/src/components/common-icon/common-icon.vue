@@ -17,7 +17,7 @@ export default {
   },
   computed: {
     iconType () {
-      return this.type.indexOf('_') === 0 ? 'Icons' : 'Icon'
+      return this.type && this.type.indexOf('_') === 0 ? 'Icons' : 'Icon'
     },
     iconName () {
       return this.iconType === 'Icons' ? this.getCustomIconName(this.type) : this.type

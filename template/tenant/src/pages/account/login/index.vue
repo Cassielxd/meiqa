@@ -33,7 +33,8 @@
               size="large"
             />
           </FormItem>
-          <FormItem prop="code">
+          <!-- 数字验证码已注释 -->
+          <!-- <FormItem prop="code">
             <div class="code">
               <Input
                 type="text"
@@ -44,7 +45,7 @@
               />
               <img :src="imgcode" class="pictrue" @click="captchas" />
             </div>
-          </FormItem>
+          </FormItem> -->
           <FormItem>
             <Button type="primary" long :loading="loading" size="large" @click="handleSubmit('formInline')" class="btn"
               >{{ $t('login.loginBtn') }}</Button
@@ -138,12 +139,13 @@
         <div id="msg"></div>
       </div>
     </Modal> -->
-      <Verify
+    <!-- 滑动验证码已注释 -->
+    <!-- <Verify
         @success="success"
         captchaType="blockPuzzle"
         :imgSize="{ width: '330px', height: '155px' }"
       ref="verify"
-    ></Verify>
+    ></Verify> -->
   </div>
 </template>
 <script>
@@ -183,7 +185,7 @@ export default {
       ruleInline: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+        // code: [{ required: true, message: '请输入验证码', trigger: 'blur' }], // 已注释验证码验证
       },
       // 注册表单数据
       registerForm: {
@@ -396,8 +398,12 @@ export default {
       this.$refs[name].validate((valid) => {
         console.log('Form validation result:', valid);
         if (valid) {
-          console.log('Form is valid, showing verify component');
-          this.$refs.verify.show()
+          console.log('Form is valid, calling login directly without captcha');
+          // 直接登录,不使用滑动验证码
+          this.closeModel({ captchaVerification: '' });
+
+          // 原滑动验证码逻辑已注释
+          // this.$refs.verify.show()
 
           // if (this.errorNum >= 2) {
           //   this.isShow = true;

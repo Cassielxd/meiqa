@@ -272,29 +272,31 @@ export default {
             recordUserListApi(this.formValidate).then(res=>{
                 this.tableData = res.data.list;
                 this.total = res.data.count;
+                // 添加空值检查
+                const statsData = res.data.data || {};
                 this.cardLists = [
                     {
                         className:'ios-contact',
                         col:6,
-                        count:res.data.data.user_count,
+                        count:statsData.user_count || 0,
                         name:'用户总数'
                     },
                     {
                         className:'ios-contact',
                         col:6,
-                        count:res.data.data.tourist_count,
+                        count:statsData.tourist_count || 0,
                         name:'游客总数'
                     },
                     {
                         className:'ios-contact',
                         col:6,
-                        count:res.data.data.dialogue_count,
+                        count:statsData.dialogue_count || 0,
                         name:'聊天记录总数'
                     },
                     {
                         className: '',
                         col: 6,
-                        count: res.data.data.recode_count,
+                        count: statsData.recode_count || 0,
                         name: '聊天用户总数'
                     }
                 ];

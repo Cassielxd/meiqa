@@ -1,0 +1,74 @@
+# CRM Chat Application Configuration
+server:
+  port: 20108  # PHP 使用的端口
+
+spring:
+  application:
+    name: crmchat
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${CRMCHAT_DB_URL:jdbc:mysql://localhost:3306/crmeb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${CRMCHAT_DB_USERNAME:root}
+    password: ${CRMCHAT_DB_PASSWORD:root123}
+
+  # Jackson配置
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+
+  # Redis配置
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+    timeout: 6000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: io.renren.crmchat.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Swagger配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  info:
+    title: CRM Chat API
+    description: Customer Service System API (PHP Compatible)
+    version: 1.0.0
+
+# CRM Chat JWT配置
+crmchat:
+  jwt:
+    # JWT密钥 (生产环境请通过环境变量 CRMCHAT_JWT_SECRET 注入)
+    secret: ${CRMCHAT_JWT_SECRET:change-me-in-production}
+    # Token过期时间(秒)
+    expire: ${CRMCHAT_JWT_EXPIRE:7200}
+
+# Renren Redis配置
+renren:
+  redis:
+    open: true

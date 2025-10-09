@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.security.dao.SysUserTokenDao">
+
+	<select id="getByToken" resultType="io.renren.modules.security.entity.SysUserTokenEntity">
+		select * from sys_user_token where token = #{value}
+	</select>
+
+	<select id="getByUserId" resultType="io.renren.modules.security.entity.SysUserTokenEntity">
+		select * from sys_user_token where user_id = #{value}
+	</select>
+
+	<update id="logout">
+		update sys_user_token set expire_date = #{expireDate} where user_id = #{userId}
+	</update>
+
+	<select id="getOnlineList" resultType="io.renren.modules.sys.entity.SysOnlineEntity">
+		select t1.user_id, t1.expire_date, t1.update_date as login_date, t2.username, t2.real_name
+			from sys_user_token t1, sys_user t2
+		where t1.user_id = t2.id and expire_date > #{expireDate}
+		<if test="username != null and username.trim() != ''">
+			and t2.username like #{username}
+		</if>
+	</select>
+</mapper>

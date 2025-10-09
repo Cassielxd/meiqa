@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客服聊天</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: white;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .header-title h3 {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .header-status {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #764ba2;
+        }
+
+        .message-content {
+            max-width: 60%;
+            margin: 0 12px;
+        }
+
+        .message-bubble {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .chat-input {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 24px;
+            padding: 8px 15px;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            outline: none;
+            padding: 6px 10px;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .system-message {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+
+        .connection-status {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .connection-status.connected {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .connection-status.disconnected {
+            background: rgba(244, 67, 54, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-info">
+                <div class="header-avatar">👤</div>
+                <div class="header-title">
+                    <h3 id="kefuName">客服在线</h3>
+                    <div class="header-status">随时为您服务</div>
+                </div>
+            </div>
+            <span class="connection-status" id="connectionStatus">连接中...</span>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="system-message">欢迎使用在线客服，我们将竭诚为您服务</div>
+        </div>
+
+        <div class="chat-input">
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" placeholder="输入消息..." />
+                <button class="send-btn" id="sendBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从 URL 参数获取配置
+        const urlParams = new URLSearchParams(window.location.search);
+        let token = urlParams.get('token') || '';  // 改为let,因为自动登录后会更新
+        const appid = urlParams.get('appid') || '';
+        const kefuid = urlParams.get('kefuid') || '';
+
+        // API 基础 URL (使用当前窗口的 location,因为 iframe 和 API 在同一域)
+        const apiBaseUrl = window.location.protocol + '//' + window.location.host;
+
+        console.log('Chat initialized with:', { token, appid, kefuid, apiBaseUrl });
+
+        // DOM 元素
+        const messagesContainer = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const kefuName = document.getElementById('kefuName');
+
+        // WebSocket 连接 (暂时不实现，使用轮询或 REST API)
+        let ws = null;
+        let userId = null;
+        let toUserId = null;  // 客服user_id
+        let currentKefuId = kefuid;
+
+        // 初始化
+        async function init() {
+            // 如果有 token，验证 token (排除字符串 "undefined")
+            if (token && token !== 'undefined') {
+                // Token 模式
+                updateConnectionStatus('connected');
+            } else if (appid) {
+                // 游客自动登录模式
+                await autoLogin();
+            } else {
+                addSystemMessage('错误：缺少必要参数 (token 或 appid)');
+                updateConnectionStatus('disconnected');
+                return;
+            }
+
+            // 加载历史消息
+            await loadHistory();
+
+            // 设置事件监听
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            sendBtn.addEventListener('click', sendMessage);
+        }
+
+        // 游客自动登录
+        async function autoLogin() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/mobile/service/auto_login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appid })
+                });
+
+                const data = await response.json();
+                if (data.status === 200 && data.data) {
+                    userId = data.data.user_info.user_id;  // 使用user_id，不是uid
+                    token = data.data.token;  // 保存自动登录返回的token
+                    console.log('游客自动登录成功:', data.data);
+                    updateConnectionStatus('connected');
+                    addSystemMessage('已连接到客服');
+                } else {
+                    throw new Error(data.msg || '自动登录失败');
+                }
+            } catch (error) {
+                console.error('自动登录失败:', error);
+                addSystemMessage('连接失败: ' + error.message);
+                updateConnectionStatus('disconnected');
+            }
+        }
+
+        // 加载历史消息
+        async function loadHistory() {
+            try {
+                const headers = token ? { 'Authori-zation': token } : {};
+                const url = `${apiBaseUrl}/api/mobile/user/record${appid ? '?appid=' + appid : ''}`;
+                console.log('Loading history:', url, 'token:', token ? 'present' : 'empty');
+                const response = await fetch(url, { headers });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('History response:', data);
+                    if (data.status === 200 && data.data) {
+                        // 保存客服user_id
+                        toUserId = data.data.toUserId || data.data.to_user_id;
+                        userId = userId || data.data.user_id;  // Fallback if not set from autoLogin
+                        console.log('Set toUserId:', toUserId, 'userId:', userId);
+                        // 显示历史消息
+                        if (data.data.serviceList) {
+                            data.data.serviceList.forEach(msg => addMessage(msg));
+                        }
+                    } else {
+                        console.error('History load failed:', data.msg);
+                        addSystemMessage('加载聊天记录失败: ' + (data.msg || '未知错误'));
+                    }
+                } else {
+                    console.error('HTTP error:', response.status);
+                }
+            } catch (error) {
+                console.error('加载历史消息失败:', error);
+                addSystemMessage('加载失败: ' + error.message);
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            if (!userId) {
+                addSystemMessage('错误：用户信息未初始化，请稍后重试');
+                return;
+            }
+
+            // toUserId可能为空(新用户)，后端会自动分配客服
+
+            // 获取消息ID
+            let guid = '';
+            try {
+                const idHeaders = token ? { 'Authori-zation': token } : {};
+                const idRes = await fetch(`${apiBaseUrl}/api/mobile/service/get_send_id`, { headers: idHeaders });
+                const idData = await idRes.json();
+                if (idData.status === 200 && idData.data) {
+                    guid = idData.data.send_id;
+                }
+            } catch (error) {
+                console.error('获取消息ID失败:', error);
+                addSystemMessage('发送失败: 无法获取消息ID');
+                return;
+            }
+
+            // 添加到界面
+            addMessage({
+                msn_type: 1, // 用户消息
+                msn: text,
+                add_time: Date.now() / 1000
+            });
+
+            messageInput.value = '';
+            sendBtn.disabled = true;
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (token) headers['Authori-zation'] = token;
+
+                const response = await fetch(`${apiBaseUrl}/api/mobile/service/send_message`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        guid: guid,
+                        user_id: userId,
+                        to_user_id: toUserId || 0,  // 0表示让后端自动分配客服
+                        msn: text,
+                        msn_type: 1,
+                        appid: appid
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status !== 200) {
+                    console.error('发送失败:', data.msg);
+                    addSystemMessage('发送失败: ' + data.msg);
+                }
+            } catch (error) {
+                console.error('发送消息错误:', error);
+                addSystemMessage('发送失败: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // 添加消息到界面
+        function addMessage(msg) {
+            const isUser = msg.msn_type === 1;
+            const time = new Date(msg.add_time * 1000).toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'kefu'}`;
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${isUser ? '我' : '客服'}</div>
+                <div class="message-content">
+                    <div class="message-bubble">${escapeHtml(msg.msn)}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 添加系统消息
+        function addSystemMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'system-message';
+            div.textContent = text;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 更新连接状态
+        function updateConnectionStatus(status) {
+            connectionStatus.className = 'connection-status ' + status;
+            connectionStatus.textContent = status === 'connected' ? '已连接' : '未连接';
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载后初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

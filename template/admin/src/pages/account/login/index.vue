@@ -32,18 +32,6 @@
               size="large"
             />
           </FormItem>
-          <FormItem prop="code">
-            <div class="code">
-              <Input
-                type="text"
-                v-model="formInline.code"
-                prefix="ios-keypad-outline"
-                placeholder="请输入验证码"
-                size="large"
-              />
-              <img :src="imgcode" class="pictrue" @click="captchas" />
-            </div>
-          </FormItem>
           <FormItem>
             <Button type="primary" long :loading="loading" size="large" @click="handleSubmit('formInline')" class="btn"
               >登录</Button
@@ -53,42 +41,21 @@
       </div>
     </div>
     
-    <!-- <Modal
-      v-model="modals"
-      scrollable
-      footer-hide
-      closable
-      title="请完成安全校验"
-      :mask-closable="false"
-      :z-index="2"
-      width="342"
-    >
-      <div class="captchaBox">
-        <div id="captcha" style="position: relative" ref="captcha"></div>
-        <div id="msg"></div>
-      </div>
-    </Modal> -->
-      <Verify
-        @success="success"
-        captchaType="blockPuzzle"
-        :imgSize="{ width: '330px', height: '155px' }"
-      ref="verify"
-    ></Verify>
+    <!-- 验证码已移除，只需用户名密码登录 -->
   </div>
 </template>
 <script>
-import { AccountLogin, loginInfoApi, captcha_pro } from '@/api/account';
+import { AccountLogin, loginInfoApi } from '@/api/account';
 import { getWorkermanUrl } from '@/api/kefu';
 // import mixins from '../mixins'
 import Setting from '@/setting';
 import { setCookies } from '@/libs/util';
 import '../../../assets/js/canvas-nest.min';
 // import '../../../assets/js/jigsaw.js';
-import Verify from "@/components/verifition/Verify";
+// 验证码已移除
 export default {
   // mixins: [mixins],
   components: {
-    Verify,
   },
   data() {
     return {
@@ -100,16 +67,13 @@ export default {
       loading: false,
       isShow: false,
       autoLogin: true,
-      imgcode: '',
       formInline: {
         username: '',
         password: '',
-        code: '',
       },
       ruleInline: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
       },
       errorNum: 0,
       // jigsaw: null,
@@ -147,7 +111,7 @@ export default {
       }
     },
     $route(n) {
-      this.captchas();
+      // 数字验证码已移除，只使用滑块验证码
     },
   },
   mounted: function () {
@@ -170,7 +134,7 @@ export default {
       }
       this.swiperData();
     });
-    this.captchas();
+    // 数字验证码已移除，只使用滑块验证码
   },
   methods: {
     swiperData() {
@@ -188,11 +152,8 @@ export default {
           this.swiperList = [{ slide: this.defaultSwiperList }];
         });
     },
-    success(params){ 
-      this.closeModel(params);
-    },
-    // 关闭模态框
-    closeModel(params) {
+    // 登录处理（无验证码）
+    closeModel() {
       this.isShow = false;
       let msg = this.$Message.loading({
         content: '登录中...',
@@ -202,19 +163,24 @@ export default {
       AccountLogin({
         account: this.formInline.username,
         pwd: this.formInline.password,
-        imgcode: this.formInline.code,
-        captchaType: 'blockPuzzle',
-        captchaVerification: params.captchaVerification,
-
       })
         .then(async (res) => {
+          console.log('[LOGIN] Response received:', res);
           msg();
           let data = res.data;
+          console.log('[LOGIN] Data:', data);
+          console.log('[LOGIN] user_info:', data.user_info);
+          console.log('[LOGIN] token:', data.token);
+          console.log('[LOGIN] expires_time:', data.expires_time);
+
           let expires = this.getExpiresTime(data.expires_time);
+          console.log('[LOGIN] Calculated expires:', expires);
+
           // 记录用户登陆信息
           setCookies('uuid', data.user_info.id, expires);
           setCookies('token', data.token, expires);
           setCookies('expires_time', data.expires_time, expires);
+          console.log('[LOGIN] Cookies set, checking:', document.cookie);
 
           this.$store.commit('userInfo/uniqueAuth', data.unique_auth);
           this.$store.commit('userInfo/userInfo', data.user_info);
@@ -233,14 +199,19 @@ export default {
 
           // if (this.jigsaw) this.jigsaw.reset();
 
-          return this.$router.replace({ path: '/admin/home/' || '/admin/' });
+          // 登录成功，跳转到首页
+          this.$router.replace({ path: '/admin/home/' }).catch(err => {
+            // 忽略导航重复错误
+            if (err.name !== 'NavigationDuplicated') {
+              console.error('Navigation error:', err);
+            }
+          });
         })
         .catch((res) => {
+          console.log('[LOGIN] Error caught:', res);
           msg();
-          this.formInline.code = '';
           let data = res === undefined ? {} : res;
           this.errorNum++;
-          this.captchas();
           this.$Message.error(data.msg || '登录失败');
           // if (this.jigsaw) this.jigsaw.reset();
         });
@@ -265,25 +236,11 @@ export default {
         document.getElementsByTagName('canvas')[0].className = 'index_bg';
       }
     },
-    captchas: function () {
-      captcha_pro().then(res => {
-        if(res.status == 200) {
-          this.imgcode = res.data.img;
-          this.formInline.key = res.data.key;
-        }
-      })
-      // this.imgcode = Setting.apiBaseURL + '/captcha_pro?' + Date.parse(new Date());
-    },
     handleSubmit(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
-          this.$refs.verify.show()
-
-          // if (this.errorNum >= 2) {
-          //   this.isShow = true;
-          // } else {
-          //   this.closeModel();
-          // }
+          // 直接登录，不需要验证码
+          this.closeModel();
         }
       });
     },

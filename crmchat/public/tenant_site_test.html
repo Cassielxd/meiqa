@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>某租户的商业网站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .test-info h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏢 欢迎访问我们的网站</h1>
+        <p>提供优质的产品和服务</p>
+    </div>
+
+    <div class="content">
+        <h2>关于我们</h2>
+        <p>我们是一家专业的服务提供商，致力于为客户提供最优质的解决方案。</p>
+
+        <div class="test-info">
+            <h3>💬 客服测试说明</h3>
+            <p>本页面集成了客服聊天组件（来自租户后台"代码获取"）</p>
+            <p><strong>测试步骤：</strong></p>
+            <ol>
+                <li>页面加载后，右下角会出现客服图标</li>
+                <li>点击图标，以游客身份打开聊天窗口</li>
+                <li>发送测试消息：<code>你好，我是游客测试</code></li>
+                <li>在客服工作台验证是否能看到此消息</li>
+            </ol>
+            <p><strong>租户信息：</strong></p>
+            <ul>
+                <li>租户邮箱: 348040933@qq.com</li>
+                <li>租户ID: 7</li>
+                <li>AppID: 202509251953426878</li>
+            </ul>
+        </div>
+
+        <h2>我们的服务</h2>
+        <ul>
+            <li>专业咨询</li>
+            <li>技术支持</li>
+            <li>定制解决方案</li>
+        </ul>
+
+        <p><strong>有任何问题？点击右下角的客服图标与我们联系！</strong></p>
+    </div>
+
+    <!-- ========================================
+         以下是从租户后台"代码获取"页面复制的代码
+         需要手动添加 appid 参数
+         ======================================== -->
+    <script>
+      (function() {
+        _s = document.createElement('script');
+        _s.src="http://localhost:20108/customerServer.js"  // 修改为 Java 后端地址
+        _s.onload = function(){
+          var option = {
+            "authInit": true,
+            openUrl: 'http://localhost:20108',  // Java 后端地址
+            token: '',  // 游客模式：空 token
+            appid: '202509251953426878',  // ✅ 添加租户的 appid
+            kefuid: '',  // 空表示自动分配客服
+            isShowTip: true,
+            mobileIcon: '',
+            pcIcon: '',
+            windowStyle: '',  // 空表示右下角浮动窗口
+          };
+          var canCustomerServer = new initCustomerServer(option);
+          canCustomerServer.init();
+        }
+        document.head.appendChild(_s)
+      })();
+    </script>
+</body>
+</html>

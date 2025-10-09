@@ -1,0 +1,48 @@
+dataSources:
+  renren_write:
+    dataSourceClassName: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/renren_write?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    username: renren
+    password: 123456
+    connectionTimeoutMilliseconds: 30000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+  renren_read:
+    dataSourceClassName: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/renren_read?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    username: renren
+    password: 123456
+
+
+rules:
+  - !READWRITE_SPLITTING
+    dataSources:
+      readwrite_ds:
+        writeDataSourceName: renren_write
+        readDataSourceNames:
+          - renren_read
+        transactionalReadQueryStrategy: PRIMARY
+        loadBalancerName: random
+    loadBalancers:
+      random:
+        type: RANDOM
+  - !SHARDING
+    tables:
+      tb_user_log:
+        actualDataNodes: renren_write.tb_user_log_$->{0..1}
+        tableStrategy:
+          standard:
+            shardingColumn: id
+            shardingAlgorithmName: tb_user_log_inline
+    shardingAlgorithms:
+      tb_user_log_inline:
+        type: INLINE
+        props:
+          algorithm-expression: tb_user_log_$->{id % 2}
+
+props:
+  sql-show: true

@@ -1,0 +1,12 @@
+version: '3'
+services:
+  security-enterprise-tenant:
+    image: renren_io:2.0
+    container_name: security-enterprise-tenant
+    ports:
+      - "8080:8080"
+    environment:
+      - spring.profiles.active=prod
+    volumes:
+      - /work/www/security-enterprise-tenant/renren-admin.jar:/app/app.jar
+      - /work/crt:/work/crt

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.renren.crmchat.dao.ChatUserMapper">
+
+    <!-- 统计时间段内的客户/游客数据，按时间分组 -->
+    <!-- PHP Reference: ChatUserDao::kefuStatistics() -->
+    <!-- Note: appid filter is added automatically by MyBatis interceptor (CrmTenantLineHandler) -->
+    <select id="kefuStatistics" resultType="io.renren.crmchat.dto.ChartDataDTO">
+        SELECT
+            <if test="type == 0">
+                DATE_FORMAT(create_time, '%Y-%m-%d') as month,
+            </if>
+            <if test="type != 0">
+                DATE_FORMAT(create_time, '%Y-%m') as month,
+            </if>
+            COUNT(*) as number
+        FROM eb_chat_user
+        WHERE is_tourist = #{isTourist}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY month
+        ORDER BY month
+    </select>
+
+</mapper>
