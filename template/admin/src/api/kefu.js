@@ -214,14 +214,14 @@ export function transferList(params) {
 }
 
 /**
- * 客服转接列表
+ * 客服转接
  * @constructor
  */
-export function serviceTransfer(params) {
+export function serviceTransfer(data) {
     return request({
         url: 'service/transfer',
         method: 'post',
-        params,
+        data,
         kefu: true
     });
 }

@@ -101,7 +101,7 @@
             </div>
             <div class="textarea-box" style="position:relative;">
               <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="Please enter text content" @on-enter="sendText" style="font-size:14px" /> -->
-              <div ref="editable" class="editable" contenteditable="true" @keydown.enter="sendText" @paste="handlePaste" @input="handleInput"></div>
+              <div ref="editable" class="editable" contenteditable="true" @keydown.enter="sendText" @keydown="handleInput" @paste="handlePaste" @input="handleInput"></div>
               <div class="send-btn">
                 <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">{{$t('kefu.send')}}</Button>
               </div>
@@ -310,10 +310,20 @@ export default {
 
   },
   methods: {
-      handleInput() {
-          let chatCon = this.$refs.editable.innerText.replace(/[\r\n]/g, '');
-          console.log(chatCon)
-          this.chatCon = chatCon.trim();
+      handleInput(event) {
+          // Prevent Enter key from being processed twice
+          if (event && event.key === 'Enter') {
+              return;
+          }
+
+          // Use nextTick to ensure DOM has updated
+          this.$nextTick(() => {
+              let chatCon = this.$refs.editable.innerText.replace(/[\r\n]/g, '');
+              console.log('handleInput - raw text:', chatCon);
+              this.chatCon = chatCon.trim();
+              console.log('handleInput - this.chatCon:', this.chatCon);
+              console.log('handleInput - send button disabled?', this.disabled);
+          });
       },
       handlePaste(event) {
         let clipboardDataItem = event.clipboardData.items[0];
@@ -539,12 +549,23 @@ export default {
 
     // 统一发送处理
     sendMsg(msn, type) {
+      console.log('sendMsg - starting with:', { msn, type });
       let guid = getGuid();
       let chat = this.chatOptinos(guid, msn, type);
+      console.log('sendMsg - message object before send:', chat);
+
       sendMessage(chat).then(res => {
+          console.log('sendMsg - API response:', res);
+          // Add required fields for display
           chat.add_time = Date.parse(new Date()) / 1000;
-        chat.msn = this.replace_em(chat.msn);
+          chat.id = res.data && res.data.id ? res.data.id : Date.now(); // Use server ID if available
+          chat.msn = this.replace_em(chat.msn);
+          console.log('sendMsg - message object after enrichment:', chat);
           this.pushMessageToList(chat);
+          console.log('sendMsg - message added to chatList, total messages:', this.chatList.length);
+      }).catch(err => {
+          console.error('sendMsg - API error:', err);
+          this.$Message.error(err.msg || 'Failed to send message');
       })
     },
     pushMessageToList(data) {

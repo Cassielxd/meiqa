@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.file.Files;
-
 /**
  * Chat View Controller - 聊天界面控制器
  * Serves the chat interface HTML for embedded chat widget
@@ -40,7 +38,8 @@ public class ChatViewController {
     public ResponseEntity<String> index() {
         try {
             Resource resource = new ClassPathResource("static/chat/index.html");
-            String content = new String(Files.readAllBytes(resource.getFile().toPath()));
+            // 使用 getInputStream() 而不是 getFile()，支持从 jar 包中读取
+            String content = new String(resource.getInputStream().readAllBytes());
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_HTML)
                     .body(content);

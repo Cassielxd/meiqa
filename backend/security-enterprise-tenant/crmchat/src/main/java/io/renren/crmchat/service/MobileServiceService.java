@@ -1276,13 +1276,14 @@ public class MobileServiceService {
 
         int totalUnread = getTotalUnreadCount(appid, toUserId);
 
+        // 发送消息给游客自己
         webSocketPushService.sendChat(appid, userId, response);
+
+        // 发送消息给客服
         if (webSocketPushService.isOnline(appid, toUserId)) {
-            if (webSocketPushService.isEngaged(appid, toUserId, userId)) {
-                webSocketPushService.sendReply(appid, toUserId, response);
-            } else {
-                webSocketPushService.sendMessageNum(appid, toUserId, userId, unreadCount, totalUnread, recored);
-            }
+            // 客服在线时，总是发送实际消息内容(reply类型)，而不是仅发送通知
+            // 这样客服端可以实时看到游客的消息，无需刷新
+            webSocketPushService.sendReply(appid, toUserId, response);
         }
 
         log.info("发送消息成功: userId={}, toUserId={}, guid={}", userId, toUserId, guid);

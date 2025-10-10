@@ -130,8 +130,11 @@ public class ChatWebSocketServer {
     }
 
     static void broadcast(String appid, int userId, String type, Object payload) {
+        log.info("=== ChatWebSocketServer.broadcast === appid={}, userId={}, type={}", appid, userId, type);
         Set<WebSocketSessionRegistry.SessionHolder> holders = WebSocketSessionRegistry.getSessions(appid, userId);
+        log.info("Found {} WebSocket sessions for user {}", holders.size(), userId);
         if (holders.isEmpty()) {
+            log.warn("No WebSocket sessions found for appid={}, userId={}, message will NOT be pushed", appid, userId);
             return;
         }
         Map<String, Object> envelope = new HashMap<>();
@@ -140,12 +143,14 @@ public class ChatWebSocketServer {
         String message;
         try {
             message = OBJECT_MAPPER.writeValueAsString(envelope);
+            log.info("Encoded WebSocket message: {}", message.substring(0, Math.min(200, message.length())));
         } catch (Exception ex) {
             log.error("Failed to encode WebSocket payload", ex);
             return;
         }
 
         for (WebSocketSessionRegistry.SessionHolder holder : holders) {
+            log.info("Sending message to session: sessionId={}", holder.getSession().getId());
             send(holder.getSession(), message);
         }
     }

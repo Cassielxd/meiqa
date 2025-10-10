@@ -29,6 +29,31 @@ window.$chat = {
     }
 };
 
+// Cookie操作函数
+function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
 
 //放入默认事件
 window.$chat.on('postMessage', function (type, data) {
@@ -120,6 +145,7 @@ function initCustomerServer(option) {
     this.settingObj.openUrl = `${this.baseUrl}/chat/index`; //服务器地址加路由, 若不传入则自动获取引入应用所在服务器的域名
     this.settingObj.domId = option.customerServerTip || 'customerServerTip'; //浮动客服dom
     this.settingObj.insertDomNode = option.insertDomNode || 'body' // 插入的标签
+    this.settingObj.authInit = option.authInit || false; // 是否启用访客自动登录
     this.settingObj.token = option.token; // token为必填项
     this.settingObj.pcIcon = option.pcIcon || base64ImageObject.pcIcon; // pcIcon 电脑端客服图片
     this.settingObj.mobileIcon = option.mobileIcon || base64ImageObject.mobileIcon; // mobile 手机端客服图片
@@ -171,7 +197,7 @@ function initCustomerServer(option) {
             this.settingObj.openUrl += `${customerServerData}`;
         }
 
-        this.settingObj.openUrl += '&version=' + this.settingObj.version
+        this.settingObj.openUrl += '&version=' + this.settingObj.version + '&_t=' + Date.now()
     }
 
 
@@ -441,6 +467,27 @@ initCustomerServer.prototype.runInit = function () {
     //初始化事件
     window.$chat.emit('init');
 
+    // 如果有pending的token（从auto_login获取），延迟发送给iframe以确保iframe已加载
+    if (this.pendingToken) {
+        const tokenToSend = this.pendingToken;
+        const userInfoToSend = this.pendingUserInfo;
+
+        // 延迟2秒确保iframe完全加载
+        setTimeout(() => {
+            console.log('发送pending token和用户信息给iframe:', tokenToSend, userInfoToSend);
+            this.iframe_contanier.contentWindow.postMessage({
+                type: 'updateToken',
+                data: {
+                    token: tokenToSend,
+                    user_info: userInfoToSend  // 传递用户信息
+                }
+            }, "*");
+        }, 2000);
+
+        this.pendingToken = null;  // 清除pending token
+        this.pendingUserInfo = null;  // 清除pending用户信息
+    }
+
     if (this.openChat) {
         this.openChatWin();
         this.openChat = false;
@@ -449,6 +496,65 @@ initCustomerServer.prototype.runInit = function () {
 
 //初始化
 initCustomerServer.prototype.init = function () {
+    // 如果是访客自动登录模式,先检查cookie中是否有保存的访客信息
+    if (this.settingObj.authInit && this.settingObj.token === 'guest_token_test') {
+        const cookieKey = 'visitor_' + this.settingObj.appid;
+        const savedVisitor = getCookie(cookieKey);
+
+        // 如果cookie中有保存的访客信息，直接使用
+        if (savedVisitor) {
+            try {
+                const visitorData = JSON.parse(savedVisitor);
+                console.log('使用已保存的访客信息:', visitorData);
+                this.settingObj.token = visitorData.token;
+                this.pendingToken = visitorData.token;
+                this.pendingUserInfo = visitorData.user_info;
+                this.loadIcon();
+                return;
+            } catch (err) {
+                console.error('解析访客cookie失败:', err);
+                // 继续执行auto_login
+            }
+        }
+
+        // 没有保存的访客信息，执行auto_login
+        const autoLoginData = {
+            appid: this.settingObj.appid,
+            nickname: this.settingObj.sendUserData?.nickname || '访客',
+            avatar: this.settingObj.sendUserData?.avatar || ''
+        };
+
+        request(this.baseUrl + '/api/mobile/service/auto_login', 'post', autoLoginData, null).then(res => {
+            console.log('auto_login成功:', res);
+            // 更新token为真实的JWT token
+            this.settingObj.token = res.data.token;
+            // 保存pending token和用户信息，等runInit完成后发送给iframe
+            this.pendingToken = res.data.token;
+            this.pendingUserInfo = res.data.user_info;  // 保存用户信息
+
+            // 保存访客信息到cookie (30天过期)
+            const visitorData = {
+                token: res.data.token,
+                user_info: res.data.user_info
+            };
+            setCookie(cookieKey, JSON.stringify(visitorData), 30);
+            console.log('访客信息已保存到cookie');
+
+            // 继续原有的初始化流程
+            this.loadIcon();
+        }).catch(err => {
+            console.error('auto_login失败:', err);
+            // 即使失败也继续初始化,但会导致后续API调用401
+            this.loadIcon();
+        });
+    } else {
+        // 非访客模式,直接加载icon
+        this.loadIcon();
+    }
+};
+
+// 加载icon的方法
+initCustomerServer.prototype.loadIcon = function () {
     // 构建带appid参数的URL
     const iconUrl = this.baseUrl + '/api/mobile/service/icon' + (this.settingObj.appid ? '?appid=' + this.settingObj.appid : '');
     request(iconUrl, 'get', null, this.settingObj.token).then(res => {
@@ -528,7 +634,13 @@ function ajax(options) {
         xhr = new ActiveXObject("Microsoft.XMLHTTP");
     }
 
-    xhr.open(options.method, options.url + "?" + params, options.async || true);
+    // 对于GET请求，参数在URL上；对于POST请求，参数在请求体中
+    var url = options.url;
+    if (options.method.toUpperCase() === 'GET' && params) {
+        url += "?" + toParams(params);
+    }
+
+    xhr.open(options.method, url, options.async || true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     if (token) {
         xhr.setRequestHeader("Authori-zation", `Bearer ${token}`);
@@ -536,7 +648,7 @@ function ajax(options) {
 
     switch (options.method.toUpperCase()) {
         case 'GET':
-            xhr.send(params ? toParams(params) : '');
+            xhr.send();
             break;
         case 'POST':
             xhr.send(JSON.stringify(params));

@@ -2,16 +2,22 @@ package io.renren.crmchat.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.renren.crmchat.dao.AuxiliaryMapper;
 import io.renren.crmchat.dao.ChatServiceDialogueRecordMapper;
 import io.renren.crmchat.dao.ChatServiceMapper;
+import io.renren.crmchat.dao.ChatServiceRecordMapper;
 import io.renren.crmchat.dao.ChatUserMapper;
+import io.renren.crmchat.entity.AuxiliaryEntity;
 import io.renren.crmchat.entity.ChatServiceDialogueRecordEntity;
 import io.renren.crmchat.entity.ChatServiceEntity;
+import io.renren.crmchat.entity.ChatServiceRecordEntity;
 import io.renren.crmchat.entity.ChatUserEntity;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.websocket.WebSocketPushService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -39,6 +45,9 @@ public class KefuChatService {
     private final ChatServiceDialogueRecordMapper chatServiceDialogueRecordMapper;
     private final ChatServiceMapper chatServiceMapper;
     private final ChatUserMapper chatUserMapper;
+    private final ChatServiceRecordMapper chatServiceRecordMapper;
+    private final AuxiliaryMapper auxiliaryMapper;
+    private final WebSocketPushService webSocketPushService;
 
     /**
      * 获取当前客服的聊天记录
@@ -224,6 +233,198 @@ public class KefuChatService {
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
         result.put("count", pageResult.getTotal());
+
+        return result;
+    }
+
+    /**
+     * 客服转接
+     * POST /api/kefu/chat/transfer
+     *
+     * PHP Reference: KefuServices.php::setTransfer() + Service.php::transfer()
+     *
+     * 业务逻辑（严格参考PHP实现）:
+     * 1. 验证参数：kefuToUserId（目标客服user_id）, chatUserId（被转接的chat_user.id）
+     * 2. 验证不能转接给自己
+     * 3. 事务操作：
+     *    a. 查询原客服与用户的会话记录信息
+     *    b. 为新客服创建会话记录（eb_chat_service_record）
+     *    c. 删除原客服的会话记录
+     *    d. 保存转接关系到辅助表（eb_auxiliary）
+     * 4. 发送WebSocket通知给用户
+     *
+     * @param kefuToUserId 目标客服user_id
+     * @param chatUserId   被转接的chat_user.id
+     * @param kefuId       当前客服ID
+     * @param currentAppid 当前租户appid
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void transferService(Integer kefuToUserId, Integer chatUserId, Integer kefuId, String currentAppid) {
+        // 1. 获取当前客服信息
+        ChatServiceEntity kefu = chatServiceMapper.selectById(kefuId);
+        if (kefu == null || !kefu.getAppid().equals(currentAppid)) {
+            throw new CrmChatException("Customer service agent does not exist");
+        }
+
+        Integer kefuUserId = kefu.getUserId();
+        if (kefuUserId == null) {
+            throw new CrmChatException("Customer service user ID does not exist");
+        }
+
+        // 2. 验证不能转接给自己
+        if (kefuUserId.equals(kefuToUserId)) {
+            throw new CrmChatException("Cannot transfer to yourself");
+        }
+
+        // 3. 验证目标客服是否存在且在线
+        QueryWrapper<ChatServiceEntity> toKefuWrapper = new QueryWrapper<>();
+        toKefuWrapper.eq("appid", currentAppid);
+        toKefuWrapper.eq("user_id", kefuToUserId);
+        toKefuWrapper.eq("status", 1);
+        ChatServiceEntity toKefu = chatServiceMapper.selectOne(toKefuWrapper);
+
+        if (toKefu == null) {
+            throw new CrmChatException("Target customer service agent does not exist or is offline");
+        }
+
+        // 4. 查询原客服与用户的会话记录
+        QueryWrapper<ChatServiceRecordEntity> recordWrapper = new QueryWrapper<>();
+        recordWrapper.eq("appid", currentAppid);
+        recordWrapper.eq("user_id", kefuUserId);
+        recordWrapper.eq("to_user_id", chatUserId);
+        ChatServiceRecordEntity originalRecord = chatServiceRecordMapper.selectOne(recordWrapper);
+
+        if (originalRecord == null) {
+            throw new CrmChatException("Conversation record does not exist");
+        }
+
+        // 5. 为新客服创建会话记录
+        ChatServiceRecordEntity newRecord = new ChatServiceRecordEntity();
+        newRecord.setAppid(currentAppid);
+        newRecord.setUserId(kefuToUserId); // 新客服的user_id
+        newRecord.setToUserId(chatUserId);  // 用户的id
+        newRecord.setType(originalRecord.getType());
+        newRecord.setMessageType(originalRecord.getMessageType());
+        newRecord.setNum(0); // 新会话未读数为0
+        newRecord.setIsTourist(originalRecord.getIsTourist());
+        newRecord.setNickname(originalRecord.getNickname());
+        newRecord.setAvatar(originalRecord.getAvatar());
+        newRecord.setAddTime((int) (System.currentTimeMillis() / 1000));
+        newRecord.setUpdateTime((int) (System.currentTimeMillis() / 1000));
+
+        int insertResult = chatServiceRecordMapper.insert(newRecord);
+        if (insertResult <= 0) {
+            throw new CrmChatException("Failed to create new conversation record");
+        }
+
+        // 6. 删除原客服的会话记录（双向）
+        QueryWrapper<ChatServiceRecordEntity> deleteWrapper1 = new QueryWrapper<>();
+        deleteWrapper1.eq("appid", currentAppid);
+        deleteWrapper1.eq("user_id", kefuUserId);
+        deleteWrapper1.eq("to_user_id", chatUserId);
+        chatServiceRecordMapper.delete(deleteWrapper1);
+
+        QueryWrapper<ChatServiceRecordEntity> deleteWrapper2 = new QueryWrapper<>();
+        deleteWrapper2.eq("appid", currentAppid);
+        deleteWrapper2.eq("user_id", chatUserId);
+        deleteWrapper2.eq("to_user_id", kefuUserId);
+        chatServiceRecordMapper.delete(deleteWrapper2);
+
+        // 7. 保存转接关系到辅助表
+        QueryWrapper<AuxiliaryEntity> auxWrapper = new QueryWrapper<>();
+        auxWrapper.eq("type", 0);
+        auxWrapper.eq("appid", currentAppid);
+        auxWrapper.eq("binding_id", chatUserId);
+        AuxiliaryEntity existingAux = auxiliaryMapper.selectOne(auxWrapper);
+
+        int now = (int) (System.currentTimeMillis() / 1000);
+        if (existingAux != null) {
+            // 更新现有记录
+            existingAux.setRelationId(kefuToUserId);
+            existingAux.setUpdateTime(now);
+            auxiliaryMapper.updateById(existingAux);
+        } else {
+            // 创建新记录
+            AuxiliaryEntity newAux = new AuxiliaryEntity();
+            newAux.setType(0); // 0=客服转接辅助
+            newAux.setAppid(currentAppid);
+            newAux.setBindingId(chatUserId);
+            newAux.setRelationId(kefuToUserId);
+            newAux.setStatus(1);
+            newAux.setAddTime(now);
+            newAux.setUpdateTime(now);
+            auxiliaryMapper.insert(newAux);
+        }
+
+        // 8. 发送WebSocket通知给用户
+        try {
+            // 获取新客服信息
+            Map<String, Object> transferData = new HashMap<>();
+            transferData.put("type", "transfer");
+            transferData.put("message", "Your conversation has been transferred to another agent");
+            transferData.put("to_user_id", kefuToUserId);
+            transferData.put("to_user_nickname", toKefu.getNickname());
+            transferData.put("to_user_avatar", toKefu.getAvatar());
+            transferData.put("add_time", now);
+
+            // 发送通知给用户
+            webSocketPushService.sendChat(currentAppid, chatUserId, transferData);
+
+            log.info("客服转接成功: fromKefu={}, toKefu={}, chatUserId={}", kefuUserId, kefuToUserId, chatUserId);
+        } catch (Exception e) {
+            // WebSocket发送失败不影响转接成功
+            log.error("转接WebSocket通知发送失败", e);
+        }
+    }
+
+    /**
+     * 获取可转接的客服列表
+     * GET /api/kefu/chat/transfer/list
+     *
+     * PHP Reference: Service.php::getServiceList()
+     *
+     * 业务逻辑:
+     * 1. 查询当前租户下的所有在线客服
+     * 2. 排除当前客服和指定用户
+     *
+     * @param kefuId       当前客服ID
+     * @param chatUserId   被转接的用户ID（可选，用于排除）
+     * @param currentAppid 当前租户appid
+     * @return 可转接的客服列表
+     */
+    public List<Map<String, Object>> getTransferableKefuList(Integer kefuId, Integer chatUserId, String currentAppid) {
+        // 1. 获取当前客服信息
+        ChatServiceEntity kefu = chatServiceMapper.selectById(kefuId);
+        if (kefu == null || !kefu.getAppid().equals(currentAppid)) {
+            throw new CrmChatException("Customer service agent does not exist");
+        }
+
+        Integer kefuUserId = kefu.getUserId();
+        if (kefuUserId == null) {
+            throw new CrmChatException("Customer service user ID does not exist");
+        }
+
+        // 2. 查询所有在线客服（排除当前客服）
+        QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("appid", currentAppid);
+        wrapper.eq("status", 1); // 状态正常
+        wrapper.eq("online", 1); // 在线
+        wrapper.ne("user_id", kefuUserId); // 排除当前客服
+        wrapper.orderByDesc("id");
+
+        List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
+
+        // 3. 格式化返回结果
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ChatServiceEntity k : kefuList) {
+            Map<String, Object> kefuMap = new HashMap<>();
+            kefuMap.put("id", k.getId());
+            kefuMap.put("user_id", k.getUserId());
+            kefuMap.put("nickname", k.getNickname());
+            kefuMap.put("avatar", k.getAvatar());
+            kefuMap.put("online", k.getOnline());
+            result.add(kefuMap);
+        }
 
         return result;
     }
