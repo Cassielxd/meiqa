@@ -523,13 +523,25 @@
                     updateConnectionStatus('disconnected');
                 };
 
-                ws.onclose = function() {
-                    console.log('WebSocket连接关闭');
+                ws.onclose = function(event) {
+                    console.log('WebSocket连接关闭, code:', event.code, ', reason:', event.reason);
                     updateConnectionStatus('disconnected');
                     ws = null;
-                    // 5秒后尝试重连
-                    if (!wsReconnectTimer) {
-                        wsReconnectTimer = setTimeout(connectWebSocket, 5000);
+
+                    // 如果是游客模式且有appid，尝试刷新token后重连
+                    if (appid && !wsReconnectTimer) {
+                        wsReconnectTimer = setTimeout(async () => {
+                            console.log('WebSocket重连中，先刷新token...');
+                            wsReconnectTimer = null;
+
+                            // 刷新token
+                            await autoLogin();
+
+                            // 重新连接WebSocket
+                            if (token && userId) {
+                                connectWebSocket();
+                            }
+                        }, 3000);  // 3秒后刷新token并重连
                     }
                 };
             } catch (error) {
