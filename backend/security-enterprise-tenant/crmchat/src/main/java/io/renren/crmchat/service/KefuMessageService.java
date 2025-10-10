@@ -96,6 +96,11 @@ public class KefuMessageService {
      */
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> sendMessage(Map<String, Object> data, Integer kefuUserId, String appid) {
+        log.info("=== sendMessage START ===");
+        log.info("kefuUserId: {}", kefuUserId);
+        log.info("appid from JWT: {}", appid);
+        log.info("data: {}", data);
+
         // 1. 验证必填字段
         if (!data.containsKey("to_user_id") || data.get("to_user_id") == null) {
             throw new CrmChatException("User does not exist");
@@ -143,15 +148,23 @@ public class KefuMessageService {
             isTourist = 0;
         }
 
+        log.info("查询客服记录: appid={}, kefuUserId={}", appid, kefuUserId);
         ChatServiceEntity kefu = findKefuByUserId(appid, kefuUserId);
+        log.info("查询结果: kefu={}", kefu);
         if (kefu == null) {
             throw new CrmChatException("Customer service agent does not exist");
         }
 
         boolean recipientOnline = webSocketPushService.isOnline(appid, toUserId);
 
+        // 获取客服的user_id（不是id）用于消息记录
+        Integer kefuRealUserId = kefu.getUserId();
+        if (kefuRealUserId == null) {
+            throw new CrmChatException("Customer service user_id does not exist");
+        }
+
         ChatServiceDialogueRecordEntity record = new ChatServiceDialogueRecordEntity();
-        record.setUserId(kefuUserId);
+        record.setUserId(kefuRealUserId);  // 使用客服的user_id而不是id
         record.setToUserId(toUserId);
         record.setMsn(msn);
         record.setMsnType(msnType);
@@ -170,18 +183,18 @@ public class KefuMessageService {
         String summaryMessage = summarizeMessage(msn, msnType);
         int userOnlineFlag = toUser.getOnline() == null ? 0 : toUser.getOnline();
 
-        // 根据PHP实现: eb_chat_service_record表中 user_id=游客, to_user_id=客服
+        // 根据PHP实现: eb_chat_service_record表中 user_id=游客, to_user_id=客服的user_id
         // PRIMARY record: user_id=visitor, to_user_id=service (游客的会话记录，显示与哪个客服聊天)
-        upsertRecord(appid, toUserId, kefuUserId, summaryMessage, msnType, 0,
+        upsertRecord(appid, toUserId, kefuRealUserId, summaryMessage, msnType, 0,
                 toUser.getIsTourist() == null ? 0 : toUser.getIsTourist(),
                 userOnlineFlag, toUser.getNickname(), toUser.getAvatar());
 
-        int pairUnread = countUnreadForPair(appid, toUserId, kefuUserId);
+        int pairUnread = countUnreadForPair(appid, toUserId, kefuRealUserId);
         // REVERSE record: user_id=service, to_user_id=visitor (客服的会话记录，显示与哪个游客聊天)
-        upsertRecord(appid, kefuUserId, toUserId, summaryMessage, msnType, pairUnread,
+        upsertRecord(appid, kefuRealUserId, toUserId, summaryMessage, msnType, pairUnread,
                 isTourist, recipientOnline ? 1 : 0, kefu.getNickname(), kefu.getAvatar());
 
-        ChatServiceRecordEntity receiverRecord = fetchRecord(appid, toUserId, kefuUserId);
+        ChatServiceRecordEntity receiverRecord = fetchRecord(appid, toUserId, kefuRealUserId);
         Map<String, Object> recoredMap = receiverRecord != null ? buildRecordMap(receiverRecord) : Collections.emptyMap();
 
         Map<String, Object> payload = new HashMap<>();
@@ -203,13 +216,13 @@ public class KefuMessageService {
             webSocketPushService.sendReply(appid, toUserId, payload);
         } else {
             int totalUnread = countTotalUnread(appid, toUserId);
-            webSocketPushService.sendMessageNum(appid, toUserId, kefuUserId, pairUnread, totalUnread, recoredMap);
+            webSocketPushService.sendMessageNum(appid, toUserId, kefuRealUserId, pairUnread, totalUnread, recoredMap);
         }
 
         Map<String, Object> response = new HashMap<>(payload);
-        autoBadgeService.dispatch(kefuUserId, toUserId, appid);
+        autoBadgeService.dispatch(kefuRealUserId, toUserId, appid);
 
-        log.info("发送消息成功: kefuUserId={}, toUserId={}, guid={}", kefuUserId, toUserId, guid);
+        log.info("发送消息成功: kefuRealUserId={}, toUserId={}, guid={}", kefuRealUserId, toUserId, guid);
         return response;
     }
 
@@ -270,10 +283,11 @@ public class KefuMessageService {
         return chatServiceRecordMapper.selectOne(wrapper);
     }
 
-    private ChatServiceEntity findKefuByUserId(String appid, Integer kefuUserId) {
+    private ChatServiceEntity findKefuByUserId(String appid, Integer kefuServiceId) {
+        // 注意：参数kefuServiceId实际是eb_chat_service.id（从JWT的user_id字段获取）
         QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("appid", appid);
-        wrapper.eq("user_id", kefuUserId);
+        wrapper.eq("id", kefuServiceId);  // 使用id字段，不是user_id字段
         return chatServiceMapper.selectOne(wrapper);
     }
 

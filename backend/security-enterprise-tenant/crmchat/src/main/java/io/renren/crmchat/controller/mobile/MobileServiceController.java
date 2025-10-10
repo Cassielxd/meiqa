@@ -1,6 +1,7 @@
 package io.renren.crmchat.controller.mobile;
 
 import io.renren.crmchat.common.result.ApiResult;
+import io.renren.crmchat.security.UserContext;
 import io.renren.crmchat.service.MobileServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,8 +64,16 @@ public class MobileServiceController {
         Map<String, Object> requestParams = new HashMap<>(params);
         String appid = requestParams.containsKey("appid") ? requestParams.get("appid").toString() : "default";
 
+        // 从JWT token中提取游客的userId（如果已登录）
+        Long jwtUserId = UserContext.getUserId();
+        if (jwtUserId != null && jwtUserId > 0) {
+            // 如果JWT中有userId，传递给Service层作为cookieUid
+            requestParams.put("cookieUid", String.valueOf(jwtUserId));
+            log.info("[游客历史消息] 从JWT提取userId: {}, appid: {}", jwtUserId, appid);
+        }
+
         // 调试日志：检查租户隔离
-        log.info("[租户隔离检查] Controller层 - 原始params: {}, 提取的appid: {}", params, appid);
+        log.info("[租户隔离检查] Controller层 - 原始params: {}, 提取的appid: {}, JWT userId: {}", params, appid, jwtUserId);
 
         Map<String, Object> result = mobileServiceService.getRecordList(requestParams, appid);
         return ApiResult.ok(result);
