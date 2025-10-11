@@ -91,7 +91,7 @@ class Admin extends AuthController
      * 修改管理员信息
      * @param $id
      * @return mixed
-     */you
+     */
     public function update($id)
     {
         $data = $this->request->postMore([

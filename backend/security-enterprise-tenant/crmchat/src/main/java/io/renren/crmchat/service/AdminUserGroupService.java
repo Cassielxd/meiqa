@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.crmchat.dao.ChatUserGroupMapper;
 import io.renren.crmchat.entity.ChatUserGroupEntity;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import io.renren.crmchat.security.TenantContextUtils;
 import io.renren.crmchat.security.TenantGuard;
 import io.renren.crmchat.security.TenantQueryHelper;
@@ -24,6 +27,7 @@ import java.util.*;
 public class AdminUserGroupService {
 
     private final ChatUserGroupMapper chatUserGroupMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取分组列表
@@ -56,47 +60,27 @@ public class AdminUserGroupService {
      * 获取创建表单数据
      * PHP Reference: Group.php::create() -> ChatUserGroupServices::add()
      *
-     * Returns form configuration for form-create library:
+     * PHP代码:
+     * public function add()
      * {
-     *   "rules": [field definitions],
-     *   "title": "Add Group",
-     *   "action": "/api/admin/user/group",
-     *   "method": "POST",
-     *   "info": "",
-     *   "status": true
+     *     $field[] = FormBuilder::input('group_name', '分组名称')->required();
+     *     return create_form('添加分组', $field, $this->url('/user/group'), 'POST');
      * }
      */
     public Map<String, Object> getCreateForm() {
-        List<Map<String, Object>> rules = new ArrayList<>();
+        List<BaseComponent> rules = new ArrayList<>();
 
-        // Create group_name input field
-        Map<String, Object> groupNameField = new HashMap<>();
-        groupNameField.put("type", "input");
-        groupNameField.put("field", "group_name");
-        groupNameField.put("title", "Group Name");
-        groupNameField.put("value", "");
+        // 分组名称输入框
+        rules.add(formBuilder.input("group_name", "分组名称", "")
+            .required()
+            .placeholder("请输入分组名称"));
 
-        // Add validation rules
-        List<Map<String, Object>> validate = new ArrayList<>();
-        Map<String, Object> requiredRule = new HashMap<>();
-        requiredRule.put("required", true);
-        requiredRule.put("message", "Please enter group name");
-        requiredRule.put("trigger", "blur");
-        validate.add(requiredRule);
-        groupNameField.put("validate", validate);
-
-        rules.add(groupNameField);
-
-        // Build complete form configuration
-        Map<String, Object> result = new HashMap<>();
-        result.put("rules", rules);
-        result.put("title", "添加分组");
-        result.put("action", "user/group");  // Relative path, frontend adds /api/admin prefix
-        result.put("method", "POST");
-        result.put("info", "");
-        result.put("status", true);
-
-        return result;
+        return FormHelper.createForm(
+            "添加分组",
+            rules,
+            "user/group",
+            "POST"
+        );
     }
 
     /**
@@ -120,6 +104,14 @@ public class AdminUserGroupService {
     /**
      * 获取编辑表单数据
      * PHP Reference: Group.php::edit() -> ChatUserGroupServices::add()
+     *
+     * PHP代码:
+     * public function add(int $id = 0)
+     * {
+     *     $groupInfo = $id ? $this->services->get($id) : [];
+     *     $field[] = FormBuilder::input('group_name', '分组名称', $groupInfo['group_name'] ?? '')->required();
+     *     return create_form($id ? '修改分组' : '添加分组', $field, $this->url('/user/group' . ($id ? ('/' . $id) : '')), $id ? 'PUT' : 'POST');
+     * }
      */
     public Map<String, Object> getEditForm(Integer id, String appid) {
         if (id == null || id <= 0) {
@@ -132,43 +124,22 @@ public class AdminUserGroupService {
         }
         TenantGuard.ensureOwnedByCurrentTenant(group.getAppid(), "Group does not exist");
 
-        List<Map<String, Object>> rules = new ArrayList<>();
+        List<BaseComponent> rules = new ArrayList<>();
 
-        // Add hidden id field
-        Map<String, Object> idField = new HashMap<>();
-        idField.put("type", "hidden");
-        idField.put("field", "id");
-        idField.put("value", id);
-        rules.add(idField);
+        // 隐藏字段：id
+        rules.add(formBuilder.hidden("id", id));
 
-        // Add group_name input field with existing value
-        Map<String, Object> groupNameField = new HashMap<>();
-        groupNameField.put("type", "input");
-        groupNameField.put("field", "group_name");
-        groupNameField.put("title", "Group Name");
-        groupNameField.put("value", group.getGroupName());
+        // 分组名称输入框（带默认值）
+        rules.add(formBuilder.input("group_name", "分组名称", group.getGroupName())
+            .required()
+            .placeholder("请输入分组名称"));
 
-        // Add validation rules
-        List<Map<String, Object>> validate = new ArrayList<>();
-        Map<String, Object> requiredRule = new HashMap<>();
-        requiredRule.put("required", true);
-        requiredRule.put("message", "Please enter group name");
-        requiredRule.put("trigger", "blur");
-        validate.add(requiredRule);
-        groupNameField.put("validate", validate);
-
-        rules.add(groupNameField);
-
-        // Build complete form configuration
-        Map<String, Object> result = new HashMap<>();
-        result.put("rules", rules);
-        result.put("title", "Modify Group");
-        result.put("action", "user/group/" + id);  // Relative path, frontend adds /api/admin prefix
-        result.put("method", "PUT");
-        result.put("info", "");
-        result.put("status", true);
-
-        return result;
+        return FormHelper.createForm(
+            "修改分组",
+            rules,
+            "user/group/" + id,
+            "PUT"
+        );
     }
 
     /**

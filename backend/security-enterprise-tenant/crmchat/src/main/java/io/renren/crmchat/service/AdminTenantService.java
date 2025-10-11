@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -36,6 +37,7 @@ public class AdminTenantService {
     private final PaginationService paginationService;
     private final ValidationService validationService;
     private final PasswordService passwordService;
+    private final AdminApplicationService adminApplicationService;
 
     /**
      * 获取租户列表（带分页和搜索）
@@ -133,8 +135,9 @@ public class AdminTenantService {
         // 3. 生成唯一的租户编码
         String tenantCode = generateTenantCode();
 
-        // 4. 生成唯一的 appid
-        String appid = generateAppId();
+        // 4. 使用ApplicationService生成应用信息（包含appid, app_secret, rand, timestamp）
+        Map<String, Object> appInfo = adminApplicationService.generateAppInfo();
+        String appid = (String) appInfo.get("appid");
 
         // 5. 创建租户实体
         TenantsEntity tenant = new TenantsEntity();
@@ -178,10 +181,16 @@ public class AdminTenantService {
             throw new CrmChatException("Failed to create tenant");
         }
 
-        // 13. TODO: 如果状态为启用，自动创建应用数据（后续实现）
-        // if (tenant.getStatus() == 1) {
-        //     createTenantApplication(tenant);
-        // }
+        // 13. 如果状态为启用(1)，自动创建应用数据到application表
+        if (tenant.getStatus() == 1) {
+            try {
+                adminApplicationService.createTenantApplication(tenant.getTenantName(), appInfo);
+            } catch (Exception e) {
+                // 应用创建失败不影响租户创建，只记录错误
+                // TODO: 添加日志记录
+                System.err.println("Failed to create tenant application: " + e.getMessage());
+            }
+        }
 
         // 14. 返回创建的租户信息
         return entityToMap(tenant);
@@ -208,6 +217,9 @@ public class AdminTenantService {
         if (tenant == null) {
             throw new CrmChatException("Tenant does not exist");
         }
+
+        // 记录原状态，用于判断是否需要创建应用
+        int oldStatus = tenant.getStatus();
 
         // 2. 更新租户名称
         if (data.containsKey("tenant_name") && data.get("tenant_name") != null) {
@@ -305,6 +317,39 @@ public class AdminTenantService {
         int result = tenantsMapper.updateById(tenant);
         if (result <= 0) {
             throw new CrmChatException("Failed to update tenant");
+        }
+
+        // 15. 如果状态从非启用变为启用(1)，检查并创建应用
+        // PHP Reference: TenantServices.php::updateTenant() -> checkAndCreateApplication()
+        int newStatus = tenant.getStatus();
+        if (newStatus == 1 && oldStatus != 1) {
+            // 状态变更为启用，需要检查appid对应的应用是否存在
+            String appid = tenant.getAppid();
+            if (appid == null || appid.trim().isEmpty()) {
+                // 如果租户没有appid，先生成一个
+                Map<String, Object> appInfo = adminApplicationService.generateAppInfo();
+                appid = (String) appInfo.get("appid");
+
+                // 更新租户的appid
+                tenant.setAppid(appid);
+                tenantsMapper.updateById(tenant);
+
+                // 创建应用
+                try {
+                    adminApplicationService.createTenantApplication(tenant.getTenantName(), appInfo);
+                } catch (Exception e) {
+                    System.err.println("更新租户时创建应用失败: " + e.getMessage());
+                }
+            } else {
+                // 租户有appid，createTenantApplication内部会检查应用是否存在，不存在则创建
+                try {
+                    // 生成新的appInfo(如果应用已存在，createTenantApplication会直接返回true)
+                    Map<String, Object> newAppInfo = adminApplicationService.generateAppInfo();
+                    adminApplicationService.createTenantApplication(tenant.getTenantName(), newAppInfo);
+                } catch (Exception e) {
+                    System.err.println("更新租户时创建应用失败: " + e.getMessage());
+                }
+            }
         }
     }
 
@@ -496,37 +541,6 @@ public class AdminTenantService {
     }
 
     /**
-     * 生成唯一的 appid
-     * 格式: app_ + 时间戳 + 随机数
-     */
-    private String generateAppId() {
-        String appid;
-        int attempts = 0;
-        int maxAttempts = 100;
-
-        do {
-            long timestamp = System.currentTimeMillis();
-            int random = new Random().nextInt(9000) + 1000;
-            appid = "app_" + timestamp + "_" + random;
-
-            QueryWrapper<TenantsEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("appid", appid);
-
-            if (tenantsMapper.selectCount(wrapper) == 0) {
-                break;
-            }
-
-            attempts++;
-        } while (attempts < maxAttempts);
-
-        if (attempts >= maxAttempts) {
-            throw new CrmChatException("Failed to generate application ID, please try again");
-        }
-
-        return appid;
-    }
-
-    /**
      * 判断租户是否过期
      */
     private boolean isExpired(Timestamp expireAt) {
@@ -600,22 +614,36 @@ public class AdminTenantService {
 
     /**
      * 解析时间戳字符串
+     * 支持格式：
+     * - yyyy-MM-dd (自动补充 23:59:59)
+     * - yyyy-MM-dd HH:mm:ss
      */
     private Timestamp parseTimestamp(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            throw new CrmChatException("Date string cannot be empty");
+        }
+
+        // 清理字符串：去除首尾空白和可能的换行符
+        dateStr = dateStr.trim().replaceAll("[\\r\\n]", "");
+
         try {
-            // 支持多种日期格式
-            DateTimeFormatter formatter;
+            LocalDateTime dateTime;
+
             if (dateStr.contains(":")) {
-                formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                // 包含时间部分：yyyy-MM-dd HH:mm:ss
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                dateTime = LocalDateTime.parse(dateStr, formatter);
             } else {
-                formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                dateStr = dateStr + " 23:59:59";
+                // 只有日期部分：yyyy-MM-dd，补充 23:59:59
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate date = LocalDate.parse(dateStr, dateFormatter);
+                // 从LocalDate创建LocalDateTime并设置时间为23:59:59
+                dateTime = date.atTime(23, 59, 59);
             }
 
-            LocalDateTime dateTime = LocalDateTime.parse(dateStr, formatter);
             return Timestamp.valueOf(dateTime);
         } catch (Exception e) {
-            throw new CrmChatException("Invalid date format: " + dateStr);
+            throw new CrmChatException("Invalid date format: '" + dateStr + "'. Expected format: yyyy-MM-dd or yyyy-MM-dd HH:mm:ss. Error: " + e.getMessage());
         }
     }
 

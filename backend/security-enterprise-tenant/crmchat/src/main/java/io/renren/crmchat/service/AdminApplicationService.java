@@ -8,6 +8,9 @@ import io.renren.crmchat.CrmChatApplication;
 import io.renren.crmchat.dao.ApplicationMapper;
 import io.renren.crmchat.entity.ApplicationEntity;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ import java.util.Base64;
 public class AdminApplicationService {
 
     private final ApplicationMapper applicationMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取应用列表
@@ -59,14 +63,59 @@ public class AdminApplicationService {
     }
 
     /**
+     * 获取表单规则
+     * 对应PHP: ApplicationServices.php::getFormRule()
+     *
+     * PHP代码:
+     * return [
+     *     FormBuilder::frameImage('icon', '应用图标', $this->url('admin/widget.images/index', ['fodder' => 'icon'], true), $data['value'])
+     *         ->icon('ios-image')->width('950px')->height('420px')->info($data['desc'])->col(13)->required(),
+     *     FormBuilder::input('name', '应用名称', $data['name'] ?? '')->required(),
+     *     FormBuilder::textarea('introduce', '应用简介', $data['introduce'] ?? ''),
+     * ];
+     */
+    public List<BaseComponent> getFormRule(Map<String, Object> data) {
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 1. 应用图标（FrameImage组件）
+        rules.add(formBuilder.frameImage("icon", "应用图标",
+                "/admin/widget/images/index?fodder=icon",
+                (String) data.getOrDefault("icon", ""))
+            .icon("ios-image")
+            .width("950px")
+            .height("420px")
+            .col(13)
+            .required());
+
+        // 2. 应用名称
+        rules.add(formBuilder.input("name", "应用名称",
+                (String) data.getOrDefault("name", ""))
+            .required());
+
+        // 3. 应用简介
+        rules.add(formBuilder.textarea("introduce", "应用简介",
+                (String) data.getOrDefault("introduce", "")));
+
+        return rules;
+    }
+
+    /**
      * 获取创建表单
-     * PHP Reference: Application.php::create()
+     * 对应PHP: ApplicationServices.php::getCreateForm()
+     *
+     * PHP代码:
+     * public function getCreateForm()
+     * {
+     *     return create_form('添加应用', $this->getFormRule(), $this->url('admin/app'), 'post');
+     * }
      */
     public Map<String, Object> getCreateForm() {
-        Map<String, Object> result = new HashMap<>();
-        // TODO: FormBuilder pattern - 返回空form_rules
-        result.put("form_rules", new Object[0]);
-        return result;
+        return FormHelper.createForm(
+            "添加应用",
+            getFormRule(new HashMap<>()),
+            "/admin/app",
+            "POST"
+        );
     }
 
     /**
@@ -133,7 +182,17 @@ public class AdminApplicationService {
 
     /**
      * 获取编辑表单
-     * PHP Reference: Application.php::edit()
+     * 对应PHP: ApplicationServices.php::getUpdateForm()
+     *
+     * PHP代码:
+     * public function getUpdateForm(int $id)
+     * {
+     *     $appInfo = $this->dao->get($id);
+     *     if (!$appInfo) {
+     *         throw new AdminException('修改的应用不存在');
+     *     }
+     *     return create_form('修改应用', $this->getFormRule($appInfo->toArray()), $this->url('admin/app', ['id' => $id]), 'put');
+     * }
      */
     public Map<String, Object> getEditForm(Integer id) {
         if (id == null || id <= 0) {
@@ -145,11 +204,18 @@ public class AdminApplicationService {
             throw new CrmChatException("Application does not exist");
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("app", app);
-        // TODO: FormBuilder pattern - 返回空form_rules
-        result.put("form_rules", new Object[0]);
-        return result;
+        // 转换实体为Map（对应PHP的toArray()）
+        Map<String, Object> appData = new HashMap<>();
+        appData.put("icon", app.getIcon());
+        appData.put("name", app.getName());
+        appData.put("introduce", app.getIntroduce());
+
+        return FormHelper.createForm(
+            "修改应用",
+            getFormRule(appData),
+            "/admin/app/" + id,
+            "PUT"
+        );
     }
 
     /**
@@ -368,6 +434,119 @@ public class AdminApplicationService {
         }
     }
 
+
+    /**
+     * 生成应用信息（用于租户创建时）
+     * PHP Reference: ApplicationServices.php::generateAppInfo()
+     *
+     * @return Map包含: appid, app_secret, rand, timestamp
+     */
+    public Map<String, Object> generateAppInfo() {
+        Random random = new Random();
+        int rand = 1000 + random.nextInt(9000); // 1000-9999
+        int timestamp = (int) (System.currentTimeMillis() / 1000);
+        String appid = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)) + timestamp + rand;
+        String appSecret = md5(appid + timestamp + rand);
+
+        Map<String, Object> appInfo = new HashMap<>();
+        appInfo.put("appid", appid);
+        appInfo.put("app_secret", appSecret);
+        appInfo.put("rand", rand);
+        appInfo.put("timestamp", timestamp);
+
+        return appInfo;
+    }
+
+    /**
+     * 为租户创建应用数据
+     * PHP Reference: TenantServices.php::createTenantApplication()
+     *
+     * @param tenantName 租户名称
+     * @param appInfo 应用信息（包含appid, app_secret, rand, timestamp）
+     * @return 创建是否成功
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean createTenantApplication(String tenantName, Map<String, Object> appInfo) {
+        try {
+            String appid = (String) appInfo.get("appid");
+            String appSecret = (String) appInfo.get("app_secret");
+            Integer rand = (Integer) appInfo.get("rand");
+            Integer timestamp = (Integer) appInfo.get("timestamp");
+
+            // 检查应用是否已存在
+            QueryWrapper<ApplicationEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("appid", appid);
+            wrapper.eq("is_delete", 0);
+            ApplicationEntity existingApp = applicationMapper.selectOne(wrapper);
+
+            if (existingApp != null) {
+                // 应用已存在，无需重复创建
+                System.out.println("应用已存在，appid: " + appid);
+                return true;
+            }
+
+            // 生成token（使用JsonUtils保持与resetToken一致）
+            String tokenJson = JsonUtils.toJsonString(appInfo);
+            String token = Base64.getEncoder().encodeToString(tokenJson.getBytes(StandardCharsets.UTF_8));
+            String tokenMd5 = md5(token);
+
+            // 准备应用数据
+            ApplicationEntity application = new ApplicationEntity();
+            application.setAppid(appid);
+            application.setName(tenantName + "的客服应用");
+            application.setIcon(""); // 默认图标
+            application.setIntroduce("由系统自动为租户 " + tenantName + " 创建的客服应用");
+            application.setAppSecret(appSecret);
+            application.setTimestamp(timestamp);
+            application.setRand(rand);
+            application.setToken(token);
+            application.setTokenMd5(tokenMd5);
+            application.setIsDelete(0);
+
+            // 保存到application表
+            return applicationMapper.insert(application) > 0;
+        } catch (Exception e) {
+            System.err.println("创建租户应用失败: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 根据appid获取应用信息
+     *
+     * @param appid 应用ID
+     * @return 应用信息Map,如果不存在返回null
+     */
+    public Map<String, Object> getApplicationByAppid(String appid) {
+        if (appid == null || appid.trim().isEmpty()) {
+            return null;
+        }
+
+        QueryWrapper<ApplicationEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("appid", appid);
+        wrapper.eq("is_delete", 0);
+
+        ApplicationEntity app = applicationMapper.selectOne(wrapper);
+        if (app == null) {
+            return null;
+        }
+
+        // 转换为Map返回
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", app.getId());
+        result.put("appid", app.getAppid());
+        result.put("name", app.getName());
+        result.put("icon", app.getIcon());
+        result.put("introduce", app.getIntroduce());
+        result.put("app_secret", app.getAppSecret());
+        result.put("rand", app.getRand());
+        result.put("timestamp", app.getTimestamp());
+        result.put("token", app.getToken());
+        result.put("token_md5", app.getTokenMd5());
+
+        return result;
+    }
 
     /**
      * MD5加密工具方法
