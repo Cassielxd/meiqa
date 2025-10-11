@@ -6,6 +6,7 @@ import io.renren.crmchat.common.constant.ApiConstants;
 import io.renren.crmchat.common.result.ApiResult;
 import io.renren.crmchat.dao.SystemAdminMapper;
 import io.renren.crmchat.entity.SystemAdminEntity;
+import io.renren.crmchat.service.AdminApplicationService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * JWT认证过滤器
@@ -32,6 +34,7 @@ public class AuthenticationFilter implements Filter {
     private final JwtUtils jwtUtils;
     private final ObjectMapper objectMapper;
     private final SystemAdminMapper systemAdminMapper;
+    private final AdminApplicationService adminApplicationService;
 
     /**
      * 不需要认证的URL
@@ -101,46 +104,58 @@ public class AuthenticationFilter implements Filter {
             returnUnauthorized(httpResponse, "未提供认证Token");
             return;
         }
-
-        // 验证Token
-        DecodedJWT jwt = jwtUtils.verifyToken(token);
-        if (jwt == null) {
-            returnUnauthorized(httpResponse, "Token无效或已过期");
-            return;
-        }
-
-        // 检查Token是否过期
-        if (jwtUtils.isTokenExpired(token)) {
-            returnUnauthorized(httpResponse, "Token已过期");
-            return;
-        }
-
-        // 设置用户上下文
-        CrmChatUser user = new CrmChatUser();
-        Long userId = jwt.getClaim("user_id").asLong();
-        String username = jwt.getClaim("username").asString();
-        String appid = jwt.getClaim("appid").asString();
-
-        user.setUserId(userId);
-        user.setUsername(username);
-        user.setAppid(appid);
-        user.setToken(token);
-
-        // 如果是管理员登录（appid = "10000"），加载角色和等级信息
-        if ("10000".equals(appid)) {
-            try {
-                SystemAdminEntity adminInfo = systemAdminMapper.selectById(userId.intValue());
-                if (adminInfo != null) {
-                    user.setRoles(adminInfo.getRoles());
-                    user.setLevel(adminInfo.getLevel());
-                }
-            } catch (Exception e) {
-                log.warn("加载管理员角色信息失败: userId={}", userId, e);
+        if(httpRequest.getServletPath().startsWith("/api/mobile")){
+           Map result= adminApplicationService.parseToken(token,null);
+           if(result==null){
+                returnUnauthorized(httpResponse, "Token无效");
+                return;
             }
+            Map appInfo = (Map) result.get("appInfo");
+            CrmChatUser user = new CrmChatUser();
+            String appid = (String) appInfo.get("appid");
+            user.setAppid(appid);
+            user.setToken(token);
+            UserContext.setUser(user);
+        }else {
+            // 验证Token
+            DecodedJWT jwt = jwtUtils.verifyToken(token);
+            if (jwt == null) {
+                returnUnauthorized(httpResponse, "Token无效或已过期");
+                return;
+            }
+
+            // 检查Token是否过期
+            if (jwtUtils.isTokenExpired(token)) {
+                returnUnauthorized(httpResponse, "Token已过期");
+                return;
+            }
+
+            // 设置用户上下文
+            CrmChatUser user = new CrmChatUser();
+            Long userId = jwt.getClaim("user_id").asLong();
+            String username = jwt.getClaim("username").asString();
+            String appid = jwt.getClaim("appid").asString();
+
+            user.setUserId(userId);
+            user.setUsername(username);
+            user.setAppid(appid);
+            user.setToken(token);
+
+            // 如果是管理员登录（appid = "10000"），加载角色和等级信息
+            if ("10000".equals(appid)) {
+                try {
+                    SystemAdminEntity adminInfo = systemAdminMapper.selectById(userId.intValue());
+                    if (adminInfo != null) {
+                        user.setRoles(adminInfo.getRoles());
+                        user.setLevel(adminInfo.getLevel());
+                    }
+                } catch (Exception e) {
+                    log.warn("加载管理员角色信息失败: userId={}", userId, e);
+                }
+            }
+
+            UserContext.setUser(user);
         }
-
-        UserContext.setUser(user);
-
         try {
             chain.doFilter(request, response);
         } finally {

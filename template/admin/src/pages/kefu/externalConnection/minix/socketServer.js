@@ -52,6 +52,7 @@ export default {
     },
   },
   created() {
+
     this.redirect();
     this.loadJS();
 
@@ -82,6 +83,7 @@ export default {
           break;
         case 'openCustomeServer'://打开窗口
           this.bus.pageWs.then((ws) => {
+
             ws.send({ type: 'to_chat', data: { id: this.chatServerData.to_user_id } });
             this.toChat = true;
             if(this.unReadMesage) {
@@ -218,6 +220,7 @@ export default {
       }
 
       userRecord(postData).then(res => {
+
           this.chatServerData = res.data;
           this.$nextTick(() => {
             this.happyScroll = !this.happyScroll;
@@ -244,6 +247,7 @@ export default {
           this.connentServer(); // 建立socket 链接
 
       }).catch(rej => {
+
         if(rej.status == 400) {
           this.$router.replace({ name: 'customerOutLine', query: this.$route.query });
         }
@@ -293,6 +297,7 @@ export default {
         });
 
         ws.$on('success', data => {
+
           this.chatStatus = true;
           let to_user_id = this.upperData.isShowTip && this.upperData.isShowTip !='undefined' ? 0 : this.chatServerData.to_user_id
             ws.send({

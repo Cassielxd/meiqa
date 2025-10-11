@@ -206,6 +206,7 @@ class Manager extends Websocket
     }
 
     /**
+     *
      * @param Frame $frame
      * @return bool
      */

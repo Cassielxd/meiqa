@@ -1,6 +1,5 @@
 package io.renren.crmchat.websocket;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,11 +10,12 @@ import io.renren.crmchat.dao.ChatUserMapper;
 import io.renren.crmchat.entity.ChatServiceEntity;
 import io.renren.crmchat.entity.ChatServiceRecordEntity;
 import io.renren.crmchat.entity.ChatUserEntity;
-import io.renren.crmchat.common.constant.TenantConstants;
-import io.renren.crmchat.service.common.TokenService;
 import io.renren.crmchat.service.ChatCacheService;
 import io.renren.crmchat.security.CrmChatUser;
 import io.renren.crmchat.security.UserContext;
+import io.renren.crmchat.websocket.handler.AuthHandlerFactory;
+import io.renren.crmchat.websocket.BaseHandler;
+import io.renren.crmchat.websocket.handler.UserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +34,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -71,7 +69,22 @@ public class ChatWebSocketServer {
 
             runWithUserContext(identity.appid, identity.userId, identity.userType,
                     () -> markUserOnline(holder, true));
+
+            // 对应PHP UserHandler::login()的业务逻辑
+            if ("user".equals(identity.userType)) {
+                handleUserLogin(identity);
+            }
+
             sendLoginSuccess(session, identity);
+
+            // 对应PHP Manager::onOpen()第109行: 发送success消息触发前端user消息发送
+            Map<String, Object> successData = new HashMap<>();
+            successData.put("appid", identity.appid);
+            if (identity.onlineFlag > 0) {
+                successData.put("uid", identity.userId);
+            }
+            sendEnvelope(session, "success", successData);
+
             sendEnvelope(session, "ping", Map.of("now", System.currentTimeMillis() / 1000));
         } catch (Exception ex) {
             log.error("WebSocket handshake failure", ex);
@@ -104,22 +117,34 @@ public class ChatWebSocketServer {
                 return;
             }
 
+            JsonNode dataNode = node.path("data");
+
             switch (type) {
                 case "ping" -> {
                     sendEnvelope(session, "pong", Map.of(
                             "timestamp", System.currentTimeMillis() / 1000));
                     WebSocketSessionRegistry.touch(session);
                 }
+                case "user" -> {
+                    // 处理用户信息同步消息，委托给UserHandler
+                    UserHandler userHandler =
+                            SpringContextUtils.getBean(UserHandler.class);
+                    if (userHandler != null) {
+                        userHandler.handleUserMessage(session, dataNode);
+                    } else {
+                        log.error("UserHandler bean not available");
+                    }
+                }
                 case "to_chat" -> {
-                    Integer target = parseIntNullable(node.path("id").asText(null));
+                    Integer target = parseIntNullable(dataNode.path("id").asText(null));
                     WebSocketSessionRegistry.updateCurrentTarget(session, target);
                 }
                 case "open" -> {
-                    Integer openTarget = parseIntNullable(node.path("open").asText(null));
+                    Integer openTarget = parseIntNullable(dataNode.path("open").asText(null));
                     WebSocketSessionRegistry.updateCurrentTarget(session, openTarget);
                 }
                 case "set_form_type" -> {
-                    Integer newFormType = parseIntNullable(node.path("form_type").asText(null));
+                    Integer newFormType = parseIntNullable(dataNode.path("form_type").asText(null));
                     WebSocketSessionRegistry.updateFormType(session, newFormType);
                 }
                 default -> log.debug("WebSocket ignore type={} payload={}", type, message);
@@ -167,11 +192,11 @@ public class ChatWebSocketServer {
         }
     }
 
-    private static void sendEnvelope(Session session, String type, Object data) {
+    public static void sendEnvelope(Session session, String type, Object data) {
         sendEnvelope(session, type, data, null);
     }
 
-    private static void sendEnvelope(Session session, String type, Object data, Integer status) {
+    static void sendEnvelope(Session session, String type, Object data, Integer status) {
         try {
             Map<String, Object> envelope = new HashMap<>();
             envelope.put("type", type);
@@ -189,6 +214,7 @@ public class ChatWebSocketServer {
 
     private SessionIdentity authenticate(Map<String, String> params) {
         String userType = params.getOrDefault("type", "").toLowerCase(Locale.ROOT);
+
         if (userType.isEmpty()) {
             log.warn("WebSocket handshake rejected: missing user type. params={}", params);
             return null;
@@ -205,130 +231,31 @@ public class ChatWebSocketServer {
         log.info("完整params={}", params);
         log.info("================================================");
 
-        TokenService tokenService = SpringContextUtils.getBean(TokenService.class);
-        ChatCacheService cacheService = SpringContextUtils.getBean(ChatCacheService.class);
-        boolean tokenProvided = token != null && !token.isBlank();
-        boolean tokenValid = tokenProvided && tokenService != null && tokenService.validateToken(token);
-
-        Long tokenUserId = null;
-        String tokenAppid = null;
-        if (tokenValid) {
-            tokenUserId = tokenService.extractUserId(token);
-            tokenAppid = tokenService.extractAppid(token);
+        // 使用工厂模式获取对应的认证处理器
+        AuthHandlerFactory factory = SpringContextUtils.getBean(AuthHandlerFactory.class);
+        if (factory == null) {
+            log.error("AuthHandlerFactory bean not available");
+            return null;
         }
 
-        String appid = params.getOrDefault("appid", params.getOrDefault("app", ""));
-        if (tokenValid && tokenAppid != null && !tokenAppid.isBlank()) {
-            appid = tokenAppid;
+        BaseHandler handler = factory.getHandler(userType);
+        if (handler == null) {
+            log.warn("WebSocket handshake rejected: unsupported or invalid user type='{}'. params={}", userType, params);
+            return null;
         }
 
-        int formType = parseInt(params.get("form_type"), 0);
-        Integer initialTarget = parseIntNullable(params.get("to_user_id"));
-
-        switch (userType) {
-            case "kefu" -> {
-                if (!tokenValid || tokenUserId == null || tokenUserId <= 0) {
-                    log.warn("WebSocket kefu handshake rejected: invalid token. params={}", params);
-                    return null;
-                }
-                ChatServiceMapper serviceMapper = SpringContextUtils.getBean(ChatServiceMapper.class);
-                if (serviceMapper == null) {
-                    log.error("ChatServiceMapper bean not available");
-                    return null;
-                }
-                ChatServiceEntity service = serviceMapper.selectOne(new QueryWrapper<ChatServiceEntity>()
-                        .eq("id", tokenUserId.intValue())
-                        .eq("appid", appid));
-                if (service == null) {
-                    log.warn("WebSocket kefu handshake rejected: service not found. serviceId={}", tokenUserId);
-                    return null;
-                }
-
-                String serviceAppid = Optional.ofNullable(service.getAppid()).orElse("");
-                if (appid.isEmpty()) {
-                    appid = serviceAppid;
-                } else if (!Objects.equals(appid, serviceAppid)) {
-                    log.warn("WebSocket kefu handshake rejected: appid mismatch. expected={}, actual={}", serviceAppid, appid);
-                    return null;
-                }
-
-                Integer chatUserId = service.getUserId();
-                if (chatUserId == null || chatUserId <= 0) {
-                    log.warn("WebSocket kefu handshake rejected: service missing user_id. serviceId={}", service.getId());
-                    return null;
-                }
-
-                if (cacheService != null) {
-                    cacheService.cacheServiceProfile(service);
-                }
-
-                int online = service.getOnline() != null ? service.getOnline() : 0;
-                return new SessionIdentity(appid, chatUserId, userType, formType, false, initialTarget, service.getId(), online);
-            }
-            case "user" -> {
-                if (!tokenValid || tokenUserId == null || tokenUserId <= 0) {
-                    log.warn("WebSocket user handshake rejected: invalid token. params={}", params);
-                    return null;
-                }
-                if (appid == null || appid.isBlank()) {
-                    log.warn("WebSocket user handshake rejected: token missing appid. params={}", params);
-                    return null;
-                }
-
-                ChatUserMapper userMapper = SpringContextUtils.getBean(ChatUserMapper.class);
-                if (userMapper == null) {
-                    log.error("ChatUserMapper bean not available");
-                    return null;
-                }
-                ChatUserEntity chatUser = userMapper.selectOne(new QueryWrapper<ChatUserEntity>()
-                        .eq("id", tokenUserId.intValue())
-                        .eq("appid", appid));
-                if (chatUser == null) {
-                    log.warn("WebSocket user handshake rejected: user not found. uid={}", tokenUserId);
-                    return null;
-                }
-
-                String userAppid = Optional.ofNullable(chatUser.getAppid()).orElse("");
-                if (!userAppid.isEmpty() && !appid.equals(userAppid)) {
-                    log.warn("WebSocket user handshake rejected: appid mismatch. expected={}, actual={}", userAppid, appid);
-                    return null;
-                }
-
-                if (cacheService != null) {
-                    cacheService.cacheUser(chatUser);
-                }
-
-                boolean tourist = chatUser.getIsTourist() != null && chatUser.getIsTourist() == 1;
-                int inferredFormType = formType != 0 ? formType : (chatUser.getType() != null ? chatUser.getType() : 0);
-                int online = chatUser.getOnline() != null ? chatUser.getOnline() : 0;
-                return new SessionIdentity(appid, chatUser.getId(), userType, inferredFormType, tourist, initialTarget, null, online);
-            }
-            case "admin" -> {
-                if (!tokenValid || tokenUserId == null) {
-                    log.warn("WebSocket admin handshake rejected: invalid token. params={}", params);
-                    return null;
-                }
-                String resolvedAppid = (tokenAppid != null && !tokenAppid.isBlank())
-                        ? tokenAppid
-                        : TenantConstants.SUPER_APPID;
-                if (!appid.isBlank() && !appid.equals(resolvedAppid)) {
-                    log.warn("WebSocket admin handshake rejected: appid mismatch. expected={}, actual={}", resolvedAppid, appid);
-                    return null;
-                }
-                appid = resolvedAppid;
-                return new SessionIdentity(appid, tokenUserId.intValue(), userType, formType, false, initialTarget, null, 1);
-            }
-            default -> {
-                log.warn("WebSocket handshake rejected: unsupported type='{}'. params={}", userType, params);
-                return null;
-            }
-        }
+        // 委托给具体的处理器进行认证
+        return handler.authenticate(params);
     }
 
     private void sendLoginSuccess(Session session, SessionIdentity identity) {
         Map<String, Object> data = new HashMap<>();
         data.put("appid", identity.appid);
-        data.put("uid", identity.userId);
+        // 对应PHP: 只有当token中有用户信息时才返回uid字段
+        // 前端通过检查uid字段是否存在来判断是否需要发送user消息
+        if (identity.onlineFlag > 0) {
+            data.put("uid", identity.userId);
+        }
         data.put("type", identity.userType);
         data.put("tourist", identity.tourist ? 1 : 0);
         data.put("form_type", identity.formType);
@@ -337,6 +264,61 @@ public class ChatWebSocketServer {
         }
         data.put("online", identity.onlineFlag);
         sendEnvelope(session, "login", data, 200);
+    }
+
+    /**
+     * 处理用户登录业务逻辑
+     * 对应PHP: UserHandler::login() 第54-63行
+     *
+     * 功能：
+     * 1. 更新chat_service_record的在线状态
+     * 2. 广播用户上线消息给所有客服（仅限已存在用户）
+     *
+     * 注意：新用户的广播在handleUserMessage()中处理
+     */
+    private static void handleUserLogin(SessionIdentity identity) {
+        try {
+            ChatServiceRecordMapper recordMapper = SpringContextUtils.getBean(ChatServiceRecordMapper.class);
+            ChatUserMapper userMapper = SpringContextUtils.getBean(ChatUserMapper.class);
+
+            // 1. 更新chat_service_record的在线状态 (对应PHP第58行)
+            if (recordMapper != null) {
+                int now = (int) (System.currentTimeMillis() / 1000);
+                UpdateWrapper<ChatServiceRecordEntity> wrapper = new UpdateWrapper<>();
+                wrapper.eq("appid", identity.appid)
+                        .eq("to_user_id", identity.userId);
+                ChatServiceRecordEntity update = new ChatServiceRecordEntity();
+                update.setOnline(1);
+                update.setType(identity.formType);
+                update.setUpdateTime(now);
+                recordMapper.update(update, wrapper);
+                log.info("Updated service record online status for user login: userId={}", identity.userId);
+            }
+
+            // 2. 广播用户上线消息给所有客服 (对应PHP第60-63行)
+            // 只有当用户已存在时才广播（onlineFlag > 0表示是已存在用户）
+            if (identity.onlineFlag > 0 && userMapper != null) {
+                ChatUserEntity chatUser = userMapper.selectById(identity.userId);
+                if (chatUser != null) {
+                    // 获取所有客服的session
+                    Set<WebSocketSessionRegistry.SessionHolder> kefuSessions =
+                            WebSocketSessionRegistry.getSessionsByType(identity.appid, "kefu");
+
+                    Map<String, Object> onlineData = new HashMap<>();
+                    onlineData.put("user_id", identity.userId);
+                    onlineData.put("online", 1);
+
+                    // 向每个客服发送消息
+                    for (WebSocketSessionRegistry.SessionHolder kefuHolder : kefuSessions) {
+                        sendEnvelope(kefuHolder.getSession(), "user_online", onlineData);
+                    }
+
+                    log.info("Broadcasted user login to {} kefu sessions: userId={}", kefuSessions.size(), identity.userId);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Failed to handle user login business logic", ex);
+        }
     }
 
     private static void markUserOnline(WebSocketSessionRegistry.SessionHolder holder, boolean online) {
@@ -455,7 +437,7 @@ public class ChatWebSocketServer {
         }
     }
 
-    private static final class SessionIdentity {
+    public static final class SessionIdentity {
         private final String appid;
         private final int userId;
         private final String userType;
@@ -465,7 +447,7 @@ public class ChatWebSocketServer {
         private final Integer serviceId;
         private final int onlineFlag;
 
-        private SessionIdentity(String appid,
+        public SessionIdentity(String appid,
                                 int userId,
                                 String userType,
                                 int formType,

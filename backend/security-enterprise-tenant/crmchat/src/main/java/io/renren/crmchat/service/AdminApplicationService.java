@@ -3,16 +3,20 @@ package io.renren.crmchat.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.renren.common.utils.JsonUtils;
+import io.renren.crmchat.CrmChatApplication;
 import io.renren.crmchat.dao.ApplicationMapper;
 import io.renren.crmchat.entity.ApplicationEntity;
 import io.renren.crmchat.exception.CrmChatException;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.Base64;
 
 /**
  * Admin Application Service - 管理员应用管理
@@ -234,9 +238,14 @@ public class AdminApplicationService {
         int timestamp = (int) (System.currentTimeMillis() / 1000);
         String appSecret = md5(app.getAppid() + timestamp + rand);
 
+        Map<String, Object> params = new HashMap<>();
+        params.put("appid", app.getAppid());
+        params.put("app_secret", appSecret);
+        params.put("rand", rand);
+        params.put("timestamp", timestamp);
+
         // 生成新token
-        String tokenJson = String.format("{\"appid\":\"%s\",\"app_secret\":\"%s\",\"rand\":%d,\"timestamp\":%d}",
-                app.getAppid(), appSecret, rand, timestamp);
+        String tokenJson = JsonUtils.toJsonString(params);
         String token = Base64.getEncoder().encodeToString(tokenJson.getBytes(StandardCharsets.UTF_8));
         String tokenMd5 = md5(token);
 
@@ -261,11 +270,109 @@ public class AdminApplicationService {
         result.put("token_md5", tokenMd5);
         return result;
     }
+    public static void main(String[] args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("appid", "202116257358989495");
+        params.put("app_secret", "28242c7066e9166b46f9b41c10e18d72");
+        params.put("rand", 9718);
+        params.put("timestamp", 1757126462);
+
+        // 生成新token
+        String tokenJson = JsonUtils.toJsonString(params);
+        String token = Base64.getEncoder().encodeToString(tokenJson.getBytes(StandardCharsets.UTF_8));
+        System.out.println(token);
+        String tokenMd5 = md5(token);
+
+        System.out.println(tokenMd5);
+        String tokenJson1 = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+        // 解析JSON格式的应用信息
+        Map<String, Object> appInfo = JsonUtils.parseObject(tokenJson1,Map.class);
+        System.out.println(appInfo);
+    }
+
+    /**
+     * 解析Token - 根据tokenMd5值解析并返回应用信息
+     * 参考PHP: ApplicationServices.php::parseToken()
+     * @param tokenMd5 token的MD5值（32位）或完整token
+     * @param additionalInfo 额外信息映射，用于创建用户信息
+     * @return 包含应用信息的Map
+     */
+    public Map<String, Object> parseToken(String tokenMd5, Map<String, Object> additionalInfo) {
+        if (tokenMd5 == null || tokenMd5.trim().isEmpty()) {
+           return null;
+        }
+
+        String token;
+        // 如果是32位MD5值，先查找对应的完整token
+        if (tokenMd5.trim().length() == 32) {
+            QueryWrapper<ApplicationEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("token_md5", tokenMd5.trim());
+            wrapper.eq("is_delete", 0);
+
+            ApplicationEntity app = applicationMapper.selectOne(wrapper);
+            if (app == null) {
+                throw new CrmChatException("Invalid token or application not found");
+            }
+            token = app.getToken();
+        } else {
+            token = tokenMd5.trim();
+        }
+
+        try {
+            // 解析Base64编码的token JSON（模拟PHP的解密过程）
+            String tokenJson = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+            // 解析JSON格式的应用信息
+            Map<String, Object> appInfo = JsonUtils.parseObject(tokenJson,Map.class);
+
+            if (!appInfo.containsKey("appid")) {
+                throw new CrmChatException("Missing application ID in token");
+            }
+
+            String appid = (String) appInfo.get("appid");
+
+            // 根据appid查找应用数据
+            QueryWrapper<ApplicationEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("appid", appid);
+            wrapper.eq("is_delete", 0);
+
+            ApplicationEntity appData = applicationMapper.selectOne(wrapper);
+            if (appData == null) {
+                throw new CrmChatException("Application not found");
+            }
+
+            // 验证app_secret
+            String expectedSecret = md5(appData.getAppid() + appData.getTimestamp() + appData.getRand());
+            String actualSecret = (String) appInfo.get("app_secret");
+
+            if (!expectedSecret.equals(actualSecret)) {
+                throw new CrmChatException("Invalid app_secret value");
+            }
+
+            // 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("appInfo", appInfo);
+
+            // 如果提供了额外信息，创建用户信息（参考PHP逻辑）
+            if (additionalInfo != null && !additionalInfo.isEmpty()) {
+                // 注意：这里需要在Java中实现用户创建逻辑
+                // 由于没有对应的用户服务，这里只做简单映射
+                result.put("user", additionalInfo);
+            }
+
+            return result;
+
+        } catch (IllegalArgumentException e) {
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
     /**
      * MD5加密工具方法
      */
-    private String md5(String input) {
+    public static String md5(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(input.getBytes(StandardCharsets.UTF_8));

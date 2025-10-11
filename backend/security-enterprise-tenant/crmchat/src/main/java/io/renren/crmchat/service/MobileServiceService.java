@@ -88,7 +88,7 @@ public class MobileServiceService {
         int limit = parseInt(params.get("limit"), 10);
         limit = limit <= 0 ? 10 : Math.min(limit, 100);
         int toUserId = parseInt(params.get("toUserId"), 0);
-        int cookieUid = parseInt(params.get("cookieUid"), 0);
+        int cookieUid = parseInt(params.get("uid"), 0);
         int kefuId = parseInt(params.get("kefu_id"), 0);
         int kefuRand = parseInt(params.get("kefu_rand"), 0);
 
@@ -122,9 +122,11 @@ public class MobileServiceService {
 
         toUserId = resolvePreferredServiceUserId(appid, toUserId, kefuId, kefuRand, userId);
 
-        // 获取在线客服列表（但不强制要求必须有在线客服）
+        // 获取在线客服列表（与PHP保持一致：必须有在线客服）
         List<ChatServiceEntity> onlineServices = chatCacheService.getOnlineServices(appid);
-        boolean hasOnlineService = !onlineServices.isEmpty();
+        if (onlineServices.isEmpty()) {
+            throw new CrmChatException("暂无客服人员在线，请稍后联系");
+        }
 
         Map<Integer, ChatServiceEntity> onlineServiceMap = new HashMap<>();
         for (ChatServiceEntity service : onlineServices) {
@@ -134,67 +136,42 @@ public class MobileServiceService {
             }
         }
 
-        // 客服分配逻辑：只在有在线客服时才分配
-        ChatServiceEntity assignedService = null;
-        if (hasOnlineService) {
-            // 如果指定的客服不在线，重置为0
-            if (toUserId > 0 && !onlineServiceMap.containsKey(toUserId)) {
-                toUserId = 0;
-            }
+        // 如果指定的客服不在线，重置为0
+        if (toUserId > 0 && !onlineServiceMap.containsKey(toUserId)) {
+            toUserId = 0;
+        }
 
-            // 尝试找最近聊天的客服（如果在线）
-            if (toUserId == 0) {
-                Integer latelyUserId = findLatestChatServiceUserId(appid, userId);
-                if (latelyUserId != null && onlineServiceMap.containsKey(latelyUserId)) {
-                    toUserId = latelyUserId;
-                }
-            }
-
-            // 如果还是没有，随机选择一个在线客服
-            if (toUserId == 0 && !onlineServiceMap.isEmpty()) {
-                toUserId = pickRandomUserId(onlineServiceMap.keySet());
-            }
-
-            assignedService = onlineServiceMap.get(toUserId);
-        } else {
-            // 没有在线客服时，尝试从历史记录中找到最近的客服（用于显示历史消息）
-            if (toUserId == 0) {
-                Integer latelyUserId = findLatestChatServiceUserId(appid, userId);
-                if (latelyUserId != null) {
-                    toUserId = latelyUserId;
-                }
-            }
-
-            // 尝试查询该客服的信息（即使不在线）
-            if (toUserId > 0) {
-                QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
-                wrapper.eq("appid", appid);
-                wrapper.eq("user_id", toUserId);
-                wrapper.eq("status", 1);
-                assignedService = chatServiceMapper.selectOne(wrapper);
+        // 尝试找最近聊天的客服（如果在线）
+        if (toUserId == 0) {
+            Integer latelyUserId = findLatestChatServiceUserId(appid, userId);
+            if (latelyUserId != null && onlineServiceMap.containsKey(latelyUserId)) {
+                toUserId = latelyUserId;
             }
         }
 
-        int resolvedKefuId = 0;
-        String toUserNickname = "";
-        String toUserAvatar = "";
-
-        if (assignedService != null) {
-            chatCacheService.cacheServiceProfile(assignedService);
-            resolvedKefuId = assignedService.getId() != null ? assignedService.getId() : 0;
-            toUserNickname = Optional.ofNullable(assignedService.getNickname()).orElse("");
-            toUserAvatar = Optional.ofNullable(assignedService.getAvatar()).orElse("");
+        // 如果还是没有，随机选择一个在线客服
+        if (toUserId == 0 && !onlineServiceMap.isEmpty()) {
+            toUserId = pickRandomUserId(onlineServiceMap.keySet());
         }
 
-        // 只在有在线客服且是首次对话时发送欢迎语
+        ChatServiceEntity assignedService = onlineServiceMap.get(toUserId);
+        if (assignedService == null || toUserId <= 0) {
+            throw new CrmChatException("暂无客服人员在线，请稍后联系");
+        }
+
+        chatCacheService.cacheServiceProfile(assignedService);
+        int resolvedKefuId = assignedService.getId() != null ? assignedService.getId() : 0;
+        String toUserNickname = Optional.ofNullable(assignedService.getNickname()).orElse("");
+        String toUserAvatar = Optional.ofNullable(assignedService.getAvatar()).orElse("");
+
+        // 首次对话时发送欢迎语
         Object welcomeData = Boolean.FALSE;
-        if (hasOnlineService && assignedService != null && idTo <= 0
-                && shouldSendWelcome(appid, userId, toUserId, assignedService.getWelcomeWords())) {
+        if (idTo <= 0 && shouldSendWelcome(appid, userId, toUserId, assignedService.getWelcomeWords())) {
             ChatServiceDialogueRecordEntity welcomeRecord = createWelcomeMessage(appid, userId, chatUser, assignedService);
             welcomeData = buildWelcomePayload(appid, welcomeRecord, assignedService, chatUser);
         }
 
-        // 查询历史聊天记录（无论客服是否在线都可以查询）
+        // 查询历史聊天记录
         List<ChatServiceDialogueRecordEntity> records = queryDialogueRecords(appid, userId, toUserId, idTo, limit);
         Collections.reverse(records);
         List<Map<String, Object>> serviceList = tidyChatRecords(appid, records);
@@ -214,7 +191,6 @@ public class MobileServiceService {
         result.put("to_user_nickname", toUserNickname);
         result.put("to_user_avatar", toUserAvatar);
         result.put("welcome", idTo > 0 ? Boolean.FALSE : welcomeData);
-        result.put("has_online_service", hasOnlineService);  // 返回客服在线状态
 
         log.info("获取聊天记录: appid={}, userId={}, toUserId={}, records={}",
                 appid, userId, toUserId, serviceList.size());
@@ -302,13 +278,11 @@ public class MobileServiceService {
         ChatUserEntity user = null;
         if (uidValue > 0) {
             QueryWrapper<ChatUserEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("appid", appid);
             wrapper.eq("uid", uidValue);
             user = chatUserMapper.selectOne(wrapper);
         }
         if (user == null && fallbackUserId > 0) {
             QueryWrapper<ChatUserEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("appid", appid);
             wrapper.eq("id", fallbackUserId);
             user = chatUserMapper.selectOne(wrapper);
         }
@@ -1276,8 +1250,8 @@ public class MobileServiceService {
 
         int totalUnread = getTotalUnreadCount(appid, toUserId);
 
-        // 发送消息给游客自己
-        webSocketPushService.sendChat(appid, userId, response);
+        // 不推送给游客自己，避免前端重复显示（前端HTTP API成功后已主动添加）
+        // webSocketPushService.sendChat(appid, userId, response);
 
         // 发送消息给客服
         if (webSocketPushService.isOnline(appid, toUserId)) {
