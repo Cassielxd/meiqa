@@ -104,6 +104,18 @@ public class FormBuilder {
     }
 
     /**
+     * 创建Number数字输入框 (别名方法,与PHP保持一致)
+     * 对应PHP: Form::number('sort', '排序', 0)
+     */
+    public InputNumberComponent number(String field, String title, String value) {
+        try {
+            return factory.inputNumber(field, title, Integer.parseInt(value));
+        } catch (NumberFormatException e) {
+            return factory.inputNumber(field, title, 0);
+        }
+    }
+
+    /**
      * 创建Upload上传组件
      */
     public UploadComponent upload(String field, String title, String action) {

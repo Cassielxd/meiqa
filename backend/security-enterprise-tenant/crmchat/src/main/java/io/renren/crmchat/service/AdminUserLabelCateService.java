@@ -6,6 +6,9 @@ import io.renren.crmchat.dao.ChatUserLabelMapper;
 import io.renren.crmchat.entity.ChatUserLabelCateEntity;
 import io.renren.crmchat.entity.ChatUserLabelEntity;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,7 @@ public class AdminUserLabelCateService {
 
     private final ChatUserLabelCateMapper chatUserLabelCateMapper;
     private final ChatUserLabelMapper chatUserLabelMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取标签分类列表
@@ -50,16 +54,35 @@ public class AdminUserLabelCateService {
 
     /**
      * 获取创建表单数据
-     * PHP Reference: LabelCate.php::create()
+     * PHP Reference: LabelCate.php::create() -> ChatUserLabelCateServices::getCreateForm()
      *
-     * @return 表单数据
+     * PHP代码:
+     * public function getCreateForm()
+     * {
+     *     return create_form('添加标签分类', $this->formRule(), $this->url('user/label/cate'));
+     * }
+     *
+     * formRule方法:
+     * return [
+     *     Form::input('name', '分类名称', $cateInfo['name'] ?? ''),
+     * ];
+     *
+     * @return 表单配置数据
      */
     public Map<String, Object> getCreateForm() {
-        // TODO: 实现表单规则构建逻辑
-        // PHP: $this->services->getCreateForm()
-        Map<String, Object> result = new HashMap<>();
-        result.put("form_rules", new ArrayList<>()); // 临时返回空表单规则
-        return result;
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 分类名称输入框
+        rules.add(formBuilder.input("name", "分类名称", "")
+            .required()
+            .placeholder("请输入分类名称"));
+
+        return FormHelper.createForm(
+            "添加标签分类",
+            rules,
+            "user/label/cate",
+            "POST"
+        );
     }
 
     /**
@@ -109,11 +132,21 @@ public class AdminUserLabelCateService {
 
     /**
      * 获取编辑表单数据
-     * PHP Reference: LabelCate.php::edit()
+     * PHP Reference: LabelCate.php::edit() -> ChatUserLabelCateServices::getEditForm()
+     *
+     * PHP代码:
+     * public function getEditForm(int $id)
+     * {
+     *     $cateInfo = $this->dao->get($id);
+     *     if (!$cateInfo) {
+     *         throw new ValidateException('获取分类失败');
+     *     }
+     *     return create_form('添加标签分类', $this->formRule($cateInfo->toArray()), $this->url('user/label/cate/' . $id), 'put');
+     * }
      *
      * @param id 分类ID
      * @param appid 租户ID
-     * @return 表单数据
+     * @return 表单配置数据
      */
     public Map<String, Object> getEditForm(Integer id, String appid) {
         if (id == null || id <= 0) {
@@ -125,12 +158,19 @@ public class AdminUserLabelCateService {
             throw new CrmChatException("Category does not exist");
         }
 
-        // TODO: 实现表单规则构建逻辑
-        // PHP: $this->services->getEditForm((int)$id)
-        Map<String, Object> result = new HashMap<>();
-        result.put("cate", cate);
-        result.put("form_rules", new ArrayList<>()); // 临时返回空表单规则
-        return result;
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 分类名称输入框（带默认值）
+        rules.add(formBuilder.input("name", "分类名称", cate.getName())
+            .required()
+            .placeholder("请输入分类名称"));
+
+        return FormHelper.createForm(
+            "修改标签分类",
+            rules,
+            "user/label/cate/" + id,
+            "PUT"
+        );
     }
 
     /**

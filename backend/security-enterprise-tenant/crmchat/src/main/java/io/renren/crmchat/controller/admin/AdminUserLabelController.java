@@ -77,13 +77,33 @@ public class AdminUserLabelController extends BaseController {
      *
      * Response:
      * {
-     *   "form_rules": [...]
+     *   "title": "创建标签",
+     *   "action": "user/label",
+     *   "method": "POST",
+     *   "rules": [
+     *     {
+     *       "type": "select",
+     *       "field": "cate_id",
+     *       "title": "标签分类",
+     *       "value": 0,
+     *       "options": [{value: 1, label: "分类1"}, ...],
+     *       "validate": [{"required": true, "message": "标签分类不能为空"}]
+     *     },
+     *     {
+     *       "type": "input",
+     *       "field": "label",
+     *       "title": "标签名称",
+     *       "value": "",
+     *       "validate": [{"required": true, "message": "标签名称不能为空"}]
+     *     }
+     *   ]
      * }
      */
     @GetMapping("/label/create")
     @Operation(summary = "Get Create Tag Form")
     public ApiResult<Map<String, Object>> getCreateForm() {
-        Map<String, Object> result = adminUserLabelService.getCreateForm();
+        String appid = currentAppid();
+        Map<String, Object> result = adminUserLabelService.getCreateForm(appid);
         return ApiResult.ok(result);
     }
 

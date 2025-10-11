@@ -62,7 +62,7 @@ public class AdminConfigController {
      */
     @GetMapping("/config")
     @Operation(summary = "Get Configuration List")
-    public ApiResult<List<SystemConfigEntity>> getConfigList(
+    public ApiResult<Map<String, Object>> getConfigList(
             @RequestParam Integer tab_id,
             @RequestParam(required = false, defaultValue = "-1") Integer status) {
 
@@ -70,7 +70,7 @@ public class AdminConfigController {
         filters.put("tab_id", tab_id);
         filters.put("status", status);
 
-        List<SystemConfigEntity> result = adminConfigService.getConfigList(filters);
+        Map<String, Object> result = adminConfigService.getConfigList(filters);
         return ApiResult.ok(result);
     }
 

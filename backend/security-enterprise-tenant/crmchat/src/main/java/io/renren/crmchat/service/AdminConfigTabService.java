@@ -6,6 +6,9 @@ import io.renren.crmchat.dao.SystemConfigTabMapper;
 import io.renren.crmchat.entity.SystemConfigEntity;
 import io.renren.crmchat.entity.SystemConfigTabEntity;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ public class AdminConfigTabService {
 
     private final SystemConfigTabMapper systemConfigTabMapper;
     private final SystemConfigMapper systemConfigMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取配置分类列表
@@ -99,21 +103,25 @@ public class AdminConfigTabService {
 
     /**
      * 获取创建表单数据
-     * PHP Reference: ConfigTab.php::create()
+     * PHP Reference: SystemConfigTabServices::createForm()
      *
-     * @return 表单数据（父级分类列表）
+     * PHP代码:
+     * public function createForm()
+     * {
+     *     return create_form('添加配置分类', $this->createConfigTabForm(), $this->url('/setting/config_class'));
+     * }
+     *
+     * @return FormBuilder生成的表单配置
      */
     public Map<String, Object> getCreateForm() {
-        // 返回所有分类用于选择父级
-        List<SystemConfigTabEntity> allTabs = systemConfigTabMapper.selectList(
-            new QueryWrapper<SystemConfigTabEntity>()
-                .eq("status", 1)
-                .orderByAsc("sort", "id")
-        );
+        List<BaseComponent> rules = createConfigTabFormRules(null);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("tabs", allTabs);
-        return result;
+        return FormHelper.createForm(
+            "添加配置分类",
+            rules,
+            "setting/config_class",
+            "POST"
+        );
     }
 
     /**
@@ -134,21 +142,31 @@ public class AdminConfigTabService {
         SystemConfigTabEntity tab = new SystemConfigTabEntity();
         tab.setTitle(title);
         tab.setEngTitle((String) data.get("eng_title"));
-        tab.setStatus((Integer) data.getOrDefault("status", 1));
+        tab.setStatus(parseInteger(data.get("status"), 1));
         tab.setIcon((String) data.get("icon"));
-        tab.setType((Integer) data.getOrDefault("type", 0));
-        tab.setSort((Integer) data.getOrDefault("sort", 0));
-        tab.setPid((Integer) data.getOrDefault("pid", 0));
+        tab.setType(parseInteger(data.get("type"), 0));
+        tab.setSort(parseInteger(data.get("sort"), 0));
+        tab.setPid(parseInteger(data.get("pid"), 0));
 
         return systemConfigTabMapper.insert(tab) > 0;
     }
 
     /**
      * 获取编辑表单数据
-     * PHP Reference: ConfigTab.php::edit()
+     * PHP Reference: SystemConfigTabServices::updateForm()
+     *
+     * PHP代码:
+     * public function updateForm(int $id)
+     * {
+     *     $configTabInfo = $this->dao->get($id);
+     *     if (!$configTabInfo) {
+     *         throw new AdminException('没有查到数据,无法修改!');
+     *     }
+     *     return create_form('编辑配置分类', $this->createConfigTabForm($configTabInfo->toArray()), $this->url('/setting/config_class/' . $id), 'PUT');
+     * }
      *
      * @param id 配置分类ID
-     * @return 表单数据
+     * @return FormBuilder生成的表单配置
      */
     public Map<String, Object> getEditForm(Integer id) {
         if (id == null || id <= 0) {
@@ -157,21 +175,17 @@ public class AdminConfigTabService {
 
         SystemConfigTabEntity tab = systemConfigTabMapper.selectById(id);
         if (tab == null) {
-            throw new CrmChatException("Data does not exist");
+            throw new CrmChatException("没有查到数据,无法修改!");
         }
 
-        // 获取所有分类用于选择父级
-        List<SystemConfigTabEntity> allTabs = systemConfigTabMapper.selectList(
-            new QueryWrapper<SystemConfigTabEntity>()
-                .eq("status", 1)
-                .ne("id", id)  // 排除自己
-                .orderByAsc("sort", "id")
-        );
+        List<BaseComponent> rules = createConfigTabFormRules(tab);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("tab", tab);
-        result.put("tabs", allTabs);
-        return result;
+        return FormHelper.createForm(
+            "编辑配置分类",
+            rules,
+            "setting/config_class/" + id,
+            "PUT"
+        );
     }
 
     /**
@@ -207,11 +221,11 @@ public class AdminConfigTabService {
 
         tab.setTitle(title);
         tab.setEngTitle(engTitle);
-        tab.setStatus((Integer) data.getOrDefault("status", tab.getStatus()));
+        tab.setStatus(parseInteger(data.get("status"), tab.getStatus()));
         tab.setIcon((String) data.get("icon"));
-        tab.setType((Integer) data.getOrDefault("type", tab.getType()));
-        tab.setSort((Integer) data.getOrDefault("sort", tab.getSort()));
-        tab.setPid((Integer) data.getOrDefault("pid", tab.getPid()));
+        tab.setType(parseInteger(data.get("type"), tab.getType()));
+        tab.setSort(parseInteger(data.get("sort"), tab.getSort()));
+        tab.setPid(parseInteger(data.get("pid"), tab.getPid()));
 
         return systemConfigTabMapper.updateById(tab) > 0;
     }
@@ -266,5 +280,181 @@ public class AdminConfigTabService {
 
         tab.setStatus(status);
         return systemConfigTabMapper.updateById(tab) > 0;
+    }
+
+    /**
+     * 获取分类选择下拉树 (public方法供外部调用)
+     * PHP Reference: SystemConfigTabServices::getSelectForm()
+     *
+     * @return 下拉选项列表
+     */
+    public List<Map<String, Object>> getConfigTabSelectOptions() {
+        return getSelectForm();
+    }
+
+    /**
+     * 获取分类选择下拉树
+     * PHP Reference: SystemConfigTabServices::getSelectForm()
+     *
+     * @return 下拉选项列表
+     */
+    private List<Map<String, Object>> getSelectForm() {
+        QueryWrapper<SystemConfigTabEntity> wrapper = new QueryWrapper<>();
+        wrapper.orderByAsc("sort", "id");
+
+        List<SystemConfigTabEntity> menuList = systemConfigTabMapper.selectList(wrapper);
+
+        // PHP: sort_list_tier($menuList, 0, 'pid', 'id')
+        List<Map<String, Object>> sortedList = sortListTier(menuList, 0, 0);
+
+        List<Map<String, Object>> menus = new ArrayList<>();
+        // PHP: 顶级按钮
+        Map<String, Object> topOption = new HashMap<>();
+        topOption.put("value", "0");
+        topOption.put("label", "顶级按钮");
+        menus.add(topOption);
+
+        for (Map<String, Object> menu : sortedList) {
+            Map<String, Object> option = new HashMap<>();
+            option.put("value", String.valueOf(menu.get("id")));
+            option.put("label", menu.get("html").toString() + menu.get("title"));
+            menus.add(option);
+        }
+
+        return menus;
+    }
+
+    /**
+     * 层级排序
+     * PHP Reference: sort_list_tier() helper function
+     */
+    private List<Map<String, Object>> sortListTier(List<SystemConfigTabEntity> list, int pid, int level) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        String html = "";
+        for (int i = 0; i < level; i++) {
+            html += "　　";
+        }
+        if (level > 0) {
+            html += "├─ ";
+        }
+
+        for (SystemConfigTabEntity entity : list) {
+            if (entity.getPid().equals(pid)) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("id", entity.getId());
+                item.put("title", entity.getTitle());
+                item.put("html", html);
+                result.add(item);
+                result.addAll(sortListTier(list, entity.getId(), level + 1));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 创建配置分类表单规则
+     * PHP Reference: SystemConfigTabServices::createConfigTabForm()
+     *
+     * PHP代码:
+     * $form[] = Form::select('pid', '父级分类', isset($formData['pid']) ? (string)$formData['pid'] : '')->setOptions($this->getSelectForm())->filterable(true);
+     * $form[] = Form::input('title', '分类名称', $formData['title'] ?? '');
+     * $form[] = Form::input('eng_title', '分类字段英文', $formData['eng_title'] ?? '');
+     * $form[] = Form::frameInput('icon', '图标', $this->url('admin/widget.widgets/icon', ['fodder' => 'icon'], true), $formData['icon'] ?? '')->icon('ios-ionic')->height('435px');
+     * $form[] = Form::radio('type', '类型', $formData['type'] ?? 0)->options([
+     *     ['value' => 0, 'label' => '系统'],
+     *     ['value' => 3, 'label' => '其它']
+     * ]);
+     * $form[] = Form::radio('status', '状态', $formData['status'] ?? 1)->options([['value' => 1, 'label' => '显示'], ['value' => 2, 'label' => '隐藏']]);
+     * $form[] = Form::number('sort', '排序', (int)($formData['sort'] ?? 0));
+     */
+    private List<BaseComponent> createConfigTabFormRules(SystemConfigTabEntity formData) {
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 1. 父级分类下拉选择
+        String pidValue = formData != null ? String.valueOf(formData.getPid()) : "0";
+        rules.add(formBuilder.select("pid", "父级分类", pidValue)
+            .options(getSelectForm())
+            .required());
+
+        // 2. 分类名称
+        String titleValue = formData != null ? formData.getTitle() : "";
+        rules.add(formBuilder.input("title", "分类名称", titleValue)
+            .required()
+            .placeholder("请输入分类名称"));
+
+        // 3. 分类字段英文
+        String engTitleValue = formData != null ? formData.getEngTitle() : "";
+        rules.add(formBuilder.input("eng_title", "分类字段英文", engTitleValue)
+            .required()
+            .placeholder("请输入分类字段英文"));
+
+        // 4. 图标 (暂时用input代替frameInput)
+        String iconValue = formData != null ? formData.getIcon() : "";
+        rules.add(formBuilder.input("icon", "图标", iconValue)
+            .placeholder("请输入图标"));
+
+        // 5. 类型
+        List<Map<String, Object>> typeOptions = new ArrayList<>();
+        Map<String, Object> typeOption1 = new HashMap<>();
+        typeOption1.put("value", "0");
+        typeOption1.put("label", "系统");
+        Map<String, Object> typeOption2 = new HashMap<>();
+        typeOption2.put("value", "3");
+        typeOption2.put("label", "其它");
+        typeOptions.add(typeOption1);
+        typeOptions.add(typeOption2);
+
+        String typeValue = formData != null ? String.valueOf(formData.getType()) : "0";
+        rules.add(formBuilder.radio("type", "类型", typeValue)
+            .options(typeOptions));
+
+        // 6. 状态
+        List<Map<String, Object>> statusOptions = new ArrayList<>();
+        Map<String, Object> statusOption1 = new HashMap<>();
+        statusOption1.put("value", "1");
+        statusOption1.put("label", "显示");
+        Map<String, Object> statusOption2 = new HashMap<>();
+        statusOption2.put("value", "2");
+        statusOption2.put("label", "隐藏");
+        statusOptions.add(statusOption1);
+        statusOptions.add(statusOption2);
+
+        String statusValue = formData != null ? String.valueOf(formData.getStatus()) : "1";
+        rules.add(formBuilder.radio("status", "状态", statusValue)
+            .options(statusOptions));
+
+        // 7. 排序
+        Integer sortValue = formData != null ? formData.getSort() : 0;
+        rules.add(formBuilder.number("sort", "排序", String.valueOf(sortValue)));
+
+        return rules;
+    }
+
+    /**
+     * 解析Integer值,处理String和Integer两种类型
+     * @param value 值对象(可能是String或Integer)
+     * @param defaultValue 默认值
+     * @return Integer值
+     */
+    private Integer parseInteger(Object value, Integer defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.trim().isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return Integer.parseInt(str);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
     }
 }
