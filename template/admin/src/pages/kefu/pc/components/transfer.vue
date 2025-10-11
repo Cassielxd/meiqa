@@ -49,10 +49,13 @@ export default {
     getList() {
       transferList({
         nickname: this.name,
-        uid: this.userUid
+        user_id: this.userUid
       }).then(res => {
         this.labelLists = res.data.list
-        console.log(this.labelLists);
+        console.log('Transfer list:', this.labelLists);
+      }).catch(error => {
+        console.error('Failed to get transfer list:', error);
+        this.$Message.error(error.msg || 'Failed to load customer service list');
       })
     },
     bindActive(item) {
