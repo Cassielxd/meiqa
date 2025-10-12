@@ -84,7 +84,7 @@ public class AdminSystemService {
         }
 
         // 5. pages 搜索 (PHP: searchPagesAttr - LIKE on 'page' field)
-        // 注意: PHP参数是"pages"，但搜索的是"page"字段
+        // Note: the PHP parameter is "pages", but the query checks the "page" column
         if (params.containsKey("pages") && params.get("pages") != null) {
             String pages = params.get("pages").toString().trim();
             if (!pages.isEmpty()) {

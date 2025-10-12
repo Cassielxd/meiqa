@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/mobile/service")
-@Tag(name = "Mobile Feedback - 移动端反馈")
+@Tag(name = "Mobile Feedback")
 @AllArgsConstructor
 public class MobileFeedbackController {
 
@@ -31,12 +31,12 @@ public class MobileFeedbackController {
      *
      * Request Body:
      * {
-     *   "rela_name": "张三",          // 姓名（必填）
-     *   "phone": "13800138000",      // 联系方式（必填）
-     *   "content": "反馈内容..."     // 反馈内容（必填）
+     *   "rela_name": "John Doe",          // name (required)
+     *   "phone": "13800138000",      // contact information (required)
+     *   "content": "Feedback details..."     // feedback content (required)
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+     * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/feedback")
     @Operation(summary = "Save User Feedback")
@@ -53,7 +53,7 @@ public class MobileFeedbackController {
      *
      * Response:
      * {
-     *   "feedback": "欢迎提交您的宝贵意见..."
+     *   "feedback": "We welcome your valuable feedback..."
      * }
      */
     @GetMapping("/feedback")

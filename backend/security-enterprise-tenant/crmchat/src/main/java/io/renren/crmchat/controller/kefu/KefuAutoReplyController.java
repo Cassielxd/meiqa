@@ -36,7 +36,7 @@ public class KefuAutoReplyController {
      * [
      *   {
      *     "id": 1,
-     *     "keyword": "你好",
+     *     "keyword": "Hello",
      *     "content": "Hello, how can I help you?",
      *     "user_id": 123,
      *     "sort": 0,
@@ -66,7 +66,7 @@ public class KefuAutoReplyController {
      * Response:
      * {
      *   "id": 1,
-     *   "keyword": "你好",
+     *   "keyword": "Hello",
      *   "content": "Hello, how can I help you?",
      *   ...
      * }
@@ -95,15 +95,15 @@ public class KefuAutoReplyController {
      *
      * Request Body:
      * {
-     *   "keyword": "你好",                  // 必填
-     *   "content": "您好，有什么可以帮您？",   // 必填
+     *   "keyword": "Hello",                  // required
+     *   "content": "Hi there, how can we help you?",   // required
      *   "sort": 0                          // 可选
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+     * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/{id}")
-    @Operation(summary = "创建或更新个人自动回复")
+    @Operation(summary = "Create or update personal auto reply")
     public ApiResult<String> saveAutoReply(
             @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {
@@ -128,10 +128,10 @@ public class KefuAutoReplyController {
      *
      * PHP Reference: AutoReply.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除个人自动回复")
+    @Operation(summary = "Delete personal auto reply")
     public ApiResult<String> deleteAutoReply(@PathVariable Integer id) {
         if (id == null || id <= 0) {
             return ApiResult.fail("Missing parameters");

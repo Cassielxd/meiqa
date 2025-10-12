@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/chat/group")
-@Tag(name = "Admin Service Group - 客服组管理")
+@Tag(name = "Admin Service Group")
 @AllArgsConstructor
 public class AdminServiceGroupController extends BaseController {
 
@@ -80,14 +80,14 @@ public class AdminServiceGroupController extends BaseController {
      *
      * Request Body:
      * {
-     *   "name": "客服组1",
+     *   "name": "Support Team 1",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "Modified successfully" } 或 { "code": 0, "msg": "添加成功" }
+     * Response: { "code": 0, "msg": "Modified successfully" } or { "code": 0, "msg": "Added successfully" }
      */
     @PostMapping("/{id}")
-    @Operation(summary = "保存客服组")
+    @Operation(summary = "Save Service Group")
     public ApiResult<String> saveGroup(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         String appid = currentAppid();
 
@@ -101,10 +101,10 @@ public class AdminServiceGroupController extends BaseController {
      *
      * PHP Reference: ServiceGroup.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除客服组")
+    @Operation(summary = "Delete Service Group")
     public ApiResult<String> deleteGroup(@PathVariable Integer id) {
         String appid = currentAppid();
 

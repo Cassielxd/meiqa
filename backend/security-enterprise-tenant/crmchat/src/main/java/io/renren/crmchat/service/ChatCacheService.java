@@ -132,13 +132,13 @@ public class ChatCacheService {
 
     public List<ChatServiceEntity> getOnlineServices(String appid) {
         // 调试日志：检查租户隔离
-        log.info("[租户隔离检查] Cache层 - 查询在线客服,appid: {}", appid);
+        log.info("[Tenant isolation] Cache layer - querying online agents, appid: {}", appid);
 
         String localKey = cacheKey(appid, "service", "online_list");
         @SuppressWarnings("unchecked")
         List<ServiceSnapshot> local = getLocal(localKey, List.class);
         if (local != null) {
-            log.info("[租户隔离检查] Cache层 - 从本地缓存返回,数量: {}", local.size());
+            log.info("[Tenant isolation] Cache layer - returning from local cache, size: {}", local.size());
             return toServiceEntities(local);
         }
 
@@ -148,15 +148,15 @@ public class ChatCacheService {
             @SuppressWarnings("unchecked")
             List<ServiceSnapshot> snapshots = (List<ServiceSnapshot>) cached;
             putLocal(localKey, snapshots, ONLINE_SERVICE_TTL_SECONDS);
-            log.info("[租户隔离检查] Cache层 - 从Redis缓存返回,数量: {}", snapshots.size());
+            log.info("[Tenant isolation] Cache layer - returning from Redis cache, size: {}", snapshots.size());
             return toServiceEntities(snapshots);
         }
 
-        log.info("[租户隔离检查] Cache层 - 执行数据库查询,appid: {}", appid);
+        log.info("[Tenant isolation] Cache layer - executing database query, appid: {}", appid);
         QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("appid", appid).eq("status", 1).eq("online", 1);
         List<ChatServiceEntity> services = chatServiceMapper.selectList(wrapper);
-        log.info("[租户隔离检查] Cache层 - 数据库查询结果,数量: {}", services.size());
+        log.info("[Tenant isolation] Cache layer - database query result count: {}", services.size());
         List<ServiceSnapshot> snapshots = services.stream()
                 .map(ServiceSnapshot::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -251,11 +251,11 @@ public class ChatCacheService {
      */
     public void invalidateAllTenantCache(String appid) {
         if (appid == null || appid.isBlank()) {
-            log.warn("尝试清除租户缓存但appid为空");
+            log.warn("Attempted to clear tenant cache but appid is empty");
             return;
         }
 
-        log.info("[缓存清理] 开始清除租户缓存, appid: {}", appid);
+        log.info("[Cache cleanup] Starting tenant cache clear, appid: {}", appid);
 
         // 1. 清除本地缓存中所有与该租户相关的数据
         localCache.keySet().removeIf(key -> key.contains("::" + appid + "::"));
@@ -268,9 +268,9 @@ public class ChatCacheService {
             // 清除游客头像配置缓存
             redisUtils.delete(redisKey(appid, "config", "tourist_avatar"));
 
-            log.info("[缓存清理] 租户缓存清除成功, appid: {}", appid);
+            log.info("[Cache cleanup] Tenant cache cleared successfully, appid: {}", appid);
         } catch (Exception e) {
-            log.error("[缓存清理] 清除租户Redis缓存失败, appid: {}, error: {}", appid, e.getMessage(), e);
+            log.error("[Cache cleanup] Failed to clear tenant Redis cache, appid: {}, error: {}", appid, e.getMessage(), e);
         }
     }
 

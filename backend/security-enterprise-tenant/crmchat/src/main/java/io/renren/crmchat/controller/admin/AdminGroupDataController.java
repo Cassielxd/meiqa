@@ -56,7 +56,7 @@ public class AdminGroupDataController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer limit) {
 
-        log.info("=== 查询组合数据 === configName: {}, status: {}, page: {}, limit: {}",
+        log.info("=== Querying group data === configName: {}, status: {}, page: {}, limit: {}",
                 configName, status, page, limit);
 
         // PHP: $this->services->getGroupDataList($where)

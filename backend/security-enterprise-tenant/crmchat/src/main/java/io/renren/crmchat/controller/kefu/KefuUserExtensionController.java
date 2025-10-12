@@ -42,7 +42,7 @@ public class KefuUserExtensionController {
      *     "id": 1,
      *     "user_id": 123,
      *     "to_user_id": 456,
-     *     "nickname": "张三",
+     *     "nickname": "John Doe",
      *     "avatar": "http://...",
      *     ...
      *   }
@@ -99,7 +99,7 @@ public class KefuUserExtensionController {
      * - 删除用户和标签的关联关系（ChatUserLabelAssist表）
      * - 不是删除标签本身
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/user/{userId}/label/{labelId}")
     @Operation(summary = "Delete User Tag")
@@ -127,10 +127,10 @@ public class KefuUserExtensionController {
      * - 先清空所有客服的相同client_id（保证唯一性）
      * - 更新当前客服的client_id
      *
-     * Response: { "code": 0, "msg": "更新成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/service")
-    @Operation(summary = "更新客服client_id")
+    @Operation(summary = "Update agent client_id")
     public ApiResult<String> updateServiceClientId(@RequestBody Map<String, Object> data) {
         Long currentUserId = UserContext.getUserId();
         String appid = UserContext.getAppid();
@@ -163,10 +163,10 @@ public class KefuUserExtensionController {
      *   - ChatServiceDialogueRecord（to_user_id = userId）
      *   - ChatUser（userId）
      *
-     * Response: { "code": 0, "msg": "拉黑成功" }
+     * Response: { "code": 0, "msg": "Blocked successfully" }
      */
     @PostMapping("/user/{userId}/block")
-    @Operation(summary = "拉黑用户")
+    @Operation(summary = "Block user")
     public ApiResult<String> blockUser(@PathVariable Integer userId) {
         kefuUserExtensionService.blockUser(userId);
         return ApiResult.ok("Blocked successfully", "success");
@@ -181,7 +181,7 @@ public class KefuUserExtensionController {
      * Request Body:
      * {
      *   "to_user_id": 456,              // 接收人user_id（必填）
-     *   "msn": "你好",                   // 消息内容（必填）
+     *   "msn": "Hello",                   // message content (required)
      *   "other": {},                     // 其他信息（可选，JSON）
      *   "type": 0,                       // 是否已读（可选）
      *   "msn_type": 1                    // 消息类型（可选，1-文字，2-表情，3-图片，4-语音）
@@ -192,17 +192,17 @@ public class KefuUserExtensionController {
      *   "id": 123,
      *   "user_id": 1,
      *   "to_user_id": 456,
-     *   "msn": "你好",
+     *   "msn": "Hello",
      *   "msn_type": 1,
      *   "type": 0,
      *   "add_time": 1234567890,
-     *   "nickname": "客服小李",
+     *   "nickname": "Agent Li",
      *   "avatar": "http://...",
      *   "_add_time": "2023-01-01 12:00:00"
      * }
      */
     @PostMapping("/chat/log")
-    @Operation(summary = "保存聊天日志")
+    @Operation(summary = "Save chat log")
     public ApiResult<Map<String, Object>> saveChatLog(@RequestBody Map<String, Object> data) {
         Long currentUserId = UserContext.getUserId();
         String appid = UserContext.getAppid();
@@ -225,7 +225,7 @@ public class KefuUserExtensionController {
      *   {
      *     "id": 1,
      *     "pid": 0,
-     *     "name": "服务态度",
+     *     "name": "Service Attitude",
      *     "type": 2,
      *     "sort": 0,
      *     ...
@@ -233,7 +233,7 @@ public class KefuUserExtensionController {
      *   {
      *     "id": 2,
      *     "pid": 1,
-     *     "name": "服务不热情",
+     *     "name": "Service Not Enthusiastic",
      *     "type": 2,
      *     "sort": 0,
      *     ...
@@ -241,7 +241,7 @@ public class KefuUserExtensionController {
      * ]
      */
     @GetMapping("/complain/categories")
-    @Operation(summary = "获取投诉分类")
+    @Operation(summary = "Get complaint categories")
     public ApiResult<List<CategoryEntity>> getComplainCategories() {
         List<CategoryEntity> result = kefuUserExtensionService.getComplainCategories();
         return ApiResult.ok(result);
@@ -255,7 +255,7 @@ public class KefuUserExtensionController {
      *
      * Request Body:
      * {
-     *   "content": "投诉内容...",         // 投诉内容（必填）
+     *   "content": "Complaint details...",         // complaint content (required)
      *   "user_id": 789,                 // 被投诉的用户ID（必填）
      *   "cate_id": [1, 3]               // 分类ID数组（必填）
      * }
@@ -267,7 +267,7 @@ public class KefuUserExtensionController {
      * Response: { "code": 0, "msg": "Complaint submitted successfully" }
      */
     @PostMapping("/complain")
-    @Operation(summary = "提交投诉")
+    @Operation(summary = "Submit complaint")
     public ApiResult<String> submitComplain(@RequestBody Map<String, Object> data) {
         kefuUserExtensionService.submitComplain(data);
         return ApiResult.ok("Complaint submitted successfully", "success");

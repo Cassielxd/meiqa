@@ -18,7 +18,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/kefu/service")
-@Tag(name = "Kefu Service Extension - 客服扩展功能")
+@Tag(name = "Kefu Service Extension")
 @AllArgsConstructor
 public class KefuServiceExtensionController {
 
@@ -84,12 +84,12 @@ public class KefuServiceExtensionController {
      *   "id": 1,
      *   "user_id": 123,
      *   "account": "kefu01",
-     *   "nickname": "客服小李",
+     *   "nickname": "Agent Li",
      *   "avatar": "http://...",
      *   "online": 1,
      *   "auto_reply": 1,
      *   "is_backstage": 0,
-     *   "site_name": "CRM客服系统",
+     *   "site_name": "CRM Support System",
      *   "config_export_open": 1,
      *   "user_ids": [123, 456, 789],  // 同租户所有客服的user_id列表
      *   ...
@@ -119,7 +119,7 @@ public class KefuServiceExtensionController {
      *   "user_id": 789        // 要转接的用户ID（必填）
      * }
      *
-     * Response: { "code": 0, "msg": "转接成功" }
+     * Response: { "code": 0, "msg": "Transfer successful" }
      *
      * 业务说明:
      * - 将当前客服与指定用户的对话转接给目标客服
@@ -162,10 +162,10 @@ public class KefuServiceExtensionController {
      * Path Variable:
      * - value: 0-关闭，1-开启
      *
-     * Response: { "code": 0, "msg": "设置成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/auth_reply/{value}")
-    @Operation(summary = "设置自动回复开关")
+    @Operation(summary = "Set auto-reply toggle")
     public ApiResult<String> setAutoReply(@PathVariable Integer value) {
         if (value != 0 && value != 1) {
             return ApiResult.fail("Invalid parameter: value must be 0 or 1");
@@ -189,10 +189,10 @@ public class KefuServiceExtensionController {
      * Path Variable:
      * - value: 0-关闭，1-开启
      *
-     * Response: { "code": 0, "msg": "设置成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/backstage/{value}")
-    @Operation(summary = "设置是否后台运行")
+    @Operation(summary = "Set background running flag")
     public ApiResult<String> setBackstage(@PathVariable("value") Integer value) {
         if (value != 0 && value != 1) {
             return ApiResult.fail("Invalid parameter: value must be 0 or 1");
@@ -224,7 +224,7 @@ public class KefuServiceExtensionController {
      *     "id": 1,
      *     "user_id": 123,
      *     "to_user_id": 456,
-     *     "msn": "你好",
+     *     "msn": "Hello",
      *     "msn_type": 1,
      *     "add_time": 1234567890,
      *     ...
@@ -232,7 +232,7 @@ public class KefuServiceExtensionController {
      * ]
      */
     @GetMapping("/chat/history")
-    @Operation(summary = "获取聊天历史记录")
+    @Operation(summary = "Get chat history")
     public ApiResult<List<Map<String, Object>>> getChatHistory(
             @RequestParam(required = false) Integer user_id,
             @RequestParam(required = false, defaultValue = "0") Integer upperId,
@@ -270,7 +270,7 @@ public class KefuServiceExtensionController {
      * }
      */
     @GetMapping("/ping")
-    @Operation(summary = "心跳检测")
+    @Operation(summary = "Heartbeat check")
     public ApiResult<Map<String, Object>> ping() {
         Map<String, Object> result = kefuServiceExtensionService.ping();
         return ApiResult.ok(result);

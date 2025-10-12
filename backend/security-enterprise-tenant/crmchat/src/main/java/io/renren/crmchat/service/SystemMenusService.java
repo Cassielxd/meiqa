@@ -31,12 +31,12 @@ public class SystemMenusService {
      * 参考PHP: SystemMenusServices::getMenusList($rouleId, int $level)
      * PHP返回树形结构：顶级菜单 + children数组
      *
-     * @param roles 角色IDs（逗号分隔，如"1"或"1,2,3"）
-     * @param level 管理员等级（0=超级管理员，拥有所有权限）
-     * @return [菜单树形列表, 权限数组]
+     * @param roles Role IDs (comma-separated, for example "1" or "1,2,3")
+     * @param level Administrator level (0 = super administrator, full access)
+     * @return [menu tree list, permissions array]
      */
     public MenusResult getMenusList(String roles, Integer level) {
-        log.info("获取菜单列表 - roles: {}, level: {}", roles, level);
+        log.info("Fetching menu list - roles: {}, level: {}", roles, level);
 
         // 参考PHP: SystemMenusDao::getMenusRoule() 的查询条件
         // 菜单树只包含：is_show=1 && auth_type=1 && is_show_path=0 的菜单
@@ -49,7 +49,7 @@ public class SystemMenusService {
         queryWrapper.orderByDesc("sort", "id");
 
         List<SystemMenusEntity> menusList = systemMenusMapper.selectList(queryWrapper);
-        log.info("查询到 {} 条菜单记录", menusList.size());
+        log.info("Found {} menu records", menusList.size());
 
         // 权限列表需要单独查询，包括所有unique_auth不为空的记录（包括按钮权限）
         // 参考PHP: SystemMenusDao::getMenusUnique() 的逻辑
@@ -65,11 +65,11 @@ public class SystemMenusService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        log.info("权限列表: {}", uniqueAuth);
+        log.info("Permission list: {}", uniqueAuth);
 
         // 构建树形菜单结构（参考PHP返回格式）
         List<Map<String, Object>> menusTree = buildMenusTree(menusList);
-        log.info("构建树形菜单，顶级菜单数: {}", menusTree.size());
+        log.info("Built menu tree, root menu count: {}", menusTree.size());
 
         return new MenusResult(menusTree, uniqueAuth);
     }
@@ -78,12 +78,12 @@ public class SystemMenusService {
      * 构建菜单树形结构
      * 参考PHP返回格式：顶级菜单数组，每个菜单可能包含children数组
      *
-     * PHP实际返回示例：
+     * Example PHP response:
      * [
-     *   {"path":"/admin/home/","title":"统计","icon":"md-home","header":"home","is_header":1},
-     *   {"path":"/admin/user","title":"用户管理","icon":"md-person","header":"user","is_header":1,
+     *   {"path":"/admin/home/","title":"Analytics","icon":"md-home","header":"home","is_header":1},
+     *   {"path":"/admin/user","title":"User Management","icon":"md-person","header":"user","is_header":1,
      *    "children":[
-     *      {"path":"/admin/user/list","title":"用户列表","icon":"","header":"user","is_header":1},
+     *      {"path":"/admin/user/list","title":"User List","icon":"","header":"user","is_header":1},
      *      ...
      *    ]}
      * ]

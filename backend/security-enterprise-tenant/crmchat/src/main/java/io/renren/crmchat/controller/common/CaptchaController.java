@@ -30,7 +30,7 @@ public class CaptchaController {
      * GET /api/ajcaptcha?captchaType=blockPuzzle
      *
      * PHP参考: Login::ajcaptcha()
-     * Response: {"repCode":"0000","repData":{...},"repMsg":"获取验证码成功","success":true}
+     * Response: {"repCode":"0000","repData":{...},"repMsg":"Captcha retrieved successfully","success":true}
      */
     @GetMapping("/api/ajcaptcha")
     @Operation(summary = "Get Slider CAPTCHA (Public API)")
@@ -46,7 +46,7 @@ public class CaptchaController {
      *
      * PHP参考: Login::ajcheck()
      * Request: {"token":"xxx","pointJson":"xxx","captchaType":"blockPuzzle"}
-     * Response: {"repCode":"0000","repMsg":"验证成功","success":true}
+     * Response: {"repCode":"0000","repMsg":"Verification successful","success":true}
      */
     @PostMapping("/api/ajcheck")
     @Operation(summary = "Verify Slider CAPTCHA (Public API)")
@@ -75,7 +75,7 @@ public class CaptchaController {
      * POST /api/admin/ajcheck
      */
     @PostMapping("/api/admin/ajcheck")
-    @Operation(summary = "验证滑块验证码（Admin路径）")
+    @Operation(summary = "Verify slider captcha (admin path)")
     public ApiResult<Map<String, Object>> adminAjCheck(@RequestBody Map<String, String> request) {
         return ajCheck(request);
     }

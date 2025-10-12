@@ -48,7 +48,7 @@ public class AdminConfigTabController {
      * [
      *   {
      *     "id": 1,
-     *     "title": "基础配置",
+     *     "title": "Basic Configuration",
      *     "eng_title": "basic",
      *     ...
      *   }
@@ -124,7 +124,7 @@ public class AdminConfigTabController {
      *
      * Request Body:
      * {
-     *   "title": "基础配置",
+     *   "title": "Basic Configuration",
      *   "eng_title": "basic",
      *   "status": 1,
      *   "icon": "setting",
@@ -133,10 +133,10 @@ public class AdminConfigTabController {
      *   "pid": 0
      * }
      *
-     * Response: { "code": 0, "msg": "添加配置分类成功!" }
+     * Response: { "code": 0, "msg": "Configuration category added successfully" }
      */
     @PostMapping({"/config_tab", "/config_class"})
-    @Operation(summary = "保存配置分类")
+    @Operation(summary = "Save Configuration Category")
     public ApiResult<String> createConfigTab(@RequestBody Map<String, Object> data) {
         adminConfigTabService.createConfigTab(data);
         return ApiResult.ok("Configuration category added successfully", "success");
@@ -169,10 +169,10 @@ public class AdminConfigTabController {
      *
      * Request Body: 同保存配置分类
      *
-     * Response: { "code": 0, "msg": "修改成功!" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping({"/config_tab/{id}", "/config_class/{id}"})
-    @Operation(summary = "更新配置分类")
+    @Operation(summary = "Update Configuration Category")
     public ApiResult<String> updateConfigTab(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         boolean success = adminConfigTabService.updateConfigTab(id, data);
         if (success) {
@@ -188,10 +188,10 @@ public class AdminConfigTabController {
      *
      * PHP Reference: ConfigTab.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功!" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping({"/config_tab/{id}", "/config_class/{id}"})
-    @Operation(summary = "删除配置分类")
+    @Operation(summary = "Delete Configuration Category")
     public ApiResult<String> deleteConfigTab(@PathVariable Integer id) {
         boolean success = adminConfigTabService.deleteConfigTab(id);
         if (success) {
@@ -207,7 +207,7 @@ public class AdminConfigTabController {
      *
      * PHP Reference: ConfigTab.php::set_status()
      *
-     * Response: { "code": 0, "msg": "隐藏成功" } 或 { "code": 0, "msg": "显示成功" }
+     * Response: { "code": 0, "msg": "Hidden successfully" } or { "code": 0, "msg": "Shown successfully" }
      */
     @PutMapping({"/config_tab/set_status/{id}/{status}", "/config_class/set_status/{id}/{status}"})
     @Operation(summary = "Modify Configuration Category Status")

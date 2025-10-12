@@ -73,7 +73,7 @@ public class KefuAuthController {
      * GET /api/kefu/key
      */
     @GetMapping("/key")
-    @Operation(summary = "获取扫码登录key")
+    @Operation(summary = "Get QR login key")
     public ApiResult<Map<String, Object>> getLoginKey() {
         Map<String, Object> payload = kefuLoginCodeManager.generateLoginKey();
         return ApiResult.ok(payload);
@@ -84,7 +84,7 @@ public class KefuAuthController {
      * GET /api/kefu/scan/{key}
      */
     @GetMapping("/scan/{key}")
-    @Operation(summary = "查询扫码登录状态")
+    @Operation(summary = "Check QR login status")
     public ApiResult<Map<String, Object>> scanLogin(@PathVariable String key) {
         KefuLoginCodeManager.LoginCode code = kefuLoginCodeManager.get(key);
         if (code == null) {
@@ -111,7 +111,7 @@ public class KefuAuthController {
      * PHP Reference: Login.php::getAppid()
      */
     @GetMapping("/config")
-    @Operation(summary = "获取客服登录配置")
+    @Operation(summary = "Get agent login configuration")
     public ApiResult<Map<String, Object>> getKefuConfig() {
         Map<String, Object> info = chatServiceService.getLoginInfo();
         return ApiResult.ok(info);
@@ -126,7 +126,7 @@ public class KefuAuthController {
      * @return 客服信息
      */
     @GetMapping("/user/userInfo")
-    @Operation(summary = "获取客服信息")
+    @Operation(summary = "Get agent information")
     public ApiResult<Map<String, Object>> getKefuInfo() {
         // 从JWT token中获取当前客服ID
         Long userId = UserContext.getUserId();
@@ -146,15 +146,15 @@ public class KefuAuthController {
      *
      * Request Body:
      * {
-     *   "nickname": "客服昵称",
+     *   "nickname": "Agent nickname",
      *   "avatar": "Avatar URL",
-     *   "phone": "手机号"
+     *   "phone": "Phone number"
      * }
      *
      * @return 修改成功
      */
     @PutMapping("/user/userInfo")
-    @Operation(summary = "更新个人信息")
+    @Operation(summary = "Update personal information")
     public ApiResult<String> updateProfile(@RequestBody Map<String, Object> data) {
         // 从JWT token中获取当前客服ID
         Long userId = UserContext.getUserId();
@@ -174,8 +174,8 @@ public class KefuAuthController {
      *
      * Request Body:
      * {
-     *   "old_password": "旧密码",
-     *   "new_password": "新密码"
+     *   "old_password": "Old password",
+     *   "new_password": "New password"
      * }
      *
      * @return 修改成功

@@ -62,7 +62,7 @@ public class AdminSystemLogController {
                     startTime = Long.parseLong(times[0].trim());
                     endTime = Long.parseLong(times[1].trim());
                 } catch (NumberFormatException e) {
-                    log.warn("时间格式错误: {}", data);
+                    log.warn("Invalid time format: {}", data);
                 }
             }
         }

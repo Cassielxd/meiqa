@@ -104,7 +104,7 @@ public class CaptchaServiceImpl implements CaptchaService {
             ajCaptchaCache.remove(token);
 
             result.put("repCode", "0000");
-            result.put("repMsg", "验证成功");
+            result.put("repMsg", "Verification succeeded");
             result.put("success", true);
 
             log.info("AJ验证码验证成功 token: {}", token);

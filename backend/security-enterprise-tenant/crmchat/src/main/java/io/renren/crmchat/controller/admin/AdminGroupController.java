@@ -49,7 +49,7 @@ public class AdminGroupController {
      * 获取所有组合数据(简化版)
      * PHP Reference: Group::getGroup()
      * 路由: GET /api/admin/setting/group_all
-     * 返回: [{"id": 1, "name": "组名"}]
+     * Response: [{"id": 1, "name": "Group Name"}]
      *
      * @return 简化的组合数据列表
      */

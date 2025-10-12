@@ -32,8 +32,8 @@ import java.util.Map;
  *    - 更新分组
  * 4. deleteGroup(): 删除分组
  *    - 检查是否有用户关联此分组
- *    - 如果有，返回错误"请先清除掉,关联的用户分组"
- *    - 如果没有，删除分组
+ *    - 若存在关联用户，则返回错误"Please remove the associated user groups first"
+ *    - 若不存在关联用户，则删除分组
  *
  * @author CRMChat Team
  */

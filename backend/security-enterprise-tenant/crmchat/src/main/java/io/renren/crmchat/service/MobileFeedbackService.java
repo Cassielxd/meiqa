@@ -74,7 +74,7 @@ public class MobileFeedbackService {
             throw new CrmChatException("Failed to save");
         }
 
-        log.info("保存反馈成功: relaName={}, phone={}", relaName, phone);
+        log.info("Feedback saved successfully: contactName={}, phone={}", relaName, phone);
     }
 
     /**
@@ -97,7 +97,7 @@ public class MobileFeedbackService {
         Map<String, Object> result = new HashMap<>();
         result.put("feedback", feedback);
 
-        log.info("获取反馈页面信息: feedback={}", feedback);
+        log.info("Retrieved feedback page data: feedback={}", feedback);
         return result;
     }
 

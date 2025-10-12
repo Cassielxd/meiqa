@@ -76,11 +76,11 @@ public class AdminAuthController {
     }
 
     /**
-     * 临时API：修复租户max_services
+     * Temporary API: fix tenant max_services
      * POST /api/admin/fix_tenant_max_services
      */
     @PostMapping("/fix_tenant_max_services")
-    @Operation(summary = "修复租户max_services")
+    @Operation(summary = "Fix tenant max_services")
     public ApiResult<String> fixTenantMaxServices() {
         // 直接执行SQL更新
         org.springframework.jdbc.core.JdbcTemplate jdbcTemplate = new org.springframework.jdbc.core.JdbcTemplate(

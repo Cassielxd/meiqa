@@ -259,7 +259,7 @@ public class TenantsService {
         Map<String, Object> result = new HashMap<>();
         result.put("status", tenant.getStatus());
         TenantStatus status = TenantStatus.fromCode(tenant.getStatus());
-        result.put("status_text", status != null ? status.getLabel() : "未知");
+        result.put("status_text", status != null ? status.getLabel() : "Unknown");
         boolean expired = isTenantExpired(tenant.getExpireAt());
         result.put("is_expired", expired);
         result.put("remaining_days", calculateRemainingDays(tenant.getExpireAt()));

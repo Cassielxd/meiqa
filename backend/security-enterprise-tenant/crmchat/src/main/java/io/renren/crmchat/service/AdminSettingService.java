@@ -138,9 +138,9 @@ public class AdminSettingService {
      * 匹配PHP返回格式
      *
      * PHP逻辑:
-     * - roles字段: 从"1,2,3"转换为"超级管理员,经理"
-     * - _add_time: 格式化为"Y-m-d H:i:s"
-     * - _last_time: 格式化为"Y-m-d H:i:s"（如果为空则为""）
+     * - roles field: convert "1,2,3" to "Super Admin, Manager"
+     * - _add_time: format as "Y-m-d H:i:s"
+     * - _last_time: format as "Y-m-d H:i:s" (empty string if null)
      */
     private Map<String, Object> adminEntityToMap(SystemAdminEntity entity, Map<Integer, String> allRoles) {
         Map<String, Object> map = new HashMap<>();

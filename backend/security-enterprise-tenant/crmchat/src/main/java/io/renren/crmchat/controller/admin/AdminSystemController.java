@@ -49,8 +49,8 @@ public class AdminSystemController {
      *       "path": "/api/admin/login",
      *       "method": "POST",
      *       "ip": "127.0.0.1",
-     *       "type": "登录",
-     *       "page": "管理员登录",
+     *       "type": "Login",
+     *       "page": "Administrator Login",
      *       "add_time": "2025-01-01 10:00:00"
      *     }
      *   ],

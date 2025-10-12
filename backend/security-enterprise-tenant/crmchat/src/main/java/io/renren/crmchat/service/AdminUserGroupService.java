@@ -71,12 +71,12 @@ public class AdminUserGroupService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 分组名称输入框
-        rules.add(formBuilder.input("group_name", "分组名称", "")
+        rules.add(formBuilder.input("group_name", "Group Name", "")
             .required()
-            .placeholder("请输入分组名称"));
+            .placeholder("Enter group name"));
 
         return FormHelper.createForm(
-            "添加分组",
+            "Add Group",
             rules,
             "user/group",
             "POST"
@@ -130,12 +130,12 @@ public class AdminUserGroupService {
         rules.add(formBuilder.hidden("id", id));
 
         // 分组名称输入框（带默认值）
-        rules.add(formBuilder.input("group_name", "分组名称", group.getGroupName())
+        rules.add(formBuilder.input("group_name", "Group Name", group.getGroupName())
             .required()
-            .placeholder("请输入分组名称"));
+            .placeholder("Enter group name"));
 
         return FormHelper.createForm(
-            "修改分组",
+            "Edit Group",
             rules,
             "user/group/" + id,
             "PUT"

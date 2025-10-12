@@ -51,10 +51,10 @@ public class AdminLogInterceptor implements HandlerInterceptor {
             // 只记录管理员 API 操作 (/api/admin/**)
             String path = request.getRequestURI();
 
-            log.info("=== AdminLogInterceptor 被触发 === path: {}", path);
+            log.info("=== AdminLogInterceptor triggered === path: {}", path);
 
             if (!path.startsWith("/api/admin/")) {
-                log.info("=== 跳过非管理员API: {}", path);
+                log.info("=== Skipping non-admin API: {}", path);
                 return;
             }
 
@@ -105,11 +105,11 @@ public class AdminLogInterceptor implements HandlerInterceptor {
             // PHP: $this->dao->save($data)
             int result = systemLogMapper.insert(logEntity);
 
-            log.info("=== 日志记录成功 === adminId={}, path={}, ip={}, result={}", adminId, path, ip, result);
+            log.info("=== Logged admin action successfully === adminId={}, path={}, ip={}, result={}", adminId, path, ip, result);
 
         } catch (Exception e) {
             // PHP: catch (\Throwable $e) {} - 静默失败,不影响业务
-            log.error("记录管理员日志失败", e);
+            log.error("Failed to record admin action log", e);
         }
     }
 

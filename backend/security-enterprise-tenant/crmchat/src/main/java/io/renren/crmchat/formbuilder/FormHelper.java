@@ -72,7 +72,7 @@ public class FormHelper {
     private static Map<String, Object> createSubmitBtn() {
         Map<String, Object> btn = new HashMap<>();
         btn.put("show", true);
-        btn.put("innerText", "提交");
+        btn.put("innerText", "Submit");
         btn.put("type", "primary");
         btn.put("size", "default");
         btn.put("col", createCol(12));
@@ -85,7 +85,7 @@ public class FormHelper {
     private static Map<String, Object> createResetBtn() {
         Map<String, Object> btn = new HashMap<>();
         btn.put("show", false);
-        btn.put("innerText", "重置");
+        btn.put("innerText", "Reset");
         btn.put("size", "default");
         btn.put("col", createCol(12));
         return btn;

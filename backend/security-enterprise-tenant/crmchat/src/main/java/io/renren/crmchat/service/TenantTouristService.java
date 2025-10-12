@@ -114,7 +114,7 @@ public class TenantTouristService {
             userInfo = new ChatUserEntity();
             userInfo.setUid(uid != null && uid > 0 ? uid : generateRandomUid());
             userInfo.setAppid(appid);
-            userInfo.setNickname(nickname != null && !nickname.isEmpty() ? nickname : "游客" + System.currentTimeMillis());
+            userInfo.setNickname(nickname != null && !nickname.isEmpty() ? nickname : "Guest" + System.currentTimeMillis());
             userInfo.setAvatar(avatar != null && !avatar.isEmpty() ? avatar : "");
             userInfo.setPhone(phone != null && !phone.isEmpty() ? phone : "");
             userInfo.setSex(sex != null ? sex : 0);

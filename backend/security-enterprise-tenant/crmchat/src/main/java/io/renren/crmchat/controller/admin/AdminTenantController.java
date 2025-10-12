@@ -89,7 +89,7 @@ public class AdminTenantController {
      *
      * Request Body:
      * {
-     *   "tenant_name": "租户名称",
+     *   "tenant_name": "Tenant Name",
      *   "account": "admin@example.com",
      *   "pwd": "password123",
      *   "contact_email": "contact@example.com",
@@ -98,7 +98,7 @@ public class AdminTenantController {
      *   "service_limit": 10,
      *   "expire_at": "2025-12-31 23:59:59",
      *   "status": 1,
-     *   "remark": "备注信息"
+     *   "remark": "Remarks"
      * }
      *
      * Response:
@@ -125,7 +125,7 @@ public class AdminTenantController {
      *
      * Request Body:
      * {
-     *   "tenant_name": "租户名称",
+     *   "tenant_name": "Tenant Name",
      *   "contact_email": "contact@example.com",
      *   "contact_phone": "13800138000",
      *   "user_limit": 100,
@@ -133,11 +133,11 @@ public class AdminTenantController {
      *   "expire_at": "2025-12-31 23:59:59",
      *   "auto_renew": 1,
      *   "status": 1,
-     *   "remark": "备注信息",
+     *   "remark": "Remarks",
      *   "pwd": "new_password" // 可选，更新密码
      * }
      *
-     * Response: { "code": 0, "msg": "更新成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/update/{id}")
     @Operation(summary = "Update Tenant")
@@ -163,10 +163,10 @@ public class AdminTenantController {
      *   "status": 1  // 0-禁用, 1-启用
      * }
      *
-     * Response: { "code": 0, "msg": "状态更新成功" }
+     * Response: { "code": 0, "msg": "Status updated successfully" }
      */
     @PutMapping("/status/{id}")
-    @Operation(summary = "更新租户状态")
+    @Operation(summary = "Update Tenant Status")
     public ApiResult<String> updateStatus(
             @Parameter(description = "Tenant ID") @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {
@@ -195,10 +195,10 @@ public class AdminTenantController {
      *
      * 注意: 这是软删除，不会真正删除数据，只是标记 is_del=1
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/delete/{id}")
-    @Operation(summary = "删除租户")
+    @Operation(summary = "Delete Tenant")
     public ApiResult<String> delete(@Parameter(description = "Tenant ID") @PathVariable("id") Integer id) {
         if (id == null || id <= 0) {
             return ApiResult.fail("Invalid parameters");
@@ -248,7 +248,7 @@ public class AdminTenantController {
      * [
      *   {
      *     "id": 1,
-     *     "tenant_name": "测试租户",
+     *     "tenant_name": "Test Tenant",
      *     "expire_at": "2025-11-01 23:59:59",
      *     "remaining_days": 25,
      *     "is_expired": false,
@@ -274,10 +274,10 @@ public class AdminTenantController {
      *   "password": "new_password123"
      * }
      *
-     * Response: { "code": 0, "msg": "密码重置成功" }
+     * Response: { "code": 0, "msg": "Password reset successfully" }
      */
     @PutMapping("/reset_password/{id}")
-    @Operation(summary = "重置租户密码")
+    @Operation(summary = "Reset Tenant Password")
     public ApiResult<String> resetPassword(
             @Parameter(description = "Tenant ID") @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {

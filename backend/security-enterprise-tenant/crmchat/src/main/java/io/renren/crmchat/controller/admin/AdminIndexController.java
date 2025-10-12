@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin")
-@Tag(name = "Admin Index - 首页统计")
+@Tag(name = "Admin Index")
 @AllArgsConstructor
 public class AdminIndexController extends BaseController {
 
@@ -152,7 +152,7 @@ public class AdminIndexController extends BaseController {
      * }
      */
     @GetMapping("/chart")
-    @Operation(summary = "客户首页统计")
+    @Operation(summary = "Customer Home Statistics")
     public ApiResult<ChartStatisticsDTO> getKefuStatistics(
             @RequestParam(defaultValue = "0") Integer type,
             @RequestParam(required = false) Integer year,

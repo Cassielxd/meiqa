@@ -24,7 +24,7 @@ public class TenantRegisterDTO implements Serializable {
     @Schema(description = "Tenant Name", example = "Test Tenant")
     private String tenantName;
 
-    @Schema(description = "Contact Name", example = "张三")
+    @Schema(description = "Contact Name", example = "John Doe")
     private String contactName;
 
     @Schema(description = "Contact Phone", example = "13800138000")
@@ -36,12 +36,12 @@ public class TenantRegisterDTO implements Serializable {
     @JsonProperty("contact_email")
     private String contactEmail;
 
-    @Schema(description = "验证码", example = "123456", required = true)
+    @Schema(description = "Verification Code", example = "123456", required = true)
     @NotBlank(message = "Please enter verification code")
     @Size(min = 6, max = 6, message = "Verification code length error")
     private String captcha;
 
-    @Schema(description = "密码", example = "123456", required = true)
+    @Schema(description = "Password", example = "123456", required = true)
     @NotBlank(message = "Please enter password")
     @Size(min = 6, max = 32, message = "Password length must be between 6-32 characters")
     private String pwd;

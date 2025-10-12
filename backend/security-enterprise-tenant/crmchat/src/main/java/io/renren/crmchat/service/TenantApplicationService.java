@@ -56,7 +56,7 @@ public class TenantApplicationService {
      */
     public ApplicationEntity getApplication(String appid) {
         // PHP: $where["appid"] = $appid;
-        // PHP: return $this->success("查询成功",$this->services->getOne($where)->toArray());
+        // PHP: return $this->success("Query succeeded", $this->services->getOne($where)->toArray());
 
         QueryWrapper<ApplicationEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("appid", appid);

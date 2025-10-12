@@ -117,7 +117,7 @@ public class AdminConfigTabService {
         List<BaseComponent> rules = createConfigTabFormRules(null);
 
         return FormHelper.createForm(
-            "添加配置分类",
+            "Add Configuration Category",
             rules,
             "setting/config_class",
             "POST"
@@ -175,13 +175,13 @@ public class AdminConfigTabService {
 
         SystemConfigTabEntity tab = systemConfigTabMapper.selectById(id);
         if (tab == null) {
-            throw new CrmChatException("没有查到数据,无法修改!");
+            throw new CrmChatException("No matching record found, update cannot continue.");
         }
 
         List<BaseComponent> rules = createConfigTabFormRules(tab);
 
         return FormHelper.createForm(
-            "编辑配置分类",
+            "Edit Configuration Category",
             rules,
             "setting/config_class/" + id,
             "PUT"
@@ -311,7 +311,7 @@ public class AdminConfigTabService {
         // PHP: 顶级按钮
         Map<String, Object> topOption = new HashMap<>();
         topOption.put("value", "0");
-        topOption.put("label", "顶级按钮");
+        topOption.put("label", "Top-level Button");
         menus.add(topOption);
 
         for (Map<String, Object> menu : sortedList) {
@@ -373,60 +373,60 @@ public class AdminConfigTabService {
 
         // 1. 父级分类下拉选择
         String pidValue = formData != null ? String.valueOf(formData.getPid()) : "0";
-        rules.add(formBuilder.select("pid", "父级分类", pidValue)
+        rules.add(formBuilder.select("pid", "Parent Category", pidValue)
             .options(getSelectForm())
             .required());
 
         // 2. 分类名称
         String titleValue = formData != null ? formData.getTitle() : "";
-        rules.add(formBuilder.input("title", "分类名称", titleValue)
+        rules.add(formBuilder.input("title", "Category Name", titleValue)
             .required()
-            .placeholder("请输入分类名称"));
+            .placeholder("Enter category name"));
 
         // 3. 分类字段英文
         String engTitleValue = formData != null ? formData.getEngTitle() : "";
-        rules.add(formBuilder.input("eng_title", "分类字段英文", engTitleValue)
+        rules.add(formBuilder.input("eng_title", "Category Field (English)", engTitleValue)
             .required()
-            .placeholder("请输入分类字段英文"));
+            .placeholder("Enter category field name"));
 
         // 4. 图标 (暂时用input代替frameInput)
         String iconValue = formData != null ? formData.getIcon() : "";
-        rules.add(formBuilder.input("icon", "图标", iconValue)
-            .placeholder("请输入图标"));
+        rules.add(formBuilder.input("icon", "Icon", iconValue)
+            .placeholder("Enter icon"));
 
         // 5. 类型
         List<Map<String, Object>> typeOptions = new ArrayList<>();
         Map<String, Object> typeOption1 = new HashMap<>();
         typeOption1.put("value", "0");
-        typeOption1.put("label", "系统");
+        typeOption1.put("label", "System");
         Map<String, Object> typeOption2 = new HashMap<>();
         typeOption2.put("value", "3");
-        typeOption2.put("label", "其它");
+        typeOption2.put("label", "Other");
         typeOptions.add(typeOption1);
         typeOptions.add(typeOption2);
 
         String typeValue = formData != null ? String.valueOf(formData.getType()) : "0";
-        rules.add(formBuilder.radio("type", "类型", typeValue)
+        rules.add(formBuilder.radio("type", "Type", typeValue)
             .options(typeOptions));
 
         // 6. 状态
         List<Map<String, Object>> statusOptions = new ArrayList<>();
         Map<String, Object> statusOption1 = new HashMap<>();
         statusOption1.put("value", "1");
-        statusOption1.put("label", "显示");
+        statusOption1.put("label", "Visible");
         Map<String, Object> statusOption2 = new HashMap<>();
         statusOption2.put("value", "2");
-        statusOption2.put("label", "隐藏");
+        statusOption2.put("label", "Hidden");
         statusOptions.add(statusOption1);
         statusOptions.add(statusOption2);
 
         String statusValue = formData != null ? String.valueOf(formData.getStatus()) : "1";
-        rules.add(formBuilder.radio("status", "状态", statusValue)
+        rules.add(formBuilder.radio("status", "Status", statusValue)
             .options(statusOptions));
 
         // 7. 排序
         Integer sortValue = formData != null ? formData.getSort() : 0;
-        rules.add(formBuilder.number("sort", "排序", String.valueOf(sortValue)));
+        rules.add(formBuilder.number("sort", "Sort Order", String.valueOf(sortValue)));
 
         return rules;
     }

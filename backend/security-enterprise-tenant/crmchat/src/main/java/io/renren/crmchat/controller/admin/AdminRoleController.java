@@ -143,12 +143,12 @@ public class AdminRoleController {
      *
      * Request Body:
      * {
-     *   "role_name": "编辑人员",
+     *   "role_name": "Editor",
      *   "status": 1,
      *   "rules": "1,2,3,4,5"  // 菜单ID，逗号分隔
      * }
      *
-     * Response: { "code": 0, "msg": "Added successfully" } 或 { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Added successfully" } or { "code": 0, "msg": "Updated successfully" }
      */
     @PostMapping("/role/{id}")
     @Operation(summary = "Save Role")
@@ -177,7 +177,7 @@ public class AdminRoleController {
      *
      * PHP Reference: Role.php::set_status()
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/role/set_status/{id}/{status}")
     @Operation(summary = "Modify Role Status")
@@ -196,10 +196,10 @@ public class AdminRoleController {
      *
      * PHP Reference: Role.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功!" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/role/{id}")
-    @Operation(summary = "删除角色")
+    @Operation(summary = "Delete Role")
     public ApiResult<String> deleteRole(@PathVariable Integer id) {
         // TODO: 从JWT token中获取当前管理员level
         Integer currentAdminLevel = 0; // 临时

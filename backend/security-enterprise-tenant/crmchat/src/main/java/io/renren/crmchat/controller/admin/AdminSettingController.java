@@ -44,7 +44,7 @@ public class AdminSettingController {
      *     {
      *       "id": 1,
      *       "account": "admin",
-     *       "real_name": "管理员",
+     *       "real_name": "Administrator",
      *       "roles": "Super Administrator, Manager",  // 角色名称，逗号分隔
      *       "status": 1,
      *       "last_ip": "127.0.0.1",
@@ -83,15 +83,15 @@ public class AdminSettingController {
      *   "account": "manager",
      *   "pwd": "123456",
      *   "conf_pwd": "123456",
-     *   "real_name": "经理",
-     *   "roles": [1, 2],  // 或 "1,2" 字符串
+     *   "real_name": "Manager",
+     *   "roles": [1, 2],  // or comma-separated string "1,2"
      *   "status": 1
      * }
      *
      * Response: { "code": 0, "msg": "Added successfully" }
      */
     @PostMapping("/admin")
-    @Operation(summary = "创建管理员")
+    @Operation(summary = "Create Administrator")
     public ApiResult<String> createAdmin(
             @RequestBody Map<String, Object> data,
             @Parameter(description = "Current Administrator Level", hidden = true) @RequestAttribute(value = "adminLevel", required = false) Integer adminLevel) {
@@ -134,15 +134,15 @@ public class AdminSettingController {
      *   "account": "manager",
      *   "pwd": "newpassword",       // 可选，修改密码时提供
      *   "conf_pwd": "newpassword",  // pwd不为空时必须
-     *   "real_name": "经理",
+     *   "real_name": "Manager",
      *   "roles": [1, 2],
      *   "status": 1
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/admin/{id}")
-    @Operation(summary = "更新管理员")
+    @Operation(summary = "Update Administrator")
     public ApiResult<String> updateAdmin(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> data,
@@ -172,7 +172,7 @@ public class AdminSettingController {
      * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/admin/{id}")
-    @Operation(summary = "删除管理员")
+    @Operation(summary = "Delete Administrator")
     public ApiResult<String> deleteAdmin(@PathVariable Integer id) {
         adminSettingService.deleteAdmin(id);
         return ApiResult.ok("Deleted successfully", "success");
@@ -188,10 +188,10 @@ public class AdminSettingController {
      * - id: 管理员ID
      * - status: 状态值（0-禁用，1-启用）
      *
-     * Response: { "code": 0, "msg": "关闭成功" } 或 { "code": 0, "msg": "开启成功" }
+     * Response: { "code": 0, "msg": "Disabled successfully" } or { "code": 0, "msg": "Enabled successfully" }
      */
     @PutMapping("/set_status/{id}/{status}")
-    @Operation(summary = "修改管理员状态")
+    @Operation(summary = "Update Administrator Status")
     public ApiResult<String> setStatus(
             @PathVariable Integer id,
             @PathVariable Integer status) {
@@ -218,7 +218,7 @@ public class AdminSettingController {
      * {
      *   "id": 1,
      *   "account": "admin",
-     *   "real_name": "管理员",
+     *   "real_name": "Administrator",
      *   "head_pic": "",
      *   "roles": "1,2",
      *   "level": 0,
@@ -230,7 +230,7 @@ public class AdminSettingController {
      * }
      */
     @GetMapping("/info")
-    @Operation(summary = "获取当前管理员信息")
+    @Operation(summary = "Get Current Administrator Info")
     public ApiResult<Map<String, Object>> info(
             @Parameter(description = "Current Administrator ID", hidden = true) @RequestAttribute(value = "adminId", required = false) Integer adminId) {
 
@@ -252,7 +252,7 @@ public class AdminSettingController {
      *
      * Request Body:
      * {
-     *   "real_name": "管理员",
+     *   "real_name": "Administrator",
      *   "head_pic": "http://...",
      *   "pwd": "oldpassword",      // 可选，修改密码时提供
      *   "new_pwd": "newpassword",  // pwd不为空时必填
@@ -261,10 +261,10 @@ public class AdminSettingController {
      *
      * 密码要求: 不小于六位且包含数字和字母
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/update_admin")
-    @Operation(summary = "修改当前管理员信息")
+    @Operation(summary = "Update Current Administrator Info")
     public ApiResult<String> updateAdmin(
             @RequestBody Map<String, Object> data,
             @Parameter(description = "Current Administrator ID", hidden = true) @RequestAttribute(value = "adminId", required = false) Integer adminId) {
@@ -306,14 +306,14 @@ public class AdminSettingController {
      * Response:
      * [
      *   { "label": "Super Administrator", "value": 1 },
-     *   { "label": "经理", "value": 2 },
-     *   { "label": "客服", "value": 3 }
+     *   { "label": "Manager", "value": 2 },
+     *   { "label": "Support", "value": 3 }
      * ]
      */
     @GetMapping("/role")
-    @Operation(summary = "管理员身份列表")
+    @Operation(summary = "Administrator Role List")
     public ApiResult<java.util.List<Map<String, Object>>> roleList(
-            @Parameter(description = "当前管理员级别", hidden = true) @RequestAttribute(value = "adminLevel", required = false) Integer adminLevel) {
+            @Parameter(description = "Current administrator level", hidden = true) @RequestAttribute(value = "adminLevel", required = false) Integer adminLevel) {
 
         // TODO: 从JWT Token或Session中获取当前管理员的level
         // 临时使用0（超级管理员）

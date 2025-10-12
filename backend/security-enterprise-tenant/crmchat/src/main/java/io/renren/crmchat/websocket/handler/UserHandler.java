@@ -207,7 +207,7 @@ public class UserHandler implements BaseHandler {
                 // 注意: 不设置id，让数据库自动生成
                 chatUser.setAppid(appId);
                 chatUser.setUid(uid != null ? uid : currentUserId);
-                chatUser.setNickname(nickname != null && !nickname.isEmpty() ? nickname : "游客" + uid);
+                chatUser.setNickname(nickname != null && !nickname.isEmpty() ? nickname : "Guest" + uid);
                 chatUser.setAvatar(avatar != null && !avatar.isEmpty() ? avatar : "");
                 chatUser.setPhone(phone != null ? phone : "");
                 chatUser.setOpenid(openid != null ? openid : "");

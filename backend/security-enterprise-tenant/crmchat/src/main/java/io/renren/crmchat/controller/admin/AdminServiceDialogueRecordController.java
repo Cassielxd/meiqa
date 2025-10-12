@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/chat")
-@Tag(name = "Admin Service Dialogue Record - 对话记录管理")
+@Tag(name = "Admin Service Dialogue Record")
 @AllArgsConstructor
 public class AdminServiceDialogueRecordController extends BaseController {
 
@@ -39,8 +39,8 @@ public class AdminServiceDialogueRecordController extends BaseController {
      *
      * Response:
      * [
-     *   {"appid": "...", "id": 1, "nickname": "客服1"},
-     *   {"appid": "...", "id": 2, "nickname": "客服2"}
+     *   {"appid": "...", "id": 1, "nickname": "Agent 1"},
+     *   {"appid": "...", "id": 2, "nickname": "Agent 2"}
      * ]
      */
     @GetMapping("/record_kefu")

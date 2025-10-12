@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/app")
-@Tag(name = "Admin Application - 应用管理")
+@Tag(name = "Admin Application")
 @AllArgsConstructor
 public class AdminApplicationController {
 
@@ -40,9 +40,9 @@ public class AdminApplicationController {
      * PHP Reference: Application.php::index()
      *
      * Query Parameters:
-     * - name: 应用名称模糊搜索
-     * - page: 页码
-     * - limit: 每页数量
+     * - name: fuzzy search by application name
+     * - page: page number
+     * - limit: page size
      *
      * Response:
      * {
@@ -93,8 +93,8 @@ public class AdminApplicationController {
      * Request Body:
      * {
      *   "icon": "Icon URL",
-     *   "name": "应用名称",
-     *   "introduce": "应用介绍"
+     *   "name": "Application Name",
+     *   "introduce": "Application Description"
      * }
      *
      * Response: { "code": 0, "msg": "Saved successfully" }
@@ -134,14 +134,14 @@ public class AdminApplicationController {
      * Request Body:
      * {
      *   "icon": "Icon URL",
-     *   "name": "应用名称",
-     *   "introduce": "应用介绍"
+     *   "name": "Application Name",
+     *   "introduce": "Application Description"
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+     * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PutMapping("/{id}")
-    @Operation(summary = "更新应用")
+    @Operation(summary = "Update Application")
     public ApiResult<String> updateApplication(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         String message = adminApplicationService.updateApplication(id, data);
         return ApiResult.ok(message, "success");
@@ -153,17 +153,17 @@ public class AdminApplicationController {
      *
      * PHP Reference: Application.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除应用")
+    @Operation(summary = "Delete Application")
     public ApiResult<String> deleteApplication(@PathVariable Integer id) {
         String message = adminApplicationService.deleteApplication(id);
         return ApiResult.ok(message, "success");
     }
 
     /**
-     * 重置Token
+     * Reset token
      * PUT /api/admin/app/reset/:id
      *
      * PHP Reference: Application.php::reset()
@@ -178,7 +178,7 @@ public class AdminApplicationController {
      * }
      */
     @PutMapping("/reset/{id}")
-    @Operation(summary = "重置Token")
+    @Operation(summary = "Reset Token")
     public ApiResult<Map<String, Object>> resetToken(@PathVariable Integer id) {
         Map<String, Object> result = adminApplicationService.resetToken(id);
         return ApiResult.ok(result);

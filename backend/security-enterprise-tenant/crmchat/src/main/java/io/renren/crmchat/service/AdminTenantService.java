@@ -339,7 +339,7 @@ public class AdminTenantService {
                 try {
                     adminApplicationService.createTenantApplication(tenant.getTenantName(), appInfo);
                 } catch (Exception e) {
-                    System.err.println("更新租户时创建应用失败: " + e.getMessage());
+                    System.err.println("Failed to create application while updating tenant: " + e.getMessage());
                 }
             } else {
                 // 租户有appid，createTenantApplication内部会检查应用是否存在，不存在则创建
@@ -348,7 +348,7 @@ public class AdminTenantService {
                     Map<String, Object> newAppInfo = adminApplicationService.generateAppInfo();
                     adminApplicationService.createTenantApplication(tenant.getTenantName(), newAppInfo);
                 } catch (Exception e) {
-                    System.err.println("更新租户时创建应用失败: " + e.getMessage());
+                    System.err.println("Failed to create application while updating tenant: " + e.getMessage());
                 }
             }
         }
@@ -393,7 +393,7 @@ public class AdminTenantService {
             try {
                 chatCacheService.invalidateAllTenantCache(appid);
             } catch (Exception e) {
-                System.err.println("禁用租户时清除缓存失败: appid=" + appid + ", error=" + e.getMessage());
+                System.err.println("Failed to clear cache while disabling tenant: appid=" + appid + ", error=" + e.getMessage());
             }
         }
     }
@@ -432,7 +432,7 @@ public class AdminTenantService {
                 chatCacheService.invalidateAllTenantCache(appid);
             } catch (Exception e) {
                 // 缓存清除失败不影响删除操作，只记录日志
-                System.err.println("清除租户缓存失败: appid=" + appid + ", error=" + e.getMessage());
+                System.err.println("Failed to clear tenant cache: appid=" + appid + ", error=" + e.getMessage());
             }
         }
     }

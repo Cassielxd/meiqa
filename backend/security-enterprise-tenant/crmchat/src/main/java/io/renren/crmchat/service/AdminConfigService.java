@@ -345,26 +345,26 @@ public class AdminConfigService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 1. 字段变量（禁用）
-        rules.add(formBuilder.input("menu_name", "字段变量", config.getMenuName())
+        rules.add(formBuilder.input("menu_name", "Field Variable", config.getMenuName())
             .disabled(true));
 
         // 2. 类型（禁用）
-        rules.add(formBuilder.input("type", "类型", config.getType())
+        rules.add(formBuilder.input("type", "Type", config.getType())
             .disabled(true));
 
         // 3. 分类选择
         List<Map<String, Object>> tabOptions = adminConfigTabService.getConfigTabSelectOptions();
         String tabIdValue = config.getConfigTabId() != null ? String.valueOf(config.getConfigTabId()) : "1";
-        rules.add(formBuilder.select("config_tab_id", "分类", tabIdValue)
+        rules.add(formBuilder.select("config_tab_id", "Category", tabIdValue)
             .options(tabOptions)
             .required());
 
         // 4. 配置名称
-        rules.add(formBuilder.input("info", "配置名称", config.getInfo())
+        rules.add(formBuilder.input("info", "Configuration Name", config.getInfo())
             .required());
 
         // 5. 配置简介
-        rules.add(formBuilder.textarea("desc", "配置简介", config.getDesc())
+        rules.add(formBuilder.textarea("desc", "Configuration Description", config.getDesc())
             .required());
 
         // 6. 根据类型添加特定字段
@@ -402,31 +402,31 @@ public class AdminConfigService {
                 break;
             default:
                 // 其他类型默认添加value输入框
-                rules.add(formBuilder.input("value", "默认值", decodedValue.toString()));
+                rules.add(formBuilder.input("value", "Default Value", decodedValue.toString()));
                 break;
         }
 
         // 7. 排序
-        rules.add(formBuilder.number("sort", "排序", String.valueOf(config.getSort())));
+        rules.add(formBuilder.number("sort", "Sort Order", String.valueOf(config.getSort())));
 
         // 8. 状态
         List<Map<String, Object>> statusOptions = new ArrayList<>();
         Map<String, Object> statusOption1 = new HashMap<>();
         statusOption1.put("value", "1");
-        statusOption1.put("label", "显示");
+        statusOption1.put("label", "Visible");
         Map<String, Object> statusOption2 = new HashMap<>();
         statusOption2.put("value", "0");
-        statusOption2.put("label", "隐藏");
+        statusOption2.put("label", "Hidden");
         statusOptions.add(statusOption1);
         statusOptions.add(statusOption2);
 
         String statusValue = String.valueOf(config.getStatus());
-        rules.add(formBuilder.radio("status", "状态", statusValue)
+        rules.add(formBuilder.radio("status", "Status", statusValue)
             .options(statusOptions));
 
         // PHP: return create_form('修改配置', $f, $this->url('/setting/config/' . $id), 'PUT');
         return FormHelper.createForm(
-            "修改配置",
+            "Edit Configuration",
             rules,
             "setting/config/" + id,
             "PUT"
@@ -532,7 +532,7 @@ public class AdminConfigService {
 
         // PHP: $service->value(['id' => $tabId], 'title');
         SystemConfigTabEntity tab = systemConfigTabMapper.selectById(tabId);
-        String title = tab != null ? tab.getTitle() : "系统配置";
+        String title = tab != null ? tab.getTitle() : "System Configuration";
 
         // 检查是否有子菜单
         List<SystemConfigTabEntity> children = systemConfigTabMapper.selectList(
@@ -979,28 +979,28 @@ public class AdminConfigService {
         inputTypeOptions.add(inputType4);
 
         String inputTypeValue = config.getInputType() != null ? config.getInputType() : "input";
-        rules.add(formBuilder.select("input_type", "类型", inputTypeValue)
+        rules.add(formBuilder.select("input_type", "Input Type", inputTypeValue)
             .options(inputTypeOptions));
 
         // 默认值
-        rules.add(formBuilder.input("value", "默认值", decodedValue.toString()));
+        rules.add(formBuilder.input("value", "Default Value", decodedValue.toString()));
 
         // 文本框宽度
-        rules.add(formBuilder.number("width", "文本框宽度", String.valueOf(config.getWidth())));
+        rules.add(formBuilder.number("width", "Input Width", String.valueOf(config.getWidth())));
 
         // 是否必填
         List<Map<String, Object>> requiredOptions = new ArrayList<>();
         Map<String, Object> requiredOption1 = new HashMap<>();
         requiredOption1.put("value", "");
-        requiredOption1.put("label", "否");
+        requiredOption1.put("label", "No");
         Map<String, Object> requiredOption2 = new HashMap<>();
         requiredOption2.put("value", "required");
-        requiredOption2.put("label", "是");
+        requiredOption2.put("label", "Yes");
         requiredOptions.add(requiredOption1);
         requiredOptions.add(requiredOption2);
 
         String requiredValue = config.getRequired() != null ? config.getRequired() : "";
-        rules.add(formBuilder.radio("required", "是否必填", requiredValue)
+        rules.add(formBuilder.radio("required", "Required", requiredValue)
             .options(requiredOptions));
 
         return rules;
@@ -1014,13 +1014,13 @@ public class AdminConfigService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 默认值
-        rules.add(formBuilder.textarea("value", "默认值", decodedValue.toString()));
+        rules.add(formBuilder.textarea("value", "Default Value", decodedValue.toString()));
 
         // 文本框宽度
-        rules.add(formBuilder.number("width", "文本框宽度", String.valueOf(config.getWidth())));
+        rules.add(formBuilder.number("width", "Input Width", String.valueOf(config.getWidth())));
 
         // 文本框高度
-        rules.add(formBuilder.number("high", "文本框高度", String.valueOf(config.getHigh())));
+        rules.add(formBuilder.number("high", "Input Height", String.valueOf(config.getHigh())));
 
         return rules;
     }
@@ -1056,13 +1056,13 @@ public class AdminConfigService {
 
         // 默认值
         String valueStr = decodedValue != null ? decodedValue.toString() : "";
-        rules.add(formBuilder.radio("value", "默认值", valueStr)
+        rules.add(formBuilder.radio("value", "Default Value", valueStr)
             .options(options));
 
         // 配置参数
         String parameterValue = parameter != null ? parameter : "";
-        rules.add(formBuilder.textarea("parameter", "配置参数", parameterValue)
-            .placeholder("参数方式例如:\n1=>白色\n2=>红色\n3=>黑色"));
+        rules.add(formBuilder.textarea("parameter", "Configuration Options", parameterValue)
+            .placeholder("Example:\n1=>White\n2=>Red\n3=>Black"));
 
         return rules;
     }
@@ -1080,13 +1080,13 @@ public class AdminConfigService {
 
         // 默认值
         Object valueObj = decodedValue;
-        rules.add(formBuilder.checkbox("value", "默认值", valueObj)
+        rules.add(formBuilder.checkbox("value", "Default Value", valueObj)
             .options(options));
 
         // 配置参数
         String parameterValue = parameter != null ? parameter : "";
-        rules.add(formBuilder.textarea("parameter", "配置参数", parameterValue)
-            .placeholder("参数方式例如:\n1=>白色\n2=>红色\n3=>黑色"));
+        rules.add(formBuilder.textarea("parameter", "Configuration Options", parameterValue)
+            .placeholder("Example:\n1=>White\n2=>Red\n3=>Black"));
 
         return rules;
     }
@@ -1123,21 +1123,21 @@ public class AdminConfigService {
         if (uploadType != null && !uploadType.isEmpty()) {
             if ("1".equals(uploadType)) {
                 // 单图上传
-                rules.add(formBuilder.frameImage("value", "默认值",
+                rules.add(formBuilder.frameImage("value", "Default Value",
                     "admin/widget.images/index?fodder=value", valueStr)
                     .icon("ios-image")
                     .width("960px")
                     .height("505px"));
             } else if ("2".equals(uploadType)) {
                 // 多图上传（暂用frameImage代替frameImages）
-                rules.add(formBuilder.frameImage("value", "默认值",
+                rules.add(formBuilder.frameImage("value", "Default Value",
                     "admin/widget.images/index?fodder=value", valueStr)
                     .icon("ios-images")
                     .width("960px")
                     .height("505px"));
             } else if ("3".equals(uploadType)) {
                 // 文件上传（暂用frameImage代替frameFile）
-                rules.add(formBuilder.frameImage("value", "默认值",
+                rules.add(formBuilder.frameImage("value", "Default Value",
                     "admin/widget.files/index?fodder=value", valueStr)
                     .icon("ios-folder")
                     .width("960px")
@@ -1145,7 +1145,7 @@ public class AdminConfigService {
             }
         } else {
             // 默认单图上传
-            rules.add(formBuilder.frameImage("value", "默认值",
+            rules.add(formBuilder.frameImage("value", "Default Value",
                 "admin/widget.images/index?fodder=value", valueStr)
                 .icon("ios-image")
                 .width("960px")
@@ -1156,19 +1156,19 @@ public class AdminConfigService {
         List<Map<String, Object>> uploadTypeOptions = new ArrayList<>();
         Map<String, Object> uploadTypeOption1 = new HashMap<>();
         uploadTypeOption1.put("value", "1");
-        uploadTypeOption1.put("label", "单图");
+        uploadTypeOption1.put("label", "Single Image");
         Map<String, Object> uploadTypeOption2 = new HashMap<>();
         uploadTypeOption2.put("value", "2");
-        uploadTypeOption2.put("label", "多图");
+        uploadTypeOption2.put("label", "Multiple Images");
         Map<String, Object> uploadTypeOption3 = new HashMap<>();
         uploadTypeOption3.put("value", "3");
-        uploadTypeOption3.put("label", "文件");
+        uploadTypeOption3.put("label", "File");
         uploadTypeOptions.add(uploadTypeOption1);
         uploadTypeOptions.add(uploadTypeOption2);
         uploadTypeOptions.add(uploadTypeOption3);
 
         String uploadTypeValue = (uploadType != null && !uploadType.isEmpty()) ? uploadType : "1";
-        rules.add(formBuilder.radio("upload_type", "上传类型", uploadTypeValue)
+        rules.add(formBuilder.radio("upload_type", "Upload Type", uploadTypeValue)
             .options(uploadTypeOptions));
 
         return rules;

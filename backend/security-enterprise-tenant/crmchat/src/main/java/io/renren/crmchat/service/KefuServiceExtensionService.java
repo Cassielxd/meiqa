@@ -265,7 +265,7 @@ public class KefuServiceExtensionService {
 
         int deleteResult = chatServiceRecordMapper.delete(deleteWrapper);
 
-        log.info("客服转接成功: fromKefu={} -> toKefu={}, user={}, deleted={}",
+        log.info("Agent transfer completed: fromKefu={} -> toKefu={}, user={}, deleted={}",
                  fromKefuUserId, toKefuUserId, userId, deleteResult);
 
         ChatServiceRecordEntity persistedNewRecord = chatServiceRecordMapper.selectById(newRecord.getId());
@@ -338,7 +338,7 @@ public class KefuServiceExtensionService {
             throw new CrmChatException("Failed to set");
         }
 
-        log.info("设置自动回复: kefuId={}, value={}", kefuId, value);
+        log.info("Updated auto-reply setting: kefuId={}, value={}", kefuId, value);
     }
 
     /**
@@ -371,7 +371,7 @@ public class KefuServiceExtensionService {
             throw new CrmChatException("Failed to set");
         }
 
-        log.info("设置后台运行: kefuId={}, value={}", kefuId, value);
+        log.info("Updated background running flag: kefuId={}, value={}", kefuId, value);
     }
 
     /**

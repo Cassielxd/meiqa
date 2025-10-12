@@ -30,7 +30,7 @@ import java.util.Map;
  *    - 更新name和sort
  * 4. deleteCate(): 删除分类
  *    - 检查是否有标签关联
- *    - 如果有，返回错误"请先删除分类下的标签"
+ *    - 如果有，返回错误"Please delete the labels under this category first"
  * 5. moveCate(): 排序移动
  *    - 批量更新排序（倒序）
  *

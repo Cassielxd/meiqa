@@ -68,22 +68,22 @@ public class AdminUserLabelCateController extends BaseController {
      *
      * Response:
      * {
-     *   "title": "添加标签分类",
+     *   "title": "Add Label Category",
      *   "action": "user/label/cate",
      *   "method": "POST",
      *   "rules": [
      *     {
      *       "type": "input",
      *       "field": "name",
-     *       "title": "分类名称",
+     *       "title": "Category Name",
      *       "value": "",
      *       "props": {
-     *         "placeholder": "请输入分类名称"
+     *         "placeholder": "Enter category name"
      *       },
      *       "validate": [
      *         {
      *           "required": true,
-     *           "message": "分类名称不能为空",
+     *           "message": "Category name is required",
      *           "trigger": "blur"
      *         }
      *       ]
@@ -113,14 +113,14 @@ public class AdminUserLabelCateController extends BaseController {
      *
      * Request Body:
      * {
-     *   "name": "客户分类",
+     *   "name": "Customer Category",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "添加成功" }
+     * Response: { "code": 0, "msg": "Added successfully" }
      */
     @PostMapping({"/label_cate", "/label/cate"})
-    @Operation(summary = "保存标签分类")
+    @Operation(summary = "Save Label Category")
     public ApiResult<String> saveCate(@RequestBody Map<String, Object> data) {
         // TODO: 从JWT token中获取当前租户appid
         String appid = currentAppid();
@@ -159,14 +159,14 @@ public class AdminUserLabelCateController extends BaseController {
      *
      * Request Body:
      * {
-     *   "name": "客户分类",
+     *   "name": "Customer Category",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping({"/label_cate/{id}", "/label/cate/{id}"})
-    @Operation(summary = "更新标签分类")
+    @Operation(summary = "Update Label Category")
     public ApiResult<String> updateCate(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         // TODO: 从JWT token中获取当前租户appid
         String appid = currentAppid();
@@ -190,10 +190,10 @@ public class AdminUserLabelCateController extends BaseController {
      *   "ids": [1, 2, 3]
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PostMapping({"/label_cate/move", "/label/cate/move"})
-    @Operation(summary = "批量排序")
+    @Operation(summary = "Sort Categories in Bulk")
     public ApiResult<String> labelMove(@RequestBody Map<String, Object> data) {
         // TODO: 从JWT token中获取当前租户appid
         String appid = currentAppid();
@@ -211,10 +211,10 @@ public class AdminUserLabelCateController extends BaseController {
      *
      * PHP Reference: LabelCate.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping({"/label_cate/{id}", "/label/cate/{id}"})
-    @Operation(summary = "删除标签分类")
+    @Operation(summary = "Delete Label Category")
     public ApiResult<String> deleteCate(@PathVariable Integer id) {
         // TODO: 从JWT token中获取当前租户appid
         String appid = currentAppid();

@@ -56,7 +56,7 @@ public class KefuMessageController {
      * Request Body:
      * {
      *   "to_user_id": 456,              // 接收人user_id（必填）
-     *   "msn": "你好",                   // 消息内容（必填）
+     *   "msn": "Hello",                   // message content (required)
      *   "guid": "unique-message-id",    // 消息唯一ID（必填，由getSendId获取）
      *   "msn_type": 1,                  // 消息类型（可选，1-文字，2-表情，3-图片，4-语音）
      *   "other": "",                    // 其他信息（可选，JSON）
@@ -73,7 +73,7 @@ public class KefuMessageController {
      *   "id": 123,
      *   "user_id": 1,
      *   "to_user_id": 456,
-     *   "msn": "你好",
+     *   "msn": "Hello",
      *   "msn_type": 1,
      *   "type": 0,
      *   "other": "",
@@ -113,7 +113,7 @@ public class KefuMessageController {
      *   4. 前端轮询检测code状态，完成登录
      * - TODO: 需要Redis支持，验证code是否过期
      *
-     * Response: { "code": 0, "msg": "登录成功" }
+     * Response: { "code": 0, "msg": "Login successful" }
      */
     @PostMapping("/service/code")
     @Operation(summary = "Set QR Code Login Code")

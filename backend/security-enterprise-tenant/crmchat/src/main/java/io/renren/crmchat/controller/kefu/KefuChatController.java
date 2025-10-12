@@ -81,7 +81,7 @@ public class KefuChatController {
      * [
      *   {
      *     "id": 10,
-     *     "nickname": "用户A",
+     *     "nickname": "User A",
      *     "avatar": "http://..."
      *   }
      * ]
@@ -116,7 +116,7 @@ public class KefuChatController {
      * }
      */
     @GetMapping("/message")
-    @Operation(summary = "查看与特定用户的对话")
+    @Operation(summary = "View conversation with a specific user")
     public ApiResult<Map<String, Object>> getChatMessageList(
             @RequestParam(required = false) Integer to_user_id,
             @RequestParam(required = false, defaultValue = "1") Integer page,

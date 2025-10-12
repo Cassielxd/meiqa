@@ -77,7 +77,7 @@ public class SystemGroupService {
     /**
      * 获取所有组合数据(简化版)
      * PHP Reference: Group::getGroup()
-     * 返回格式: [{"id": 1, "name": "组名"}]
+     * Response format: [{"id": 1, "name": "Group Name"}]
      *
      * @return 组合数据列表
      */

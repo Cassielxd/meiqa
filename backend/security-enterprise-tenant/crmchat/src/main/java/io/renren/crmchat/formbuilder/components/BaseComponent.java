@@ -91,7 +91,7 @@ public abstract class BaseComponent {
         if (required) {
             Map<String, Object> rule = new HashMap<>();
             rule.put("required", true);
-            rule.put("message", this.title + "不能为空");
+            rule.put("message", this.title + " is required");
             rule.put("trigger", "blur");
             this.validate.add(rule);
         }

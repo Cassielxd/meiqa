@@ -72,7 +72,7 @@ public class KefuMessageService {
         Map<String, Object> result = new HashMap<>();
         result.put("send_id", sendId);
 
-        log.info("生成消息发送ID: sendId={}", sendId);
+        log.info("Generated message send ID: sendId={}", sendId);
         return result;
     }
 
@@ -148,9 +148,9 @@ public class KefuMessageService {
             isTourist = 0;
         }
 
-        log.info("查询客服记录: appid={}, kefuUserId={}", appid, kefuUserId);
+        log.info("Querying agent record: appid={}, kefuUserId={}", appid, kefuUserId);
         ChatServiceEntity kefu = findKefuByUserId(appid, kefuUserId);
-        log.info("查询结果: kefu={}", kefu);
+        log.info("Query result: kefu={}", kefu);
         if (kefu == null) {
             throw new CrmChatException("Customer service agent does not exist");
         }
@@ -222,7 +222,7 @@ public class KefuMessageService {
         Map<String, Object> response = new HashMap<>(payload);
         autoBadgeService.dispatch(kefuRealUserId, toUserId, appid);
 
-        log.info("发送消息成功: kefuRealUserId={}, toUserId={}, guid={}", kefuRealUserId, toUserId, guid);
+        log.info("Message sent: kefuRealUserId={}, toUserId={}, guid={}", kefuRealUserId, toUserId, guid);
         return response;
     }
 
@@ -406,7 +406,7 @@ public class KefuMessageService {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Login successful");
 
-        log.info("设置登录code成功: kefuUserId={}, code={}", kefuUserId, code);
+        log.info("Login code generated successfully: kefuUserId={}, code={}", kefuUserId, code);
 
         return response;
     }

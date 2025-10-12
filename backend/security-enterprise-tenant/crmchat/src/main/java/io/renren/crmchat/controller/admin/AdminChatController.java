@@ -85,7 +85,7 @@ public class AdminChatController {
      * [
      *   {
      *     "id": 1,
-     *     "name": "售前咨询",
+     *     "name": "Pre-sales Inquiry",
      *     "sort": 100,
      *     "kefu_count": 5
      *   }
@@ -108,17 +108,17 @@ public class AdminChatController {
      * {
      *   "account": "kefu001",
      *   "password": "123456",
-     *   "nickname": "客服小王",
+     *   "nickname": "Agent Wang",
      *   "phone": "13800138000",
      *   "group_id": 1,
      *   "status": 1,
-     *   "welcome_words": "您好，请问有什么可以帮助您的？"
+     *   "welcome_words": "Hello, how can we assist you today?"
      * }
      *
-     * Response: { "code": 0, "msg": "添加成功" }
+     * Response: { "code": 0, "msg": "Added successfully" }
      */
     @PostMapping("/kefu")
-    @Operation(summary = "添加客服")
+    @Operation(summary = "Add Customer Service Agent")
     public ApiResult<String> addKefu(@RequestBody Map<String, Object> data) {
         adminChatService.createKefu(data);
         return ApiResult.ok("Customer service representative added successfully", "success");
@@ -132,18 +132,18 @@ public class AdminChatController {
      *
      * Request Body:
      * {
-     *   "nickname": "客服小李",
+     *   "nickname": "Agent Li",
      *   "phone": "13900139000",
      *   "group_id": 2,
      *   "status": 1,
-     *   "welcome_words": "您好，欢迎咨询！",
+     *   "welcome_words": "Hello, welcome to our service!",
      *   "password": "newpass" // 可选
      * }
      *
-     * Response: { "code": 0, "msg": "更新成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/kefu/{id}")
-    @Operation(summary = "修改客服")
+    @Operation(summary = "Update Customer Service Agent")
     public ApiResult<String> updateKefu(
             @Parameter(description = "Customer Service ID") @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {
@@ -164,7 +164,7 @@ public class AdminChatController {
      * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/kefu/{id}")
-    @Operation(summary = "删除客服")
+    @Operation(summary = "Delete Customer Service Agent")
     public ApiResult<String> deleteKefu(@Parameter(description = "Customer Service ID") @PathVariable("id") Integer id) {
         if (id == null || id <= 0) {
             return ApiResult.fail("Invalid parameters");
@@ -180,10 +180,10 @@ public class AdminChatController {
      *
      * PHP Reference: Chat.php::setKefuStatus($id, $status)
      *
-     * Response: { "code": 0, "msg": "状态更新成功" }
+     * Response: { "code": 0, "msg": "Status updated successfully" }
      */
     @PutMapping("/kefu/set_status/{id}/{status}")
-    @Operation(summary = "修改客服状态")
+    @Operation(summary = "Update Customer Service Agent Status")
     public ApiResult<String> setKefuStatus(
             @Parameter(description = "Customer Service ID") @PathVariable("id") Integer id,
             @Parameter(description = "Status: 0-Disabled, 1-Enabled") @PathVariable("status") Integer status) {

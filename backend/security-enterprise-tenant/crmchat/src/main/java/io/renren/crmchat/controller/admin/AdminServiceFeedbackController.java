@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/chat/feedback")
-@Tag(name = "Admin Service Feedback - 反馈管理")
+@Tag(name = "Admin Service Feedback")
 @AllArgsConstructor
 public class AdminServiceFeedbackController extends BaseController {
 
@@ -97,11 +97,11 @@ public class AdminServiceFeedbackController extends BaseController {
      *
      * Request Body:
      * {
-     *   "make": "备注内容",
+     *   "make": "Remarks",
      *   "status": 1
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update Feedback")
@@ -122,7 +122,7 @@ public class AdminServiceFeedbackController extends BaseController {
      *
      * PHP Reference: ServiceFeedback.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete Feedback")

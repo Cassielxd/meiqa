@@ -7,10 +7,10 @@ import java.util.Arrays;
  */
 public enum TenantStatus {
 
-    PENDING(0, "待审核"),
-    APPROVED(1, "已批准"),
-    REJECTED(2, "已拒绝"),
-    DISABLED(3, "已禁用");
+    PENDING(0, "Pending Review"),
+    APPROVED(1, "Approved"),
+    REJECTED(2, "Rejected"),
+    DISABLED(3, "Disabled");
 
     private final int code;
     private final String label;

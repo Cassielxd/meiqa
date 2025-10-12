@@ -80,7 +80,7 @@ public class TenantSiteStatisticsService {
         }
 
         // PHP: 时间筛选create_time
-        // 格式: "2024-01-01 - 2024-01-31" 或 "2024-01-01,2024-01-31"
+        // Accepted formats: "2024-01-01 - 2024-01-31" or "2024-01-01,2024-01-31"
         if (createTime != null && !createTime.trim().isEmpty()) {
             String[] times = createTime.contains(" - ")
                 ? createTime.split(" - ")

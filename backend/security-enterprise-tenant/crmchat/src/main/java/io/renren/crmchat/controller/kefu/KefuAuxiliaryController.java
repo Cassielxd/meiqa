@@ -34,9 +34,9 @@ public class KefuAuxiliaryController {
      * 业务说明:
      * - 清除客服登录状态
      * - 更新online状态为离线
-     * - 清空client_id和相关APP状态
+     * - clear client_id and related app state
      *
-     * Response: { "code": 0, "msg": "登出成功" }
+     * Response: { "code": 0, "msg": "Logged out successfully" }
      */
     @PostMapping("/user/logout")
     @Operation(summary = "Customer Service Logout")
@@ -81,12 +81,12 @@ public class KefuAuxiliaryController {
      *
      * Request Body:
      * {
-     *   "rela_name": "张三",         // 联系人姓名（必填）
-     *   "phone": "13800138000",     // 联系电话（必填）
-     *   "content": "反馈内容..."     // 反馈内容（必填）
+ *   "rela_name": "John Doe",         // contact name (required)
+ *   "phone": "13800138000",     // contact phone (required)
+ *   "content": "Feedback content..."     // feedback text (required)
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+ * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/user/feedback")
     @Operation(summary = "Save Customer Service Feedback")
@@ -108,32 +108,32 @@ public class KefuAuxiliaryController {
      *
      * Response:
      * {
-     *   "content": "用户协议内容..."
+ *   "content": "User agreement content..."
      * }
      */
     @GetMapping("/agreement")
-    @Operation(summary = "获取用户协议")
+@Operation(summary = "Get user agreement")
     public ApiResult<Map<String, Object>> getUserAgreement() {
         Map<String, Object> result = kefuAuxiliaryService.getUserAgreement();
         return ApiResult.ok(result);
     }
 
     /**
-     * 客户统计
+     * Customer statistics
      * GET /api/kefu/statistics/all
      *
      * PHP Reference: Statistics.php::sum()
      *
      * Response:
      * {
-     *   "all": 100,          // 所有客户总数
-     *   "toDayKefu": 10,     // 今日新增客户（非游客）
-     *   "month": 50,         // 本月客户总数
+     *   "all": 100,          // total customers
+     *   "toDayKefu": 10,     // new customers today (non-guest)
+     *   "month": 50,         // customers this month
      *   "toDayTourist": 5    // 今日游客数
      * }
      */
     @GetMapping("/statistics/all")
-    @Operation(summary = "客户统计")
+    @Operation(summary = "Customer statistics")
     public ApiResult<Map<String, Object>> getKefuSum() {
         // 从JWT token中获取当前租户appid
         String appid = UserContext.getAppid();
@@ -143,7 +143,7 @@ public class KefuAuxiliaryController {
     }
 
     /**
-     * 客户首页统计（移动端）
+     * Customer home statistics (mobile)
      * GET /api/kefu/statistics/index
      *
      * PHP Reference: Statistics.php::index()
@@ -158,7 +158,7 @@ public class KefuAuxiliaryController {
      * }
      */
     @GetMapping("/statistics/index")
-    @Operation(summary = "客户首页统计（移动端）")
+    @Operation(summary = "Customer home statistics (mobile)")
     public ApiResult<Map<String, Object>> getKefuMobileStatistics(
             @RequestParam(required = false, defaultValue = "") String time) {
 
@@ -170,14 +170,14 @@ public class KefuAuxiliaryController {
     }
 
     /**
-     * APP版本检查
+     * App version check
      * POST /api/kefu/service/version
      *
      * PHP Reference: Service.php::version()
      *
      * Request Body:
      * {
-     *   "version": "1.0.0",  // 当前APP版本号
+     *   "version": "1.0.0",  // current app version
      *   "name": "iOS"        // 设备名称（可选）
      * }
      *
@@ -186,8 +186,8 @@ public class KefuAuxiliaryController {
      *   "update": true,               // 是否有更新
      *   "version": "1.0.1",          // 新版本号
      *   "url": "http://...",         // 下载地址
-     *   "name": "客服APP",            // 应用名称
-     *   "info": "更新说明..."         // 更新说明
+     *   "name": "Support App",            // application name
+     *   "info": "Update notes..."         // update description
      * }
      *
      * 或
@@ -197,7 +197,7 @@ public class KefuAuxiliaryController {
      * }
      */
     @PostMapping("/service/version")
-    @Operation(summary = "APP版本检查")
+    @Operation(summary = "App version check")
     public ApiResult<Map<String, Object>> checkVersion(@RequestBody Map<String, Object> data) {
         String version = data.containsKey("version") && data.get("version") != null
             ? data.get("version").toString() : "";

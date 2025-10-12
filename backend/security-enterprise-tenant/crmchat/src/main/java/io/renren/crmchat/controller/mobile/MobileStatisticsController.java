@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/mobile/user")
-@Tag(name = "Mobile Statistics - 移动端统计")
+@Tag(name = "Mobile Statistics")
 @AllArgsConstructor
 public class MobileStatisticsController {
 

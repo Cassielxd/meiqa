@@ -52,7 +52,7 @@ public class OssFileStorage implements FileStorageStrategy {
     @Override
     public boolean deleteFile(String filePath) {
         // TODO: 实现OSS删除逻辑
-        log.warn("OSS删除功能暂未实现: {}", filePath);
+        log.warn("OSS delete functionality is not implemented yet: {}", filePath);
         return false;
     }
 
@@ -67,7 +67,7 @@ public class OssFileStorage implements FileStorageStrategy {
     @Override
     public boolean fileExists(String filePath) {
         // TODO: 实现OSS文件存在检查
-        log.warn("OSS文件检查功能暂未实现: {}", filePath);
+        log.warn("OSS file inspection functionality is not implemented yet: {}", filePath);
         return false;
     }
 

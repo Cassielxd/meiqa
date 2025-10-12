@@ -82,7 +82,7 @@ public class MobileServiceService {
      */
     public Map<String, Object> getRecordList(Map<String, Object> params, String appid) {
         // 调试日志：检查租户隔离
-        log.info("[租户隔离检查] Service层 - 接收到的appid: {}", appid);
+        log.info("[Tenant isolation check] Service layer received appid: {}", appid);
 
         int idTo = parseInt(params.get("idTo"), 0);
         int limit = parseInt(params.get("limit"), 10);
@@ -125,7 +125,7 @@ public class MobileServiceService {
         // 获取在线客服列表（与PHP保持一致：必须有在线客服）
         List<ChatServiceEntity> onlineServices = chatCacheService.getOnlineServices(appid);
         if (onlineServices.isEmpty()) {
-            throw new CrmChatException("暂无客服人员在线，请稍后联系");
+            throw new CrmChatException("No support agents are online right now. Please try again later.");
         }
 
         Map<Integer, ChatServiceEntity> onlineServiceMap = new HashMap<>();
@@ -156,7 +156,7 @@ public class MobileServiceService {
 
         ChatServiceEntity assignedService = onlineServiceMap.get(toUserId);
         if (assignedService == null || toUserId <= 0) {
-            throw new CrmChatException("暂无客服人员在线，请稍后联系");
+            throw new CrmChatException("No support agents are online right now. Please try again later.");
         }
 
         chatCacheService.cacheServiceProfile(assignedService);
@@ -192,7 +192,7 @@ public class MobileServiceService {
         result.put("to_user_avatar", toUserAvatar);
         result.put("welcome", idTo > 0 ? Boolean.FALSE : welcomeData);
 
-        log.info("获取聊天记录: appid={}, userId={}, toUserId={}, records={}",
+        log.info("Fetching chat history: appid={}, userId={}, toUserId={}, records={}",
                 appid, userId, toUserId, serviceList.size());
         return result;
     }
@@ -243,7 +243,7 @@ public class MobileServiceService {
         result.put("user_info", userInfo);
         result.put("is_new_user", ensureResult.created);
 
-        log.info("游客自动登录: appid={}, userId={}, isNew={}", chatUser.getAppid(), chatUser.getId(), ensureResult.created);
+        log.info("Guest auto-login: appid={}, userId={}, isNew={}", chatUser.getAppid(), chatUser.getId(), ensureResult.created);
         return result;
     }
 
@@ -949,7 +949,7 @@ public class MobileServiceService {
         Map<String, Object> result = new HashMap<>();
         result.put("content", content);
 
-        log.info("获取客服广告内容: content={}", content);
+        log.info("Retrieved agent banner content: content={}", content);
         return result;
     }
 
@@ -974,7 +974,7 @@ public class MobileServiceService {
         Map<String, Object> result = new HashMap<>();
         result.put("value", value);
 
-        log.info("获取缓存: key={}", key);
+        log.info("Fetching cache entry: key={}", key);
         return result;
     }
 
@@ -1001,7 +1001,7 @@ public class MobileServiceService {
         // TODO: 使用CacheServices设置缓存
         // PHP: $cache->setDbCache($key, $value, 600);
 
-        log.info("设置缓存: key={}, value={}", key, value);
+        log.info("Setting cache entry: key={}, value={}", key, value);
     }
 
     /**
@@ -1037,7 +1037,7 @@ public class MobileServiceService {
         result.put("name", file.getOriginalFilename());
         result.put("url", "");  // TODO: 实际上传后的URL
 
-        log.info("图片上传: appid={}, filename={}", appid, file.getOriginalFilename());
+        log.info("Uploading image: appid={}, filename={}", appid, file.getOriginalFilename());
         return result;
     }
 
@@ -1065,7 +1065,7 @@ public class MobileServiceService {
         result.put("icon", icon);
         result.put("type", type);
 
-        log.info("获取客服配置: type={}, icon={}", type, icon);
+        log.info("Fetching agent configuration: type={}, icon={}", type, icon);
         return result;
     }
 
@@ -1093,7 +1093,7 @@ public class MobileServiceService {
         Map<String, Object> result = new HashMap<>();
         result.put("send_id", sendId);
 
-        log.info("生成消息发送ID: sendId={}", sendId);
+        log.info("Generated message send ID: sendId={}", sendId);
         return result;
     }
 
@@ -1168,13 +1168,13 @@ public class MobileServiceService {
                 Integer recentServiceUserId = findLatestChatServiceUserId(appid, userId);
                 if (recentServiceUserId != null && recentServiceUserId > 0) {
                     toUserId = recentServiceUserId;
-                    log.info("没有在线客服，使用历史客服: toUserId={}", toUserId);
+                    log.info("No agent online; falling back to last agent: toUserId={}", toUserId);
                 } else {
                     // 如果连历史记录也没有，选择系统中的任意一个客服（允许留言给离线客服）
                     Integer anyServiceUserId = findAnyActiveServiceUserId(appid);
                     if (anyServiceUserId != null && anyServiceUserId > 0) {
                         toUserId = anyServiceUserId;
-                        log.info("没有在线客服和历史记录，使用默认客服: toUserId={}", toUserId);
+                        log.info("No agent online and no history; using default agent: toUserId={}", toUserId);
                     } else {
                         // 系统中完全没有可用的客服
                         throw new CrmChatException("No customer service agents available in the system");
@@ -1260,7 +1260,7 @@ public class MobileServiceService {
             webSocketPushService.sendReply(appid, toUserId, response);
         }
 
-        log.info("发送消息成功: userId={}, toUserId={}, guid={}", userId, toUserId, guid);
+        log.info("Message sent successfully: userId={}, toUserId={}, guid={}", userId, toUserId, guid);
         return response;
     }
 }

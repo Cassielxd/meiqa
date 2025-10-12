@@ -73,12 +73,12 @@ public class AdminUserLabelCateService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 分类名称输入框
-        rules.add(formBuilder.input("name", "分类名称", "")
+        rules.add(formBuilder.input("name", "Category Name", "")
             .required()
-            .placeholder("请输入分类名称"));
+            .placeholder("Enter category name"));
 
         return FormHelper.createForm(
-            "添加标签分类",
+            "Add Label Category",
             rules,
             "user/label/cate",
             "POST"
@@ -161,12 +161,12 @@ public class AdminUserLabelCateService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 分类名称输入框（带默认值）
-        rules.add(formBuilder.input("name", "分类名称", cate.getName())
+        rules.add(formBuilder.input("name", "Category Name", cate.getName())
             .required()
-            .placeholder("请输入分类名称"));
+            .placeholder("Enter category name"));
 
         return FormHelper.createForm(
-            "修改标签分类",
+            "Edit Label Category",
             rules,
             "user/label/cate/" + id,
             "PUT"

@@ -122,7 +122,7 @@ public class KefuUserController {
      * Response: 标签列表
      */
     @GetMapping("/label")
-    @Operation(summary = "获取用户标签")
+    @Operation(summary = "Get user tags")
     public ApiResult<List<Map<String, Object>>> getUserLabel(@RequestParam(defaultValue = "0") Integer id) {
         List<Map<String, Object>> result = kefuUserService.getUserLabel(id);
         return ApiResult.ok(result);
@@ -137,7 +137,7 @@ public class KefuUserController {
      * Response: 分组列表
      */
     @GetMapping("/group")
-    @Operation(summary = "获取用户分组")
+    @Operation(summary = "Get user groups")
     public ApiResult<List<Map<String, Object>>> getUserGroup() {
         List<Map<String, Object>> result = kefuUserService.getUserGroup();
         return ApiResult.ok(result);
@@ -178,7 +178,7 @@ public class KefuUserController {
      * Response: 设置成功
      */
     @PutMapping("/label/{id}")
-    @Operation(summary = "设置用户标签")
+    @Operation(summary = "Set user tags")
     public ApiResult<String> setUserLabel(@PathVariable("id") Integer userId, @RequestBody Map<String, Object> data) {
         @SuppressWarnings("unchecked")
         List<Integer> labelIds = (List<Integer>) data.get("label_ids");
@@ -201,17 +201,17 @@ public class KefuUserController {
      *
      * Request Body:
      * {
-     *   "nickname": "昵称",
-     *   "remark_nickname": "备注昵称",
-     *   "sex": "性别",
-     *   "phone": "手机号",
-     *   "remarks": "备注"
+     *   "nickname": "Nickname",
+     *   "remark_nickname": "Remark nickname",
+     *   "sex": "Gender",
+     *   "phone": "Phone number",
+     *   "remarks": "Remarks"
      * }
      *
      * Response: 修改成功
      */
     @PutMapping("/updateUser/{id}")
-    @Operation(summary = "修改用户信息")
+    @Operation(summary = "Update user information")
     public ApiResult<String> updateUser(@PathVariable("id") Integer userId, @RequestBody Map<String, Object> data) {
         kefuUserService.updateUser(userId, data);
         return ApiResult.ok("Updated successfully", "success");

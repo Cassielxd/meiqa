@@ -92,7 +92,7 @@ public class KefuAuxiliaryService {
         // 4. 注意：ChatUser表中没有online字段，只在ChatService中维护
         // 所以不需要更新ChatUser
 
-        log.info("客服登出成功: kefuId={}, userId={}", kefuId, userId);
+        log.info("Agent signed out successfully: kefuId={}, userId={}", kefuId, userId);
     }
 
     /**
@@ -168,12 +168,12 @@ public class KefuAuxiliaryService {
         // 1. 获取客服信息
         ChatServiceEntity kefu = chatServiceMapper.selectById(kefuId);
         if (kefu == null || !kefu.getAppid().equals(currentAppid)) {
-            throw new CrmChatException("客服不存在");
+            throw new CrmChatException("Support agent not found.");
         }
 
         Integer userId = kefu.getUserId();
         if (userId == null) {
-            throw new CrmChatException("客服用户不存在");
+            throw new CrmChatException("Support user account not found.");
         }
 
         // 2. 验证必填字段
@@ -212,7 +212,7 @@ public class KefuAuxiliaryService {
             throw new CrmChatException("Failed to save");
         }
 
-        log.info("保存客服反馈成功: kefuId={}, userId={}", kefuId, userId);
+        log.info("Saved agent feedback successfully: kefuId={}, userId={}", kefuId, userId);
     }
 
     /**

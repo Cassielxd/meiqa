@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/setting")
-@Tag(name = "Admin Setting - 菜单管理")
+@Tag(name = "Admin Setting - Menu Management")
 @AllArgsConstructor
 public class AdminMenuController {
 
@@ -105,7 +105,7 @@ public class AdminMenuController {
      *   "action": "index",
      *   "icon": "setting",
      *   "params": "",
-     *   "path": ["admin", "system"],  // 数组，后端会用"/"连接
+     *   "path": ["admin", "system"],  // array; backend joins with "/"
      *   "menu_path": "/admin/system",
      *   "api_url": "api/admin/system",
      *   "methods": "GET",
@@ -120,7 +120,7 @@ public class AdminMenuController {
      *   "is_show_path": 0
      * }
      *
-     * Response: { "code": 0, "msg": "添加成功" }
+     * Response: { "code": 0, "msg": "Added successfully" }
      */
     @PostMapping("/menus")
     @Operation(summary = "Save Menu")
@@ -138,7 +138,7 @@ public class AdminMenuController {
      * Response:
      * {
      *   "id": 1,
-     *   "menu_name": "系统设置",
+     *   "menu_name": "System Settings",
      *   ...
      * }
      */
@@ -179,7 +179,7 @@ public class AdminMenuController {
      * Response: { "code": 0, "msg": "Modified successfully" }
      */
     @PutMapping("/menus/{id}")
-    @Operation(summary = "更新菜单")
+    @Operation(summary = "Update Menu")
     public ApiResult<String> updateMenu(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         boolean success = adminMenuService.updateMenu(id, data);
         if (success) {
@@ -198,7 +198,7 @@ public class AdminMenuController {
      * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/menus/{id}")
-    @Operation(summary = "删除菜单")
+    @Operation(summary = "Delete Menu")
     public ApiResult<String> deleteMenu(@PathVariable Integer id) {
         boolean success = adminMenuService.deleteMenu(id);
         if (success) {
@@ -222,7 +222,7 @@ public class AdminMenuController {
      * Response: { "code": 0, "msg": "Modified successfully" }
      */
     @PutMapping("/menus/{id}/show")
-    @Operation(summary = "显示/隐藏菜单")
+    @Operation(summary = "Toggle Menu Visibility")
     public ApiResult<String> updateMenuShow(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         Integer isShow = (Integer) data.getOrDefault("is_show", 0);
         boolean success = adminMenuService.updateMenuShow(id, isShow);

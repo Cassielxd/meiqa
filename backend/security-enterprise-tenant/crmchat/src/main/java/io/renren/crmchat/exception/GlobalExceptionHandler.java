@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(CrmChatException.class)
     public ApiResult<Object> handleCrmChatException(CrmChatException e) {
-        log.error("业务异常: {}", e.getMessage());
+        log.error("Business exception: {}", e.getMessage());
         return ApiResult.fail(e.getMessage());
     }
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DuplicateKeyException.class)
     public ApiResult<Object> handleDuplicateKeyException(DuplicateKeyException e) {
-        log.error("数据库唯一键冲突: {}", e.getMessage());
+        log.error("Duplicate key conflict: {}", e.getMessage());
         return ApiResult.fail("Data already exists, please do not repeat the operation");
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ApiResult<Object> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("参数验证异常: {}", e.getMessage());
+        log.error("Parameter validation failed: {}", e.getMessage());
         return ApiResult.fail(e.getMessage());
     }
 
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ApiResult<Object> handleException(Exception e) {
-        log.error("系统异常: ", e);
+        log.error("Unhandled system exception", e);
 
         ApiResult<Object> result = new ApiResult<>();
         result.setStatus(500);

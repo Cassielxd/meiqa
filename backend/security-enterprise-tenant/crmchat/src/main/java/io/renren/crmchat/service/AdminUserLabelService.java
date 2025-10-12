@@ -81,17 +81,17 @@ public class AdminUserLabelService extends AbstractUserLabelService {
         // 1. 标签分类下拉框
         // 默认值：如果有分类则使用第一个分类的ID（字符串格式），否则为空字符串
         String defaultCateId = categories.isEmpty() ? "" : String.valueOf(categories.get(0).getId());
-        rules.add(formBuilder.select("cate_id", "标签分类", defaultCateId)
+        rules.add(formBuilder.select("cate_id", "Label Category", defaultCateId)
             .options(options)
             .required());
 
         // 2. 标签名称输入框
-        rules.add(formBuilder.input("label", "标签名称", "")
+        rules.add(formBuilder.input("label", "Label Name", "")
             .required()
-            .placeholder("请输入标签名称"));
+            .placeholder("Enter label name"));
 
         return FormHelper.createForm(
-            "创建标签",
+            "Create Label",
             rules,
             "user/label",
             "POST"
@@ -145,17 +145,17 @@ public class AdminUserLabelService extends AbstractUserLabelService {
         List<BaseComponent> rules = new ArrayList<>();
 
         // 1. 标签分类下拉框（设置当前值，转为字符串格式）
-        rules.add(formBuilder.select("cate_id", "标签分类", String.valueOf(label.getCateId()))
+        rules.add(formBuilder.select("cate_id", "Label Category", String.valueOf(label.getCateId()))
             .options(options)
             .required());
 
         // 2. 标签名称输入框（设置当前值）
-        rules.add(formBuilder.input("label", "标签名称", label.getLabel())
+        rules.add(formBuilder.input("label", "Label Name", label.getLabel())
             .required()
-            .placeholder("请输入标签名称"));
+            .placeholder("Enter label name"));
 
         return FormHelper.createForm(
-            "修改标签",
+            "Edit Label",
             rules,
             "user/label/" + id,
             "PUT"

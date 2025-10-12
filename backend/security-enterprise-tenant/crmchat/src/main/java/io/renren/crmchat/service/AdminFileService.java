@@ -218,7 +218,7 @@ public class AdminFileService {
                     }
                 } catch (Exception e) {
                     // PHP: 捕获异常但不抛出，继续删除数据库记录
-                    log.warn("删除物理文件失败: {}", e.getMessage());
+                    log.warn("Failed to delete physical file: {}", e.getMessage());
                 }
 
                 // 4. 删除数据库记录

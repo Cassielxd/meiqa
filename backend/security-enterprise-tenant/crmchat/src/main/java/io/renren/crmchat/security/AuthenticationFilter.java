@@ -107,13 +107,13 @@ public class AuthenticationFilter implements Filter {
         String token = getToken(httpRequest);
 
         if (token == null || token.isEmpty()) {
-            returnUnauthorized(httpResponse, "未提供认证Token");
+            returnUnauthorized(httpResponse, "Authentication token is missing.");
             return;
         }
         if(httpRequest.getServletPath().startsWith("/api/mobile")){
            Map result= adminApplicationService.parseToken(token,null);
            if(result==null){
-                returnUnauthorized(httpResponse, "Token无效");
+                returnUnauthorized(httpResponse, "Invalid token.");
                 return;
             }
             Map appInfo = (Map) result.get("appInfo");
@@ -126,13 +126,13 @@ public class AuthenticationFilter implements Filter {
             // 验证Token
             DecodedJWT jwt = jwtUtils.verifyToken(token);
             if (jwt == null) {
-                returnUnauthorized(httpResponse, "Token无效或已过期");
+                returnUnauthorized(httpResponse, "Invalid or expired token.");
                 return;
             }
 
             // 检查Token是否过期
             if (jwtUtils.isTokenExpired(token)) {
-                returnUnauthorized(httpResponse, "Token已过期");
+                returnUnauthorized(httpResponse, "Token has expired.");
                 return;
             }
 
@@ -150,25 +150,25 @@ public class AuthenticationFilter implements Filter {
                 );
 
                 if (tenant == null) {
-                    log.warn("[安全验证] 租户不存在或已被删除, appid={}, userId={}", appid, userId);
-                    returnUnauthorized(httpResponse, "租户不存在或已被删除，请联系管理员");
+                    log.warn("[Security] Tenant is missing or has been deleted, appid={}, userId={}", appid, userId);
+                    returnUnauthorized(httpResponse, "Tenant does not exist or has been removed. Please contact the administrator.");
                     return;
                 }
 
                 TenantStatus status = TenantStatus.fromCode(tenant.getStatus());
                 if (status != TenantStatus.APPROVED) {
-                    log.warn("[安全验证] 租户状态异常, appid={}, status={}, userId={}", appid, status, userId);
-                    returnUnauthorized(httpResponse, "租户已被禁用或状态异常，请联系管理员");
+                    log.warn("[Security] Tenant status is invalid, appid={}, status={}, userId={}", appid, status, userId);
+                    returnUnauthorized(httpResponse, "Tenant is disabled or in an invalid state. Please contact the administrator.");
                     return;
                 }
 
                 if (isTenantExpired(tenant.getExpireAt())) {
-                    log.warn("[安全验证] 租户已过期, appid={}, expireAt={}, userId={}", appid, tenant.getExpireAt(), userId);
-                    returnUnauthorized(httpResponse, "租户已过期，请联系管理员续费");
+                    log.warn("[Security] Tenant subscription has expired, appid={}, expireAt={}, userId={}", appid, tenant.getExpireAt(), userId);
+                    returnUnauthorized(httpResponse, "Tenant subscription has expired. Please contact the administrator to renew.");
                     return;
                 }
 
-                log.debug("[安全验证] 租户状态验证通过, appid={}, userId={}", appid, userId);
+                log.debug("[Security] Tenant status check passed, appid={}, userId={}", appid, userId);
             }
 
             user.setUserId(userId);
@@ -185,7 +185,7 @@ public class AuthenticationFilter implements Filter {
                         user.setLevel(adminInfo.getLevel());
                     }
                 } catch (Exception e) {
-                    log.warn("加载管理员角色信息失败: userId={}", userId, e);
+                    log.warn("Failed to load administrator role information: userId={}", userId, e);
                 }
             }
 

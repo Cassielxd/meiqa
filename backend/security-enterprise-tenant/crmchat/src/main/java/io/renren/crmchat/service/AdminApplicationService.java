@@ -77,8 +77,8 @@ public class AdminApplicationService {
     public List<BaseComponent> getFormRule(Map<String, Object> data) {
         List<BaseComponent> rules = new ArrayList<>();
 
-        // 1. 应用图标（FrameImage组件）
-        rules.add(formBuilder.frameImage("icon", "应用图标",
+        // 1. Application icon (FrameImage component)
+        rules.add(formBuilder.frameImage("icon", "Application Icon",
                 "/admin/widget/images/index?fodder=icon",
                 (String) data.getOrDefault("icon", ""))
             .icon("ios-image")
@@ -87,13 +87,13 @@ public class AdminApplicationService {
             .col(13)
             .required());
 
-        // 2. 应用名称
-        rules.add(formBuilder.input("name", "应用名称",
+        // 2. Application name
+        rules.add(formBuilder.input("name", "Application Name",
                 (String) data.getOrDefault("name", ""))
             .required());
 
-        // 3. 应用简介
-        rules.add(formBuilder.textarea("introduce", "应用简介",
+        // 3. Application summary
+        rules.add(formBuilder.textarea("introduce", "Application Description",
                 (String) data.getOrDefault("introduce", "")));
 
         return rules;
@@ -111,7 +111,7 @@ public class AdminApplicationService {
      */
     public Map<String, Object> getCreateForm() {
         return FormHelper.createForm(
-            "添加应用",
+            "Add Application",
             getFormRule(new HashMap<>()),
             "/admin/app",
             "POST"
@@ -211,7 +211,7 @@ public class AdminApplicationService {
         appData.put("introduce", app.getIntroduce());
 
         return FormHelper.createForm(
-            "修改应用",
+            "Edit Application",
             getFormRule(appData),
             "/admin/app/" + id,
             "PUT"
@@ -481,7 +481,7 @@ public class AdminApplicationService {
 
             if (existingApp != null) {
                 // 应用已存在，无需重复创建
-                System.out.println("应用已存在，appid: " + appid);
+                System.out.println("Application already exists, appid: " + appid);
                 return true;
             }
 
@@ -493,9 +493,9 @@ public class AdminApplicationService {
             // 准备应用数据
             ApplicationEntity application = new ApplicationEntity();
             application.setAppid(appid);
-            application.setName(tenantName + "的客服应用");
-            application.setIcon(""); // 默认图标
-            application.setIntroduce("由系统自动为租户 " + tenantName + " 创建的客服应用");
+            application.setName(tenantName + " Support Application");
+            application.setIcon(""); // default icon placeholder
+            application.setIntroduce("Support application automatically created for tenant " + tenantName);
             application.setAppSecret(appSecret);
             application.setTimestamp(timestamp);
             application.setRand(rand);
@@ -506,7 +506,7 @@ public class AdminApplicationService {
             // 保存到application表
             return applicationMapper.insert(application) > 0;
         } catch (Exception e) {
-            System.err.println("创建租户应用失败: " + e.getMessage());
+            System.err.println("Failed to create tenant application: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

@@ -53,20 +53,20 @@ public class LocalFileStorage implements FileStorageStrategy {
             Path directory = Paths.get(savePath);
             if (!Files.exists(directory)) {
                 Files.createDirectories(directory);
-                log.info("创建上传目录: {}", savePath);
+                log.info("Created upload directory: {}", savePath);
             }
 
             // 3. 保存文件
             Path targetPath = Paths.get(fullPath);
             file.transferTo(targetPath.toFile());
-            log.info("文件上传成功: {}", fullPath);
+            log.info("File uploaded successfully: {}", fullPath);
 
             // 4. 返回访问URL
             String relativePath = fullPath.replace(uploadBasePath, "");
             return getFileUrl(relativePath);
 
         } catch (IOException e) {
-            log.error("文件上传失败: {}", e.getMessage(), e);
+            log.error("File upload failed: {}", e.getMessage(), e);
             throw new CrmChatException("File upload failed: " + e.getMessage());
         }
     }
@@ -84,15 +84,15 @@ public class LocalFileStorage implements FileStorageStrategy {
             if (file.exists()) {
                 boolean deleted = file.delete();
                 if (deleted) {
-                    log.info("文件删除成功: {}", localPath);
+                    log.info("File deleted successfully: {}", localPath);
                 }
                 return deleted;
             } else {
-                log.warn("文件不存在: {}", localPath);
+                log.warn("File does not exist: {}", localPath);
                 return false;
             }
         } catch (Exception e) {
-            log.error("文件删除失败: {}", e.getMessage(), e);
+            log.error("File deletion failed: {}", e.getMessage(), e);
             return false;
         }
     }

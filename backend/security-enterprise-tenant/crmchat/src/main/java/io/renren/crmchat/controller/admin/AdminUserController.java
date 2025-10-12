@@ -103,7 +103,7 @@ public class AdminUserController extends BaseController {
      *     "label": "Customer Category",
      *     "options": [
      *       {"value": 1, "label": "VIP Customer"},
-     *       {"value": 2, "label": "普通客户"}
+     *       {"value": 2, "label": "Regular Customer"}
      *     ]
      *   }
      * ]
@@ -147,17 +147,17 @@ public class AdminUserController extends BaseController {
      * Request Body:
      * {
      *   "avatar": "https://...",
-     *   "nickname": "张三",
+     *   "nickname": "John Doe",
      *   "group_id": 1,
-     *   "remarks": "备注",
-     *   "remark_nickname": "备注昵称",
+     *   "remarks": "Notes",
+     *   "remark_nickname": "Remark Nickname",
      *   "phone": "13800138000"
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/{id}")
-    @Operation(summary = "修改用户")
+    @Operation(summary = "Update User")
     public ApiResult<String> updateChatUser(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         String appid = currentAppid();
 
@@ -182,10 +182,10 @@ public class AdminUserController extends BaseController {
      *   "un_label_id": [3, 4]
      * }
      *
-     * Response: { "code": 0, "msg": "设置成功" }
+     * Response: { "code": 0, "msg": "Tags updated successfully" }
      */
     @PutMapping("/batch/label")
-    @Operation(summary = "批量修改用户标签")
+    @Operation(summary = "Bulk Update User Tags")
     public ApiResult<String> batchUpdateLabel(@RequestBody Map<String, Object> data) {
         String appid = currentAppid();
 
@@ -212,10 +212,10 @@ public class AdminUserController extends BaseController {
      *   "group_id": 1
      * }
      *
-     * Response: { "code": 0, "msg": "批量设置成功" }
+     * Response: { "code": 0, "msg": "Bulk update successful" }
      */
     @PutMapping("/batch/group")
-    @Operation(summary = "批量修改用户分组")
+    @Operation(summary = "Bulk Update User Groups")
     public ApiResult<String> batchUpdateGroup(@RequestBody Map<String, Object> data) {
         String appid = currentAppid();
 
@@ -240,7 +240,7 @@ public class AdminUserController extends BaseController {
      * [
      *   {
      *     "id": 1,
-     *     "name": "客户分类",
+     *     "name": "Customer Category",
      *     "label": [...]
      *   }
      * ]
@@ -263,7 +263,7 @@ public class AdminUserController extends BaseController {
      * Response: [...]
      */
     @GetMapping("/group/all")
-    @Operation(summary = "获取全部分组")
+    @Operation(summary = "Get All Groups")
     public ApiResult<List<ChatUserGroupEntity>> getGroupAll() {
         String appid = currentAppid();
 

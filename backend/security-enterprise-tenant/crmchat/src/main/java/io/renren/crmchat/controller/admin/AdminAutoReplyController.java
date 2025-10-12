@@ -98,14 +98,14 @@ public class AdminAutoReplyController extends BaseController {
      *
      * Request Body:
      * {
-     *   "keyword": "关键字",
-     *   "content": "回复内容",
+     *   "keyword": "Keyword",
+     *   "content": "Reply Content",
      *   "user_id": 0,
      *   "appid": "",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "Modified successfully" } 或 { "code": 0, "msg": "保存成功" }
+     * Response: { "code": 0, "msg": "Modified successfully" } or { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/{id}")
     @Operation(summary = "Save Auto Reply")
@@ -122,10 +122,10 @@ public class AdminAutoReplyController extends BaseController {
      *
      * PHP Reference: AutoReply.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除自动回复")
+    @Operation(summary = "Delete Auto Reply")
     public ApiResult<String> deleteAutoReply(@PathVariable Integer id) {
         String appid = currentAppid();
 

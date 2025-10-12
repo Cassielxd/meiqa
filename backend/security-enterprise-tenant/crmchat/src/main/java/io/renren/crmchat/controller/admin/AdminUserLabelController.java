@@ -77,24 +77,24 @@ public class AdminUserLabelController extends BaseController {
      *
      * Response:
      * {
-     *   "title": "创建标签",
+ *   "title": "Create Label",
      *   "action": "user/label",
      *   "method": "POST",
      *   "rules": [
      *     {
      *       "type": "select",
      *       "field": "cate_id",
-     *       "title": "标签分类",
+ *       "title": "Label Category",
      *       "value": 0,
-     *       "options": [{value: 1, label: "分类1"}, ...],
-     *       "validate": [{"required": true, "message": "标签分类不能为空"}]
+ *       "options": [{value: 1, label: "Category 1"}, ...],
+ *       "validate": [{"required": true, "message": "Label category is required"}]
      *     },
      *     {
      *       "type": "input",
      *       "field": "label",
-     *       "title": "标签名称",
+ *       "title": "Label Name",
      *       "value": "",
-     *       "validate": [{"required": true, "message": "标签名称不能为空"}]
+ *       "validate": [{"required": true, "message": "Label name is required"}]
      *     }
      *   ]
      * }
@@ -116,11 +116,11 @@ public class AdminUserLabelController extends BaseController {
      * Request Body:
      * {
      *   "cate_id": 1,
-     *   "label": "VIP客户",
+ *   "label": "VIP Customer",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+ * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/label")
     @Operation(summary = "Save Tag")
@@ -188,14 +188,14 @@ public class AdminUserLabelController extends BaseController {
      * Request Body:
      * {
      *   "cate_id": 1,
-     *   "label": "VIP客户",
+ *   "label": "VIP Customer",
      *   "sort": 0
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+ * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/label/{id}")
-    @Operation(summary = "更新标签")
+    @Operation(summary = "Update Label")
     public ApiResult<String> updateLabel(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         String appid = currentAppid();
 
@@ -209,10 +209,10 @@ public class AdminUserLabelController extends BaseController {
      *
      * PHP Reference: Label.php::delete()
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/label/{id}")
-    @Operation(summary = "删除标签")
+    @Operation(summary = "Delete Label")
     public ApiResult<String> deleteLabel(@PathVariable Integer id) {
         String appid = currentAppid();
 

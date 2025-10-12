@@ -224,7 +224,7 @@ public class AdminIndexService {
 
     /**
      * 获取所有菜单的权限标识（超级管理员使用）
-     * 注意：包括is_show=0的按钮权限（如"添加标签"、"添加分类"等按钮操作）
+     * Note: includes button permissions where is_show=0 (for example, "Add Label", "Add Category", etc.)
      */
     private List<String> getAllMenusUniqueAuth() {
         List<SystemMenusEntity> menus = systemMenusMapper.selectList(

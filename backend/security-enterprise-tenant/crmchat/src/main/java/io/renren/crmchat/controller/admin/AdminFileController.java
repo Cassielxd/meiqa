@@ -104,10 +104,10 @@ public class AdminFileController {
      *
      * Request Body:
      * {
-     *   "ids": [1, 2, 3]  // 或 "1,2,3" 字符串
+     *   "ids": [1, 2, 3]  // or comma-separated string "1,2,3"
      * }
      *
-     * Response: { "code": 0, "msg": "删除成功" }
+     * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @PostMapping("/file/delete")
     @Operation(summary = "Delete Image")
@@ -129,13 +129,13 @@ public class AdminFileController {
      *
      * Request Body:
      * {
-     *   "name": "新图片名称"  // 或 "real_name"
+     *   "name": "New Image Name"  // or use "real_name"
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/file/update/{id}")
-    @Operation(summary = "修改图片名称")
+    @Operation(summary = "Rename Image")
     public ApiResult<String> update(
             @Parameter(description = "Attachment ID") @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {
@@ -168,14 +168,14 @@ public class AdminFileController {
      *
      * Request Body:
      * {
-     *   "ids": [1, 2, 3],  // 或 "images" 字段
+     *   "ids": [1, 2, 3],  // or from "images" field
      *   "pid": 2
      * }
      *
-     * Response: { "code": 0, "msg": "移动成功" }
+     * Response: { "code": 0, "msg": "Moved successfully" }
      */
     @PutMapping("/file/do_move")
-    @Operation(summary = "移动图片分类")
+    @Operation(summary = "Move Image Category")
     public ApiResult<String> moveFiles(@RequestBody Map<String, Object> data) {
         if (!data.containsKey("pid")) {
             return ApiResult.fail("Please specify target category");
@@ -215,7 +215,7 @@ public class AdminFileController {
      * }
      */
     @GetMapping("/category")
-    @Operation(summary = "获取分类列表")
+    @Operation(summary = "Get Category List")
     public ApiResult<Map<String, Object>> categoryList(@RequestParam(required = false) Map<String, Object> params) {
         Map<String, Object> result = adminFileService.getCategoryList(params);
         return ApiResult.ok(result);
@@ -228,7 +228,7 @@ public class AdminFileController {
      * PHP Reference: AttachmentCategory.php::save()
      */
     @PostMapping("/category")
-    @Operation(summary = "创建分类")
+    @Operation(summary = "Create Category")
     public ApiResult<String> createCategory(@RequestBody Map<String, Object> data) {
         if (!data.containsKey("name") || data.get("name") == null || data.get("name").toString().trim().isEmpty()) {
             return ApiResult.fail("Please enter category name");
@@ -243,7 +243,7 @@ public class AdminFileController {
      * GET /api/admin/file/category/:id
      */
     @GetMapping("/category/{id}")
-    @Operation(summary = "获取分类详情")
+    @Operation(summary = "Get Category Detail")
     public ApiResult<Map<String, Object>> categoryDetail(@PathVariable("id") Integer id) {
         if (id == null || id <= 0) {
             return ApiResult.fail("Invalid parameters");
@@ -260,7 +260,7 @@ public class AdminFileController {
      * PHP Reference: AttachmentCategory.php::update()
      */
     @PutMapping("/category/{id}")
-    @Operation(summary = "更新分类")
+    @Operation(summary = "Update Category")
     public ApiResult<String> updateCategory(
             @PathVariable("id") Integer id,
             @RequestBody Map<String, Object> data) {
@@ -284,7 +284,7 @@ public class AdminFileController {
      * PHP Reference: AttachmentCategory.php::delete()
      */
     @DeleteMapping("/category/{id}")
-    @Operation(summary = "删除分类")
+    @Operation(summary = "Delete Category")
     public ApiResult<String> deleteCategory(@PathVariable("id") Integer id) {
         if (id == null || id <= 0) {
             return ApiResult.fail("Invalid parameters");

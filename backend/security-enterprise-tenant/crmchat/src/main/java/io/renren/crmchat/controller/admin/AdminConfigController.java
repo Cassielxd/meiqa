@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/setting")
-@Tag(name = "Admin Setting - 配置管理")
+@Tag(name = "Admin Settings")
 @AllArgsConstructor
 public class AdminConfigController {
 
@@ -47,15 +47,15 @@ public class AdminConfigController {
      * PHP Reference: Config.php::index()
      *
      * Query Parameters:
-     * - tab_id: 配置分类ID（必填）
-     * - status: 状态筛选（-1=全部，0=隐藏，1=显示）
+     * - tab_id: configuration category ID (required)
+     * - status: status filter (-1 = all, 0 = hidden, 1 = visible)
      *
      * Response:
      * [
      *   {
      *     "id": 1,
      *     "menu_name": "site_name",
-     *     "info": "网站名称",
+     *     "info": "Website Name",
      *     ...
      *   }
      * ]
@@ -82,7 +82,7 @@ public class AdminConfigController {
      *
      * Query Parameters:
      * - type: 类型
-     * - tab_id: 分类ID（默认1）
+     * - tab_id: category ID (default 1)
      *
      * Response:
      * {
@@ -119,8 +119,8 @@ public class AdminConfigController {
      *   "width": 100,
      *   "high": 0,
      *   "value": "My Website",
-     *   "info": "网站名称",
-     *   "desc": "网站名称配置",
+     *   "info": "Website Name",
+     *   "desc": "Website name configuration",
      *   "sort": 0,
      *   "status": 1
      * }
@@ -128,7 +128,7 @@ public class AdminConfigController {
      * Response: { "code": 0, "msg": "Configuration added successfully" }
      */
     @PostMapping("/config")
-    @Operation(summary = "保存配置")
+    @Operation(summary = "Save Configuration")
     public ApiResult<String> saveConfig(@RequestBody Map<String, Object> data) {
         adminConfigService.saveConfig(data);
         return ApiResult.ok("Configuration added successfully", "success");
@@ -150,7 +150,7 @@ public class AdminConfigController {
      * }
      */
     @GetMapping("/config/{id}")
-    @Operation(summary = "获取配置详情")
+    @Operation(summary = "Get Configuration Detail")
     public ApiResult<Map<String, Object>> getConfigInfo(@PathVariable Integer id) {
         SystemConfigEntity config = adminConfigService.getConfigInfo(id);
         Map<String, Object> result = new java.util.HashMap<>();
@@ -186,21 +186,21 @@ public class AdminConfigController {
      * Request Body:
      * {
      *   "status": 1,
-     *   "info": "网站名称",
-     *   "desc": "网站名称配置",
+     *   "info": "Website Name",
+     *   "desc": "Website name configuration",
      *   "sort": 0,
      *   "config_tab_id": 1,
      *   "required": "",
      *   "parameter": "",
-     *   "value": "我的新网站",
+     *   "value": "My New Website",
      *   "upload_type": "",
      *   "input_type": ""
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功!" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PutMapping("/config/{id}")
-    @Operation(summary = "更新配置")
+    @Operation(summary = "Update Configuration")
     public ApiResult<String> updateConfig(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         boolean success = adminConfigService.updateConfig(id, data);
         if (success) {
@@ -219,7 +219,7 @@ public class AdminConfigController {
      * Response: { "code": 0, "msg": "Deleted successfully" }
      */
     @DeleteMapping("/config/{id}")
-    @Operation(summary = "删除配置")
+    @Operation(summary = "Delete Configuration")
     public ApiResult<String> deleteConfig(@PathVariable Integer id) {
         boolean success = adminConfigService.deleteConfig(id);
         if (success) {
@@ -235,10 +235,10 @@ public class AdminConfigController {
      *
      * PHP Reference: Config.php::set_status()
      *
-     * Response: { "code": 0, "msg": "隐藏成功" } 或 { "code": 0, "msg": "显示成功" }
+     * Response: { "code": 0, "msg": "Hidden successfully" } or { "code": 0, "msg": "Shown successfully" }
      */
     @PutMapping("/config/set_status/{id}/{status}")
-    @Operation(summary = "修改配置状态")
+    @Operation(summary = "Update Configuration Status")
     public ApiResult<String> updateStatus(@PathVariable Integer id, @PathVariable Integer status) {
         adminConfigService.updateStatus(id, status);
         return ApiResult.ok(status == 0 ? "Hidden successfully" : "Shown successfully", "success");
@@ -260,7 +260,7 @@ public class AdminConfigController {
      * }
      */
     @GetMapping("/config/edit_basics")
-    @Operation(summary = "获取基础配置表单")
+    @Operation(summary = "Get Basic Configuration Form")
     public ApiResult<Map<String, Object>> getConfigForm(
             @RequestParam(required = false, defaultValue = "1") Integer tab_id) {
 
@@ -274,18 +274,18 @@ public class AdminConfigController {
      *
      * PHP Reference: Config.php::save_basics()
      *
-     * Request Body: 配置项的键值对
+     * Request Body: key-value pairs of configuration items
      * {
-     *   "site_name": "新网站名称",
+     *   "site_name": "New Website Name",
      *   "site_url": "https://example.com",
      *   "site_logo": "https://example.com/logo.png",
      *   ...
      * }
      *
-     * Response: { "code": 0, "msg": "修改成功" }
+     * Response: { "code": 0, "msg": "Updated successfully" }
      */
     @PostMapping("/config/save_basics")
-    @Operation(summary = "批量保存基础配置")
+    @Operation(summary = "Save Basic Configuration in Bulk")
     public ApiResult<String> saveBasics(@RequestBody Map<String, Object> data) {
         adminConfigService.saveBasics(data);
         return ApiResult.ok("Updated successfully", "success");
@@ -298,8 +298,8 @@ public class AdminConfigController {
      * PHP Reference: Config.php::header_basics()
      *
      * Query Parameters:
-     * - type: 类型（默认0）
-     * - pid: 父级ID（默认0）
+     * - type: type (default 0)
+     * - pid: parent ID (default 0)
      *
      * Response:
      * {
@@ -307,7 +307,7 @@ public class AdminConfigController {
      * }
      */
     @GetMapping("/config/header_basics")
-    @Operation(summary = "获取配置分类头部")
+    @Operation(summary = "Get Configuration Category Header")
     public ApiResult<Map<String, Object>> getHeaderBasics(
             @RequestParam(required = false, defaultValue = "0") Integer type,
             @RequestParam(required = false, defaultValue = "0") Integer pid) {
@@ -328,10 +328,10 @@ public class AdminConfigController {
      *   "kefu_icon_type": "1"
      * }
      *
-     * Response: { "code": 0, "msg": "保存成功" }
+     * Response: { "code": 0, "msg": "Saved successfully" }
      */
     @PostMapping("/config/kefu_icon")
-    @Operation(summary = "设置客服图标")
+    @Operation(summary = "Set Customer Service Icon")
     public ApiResult<String> setKefuIcon(@RequestBody Map<String, Object> data) {
         String kefuIconUrl3 = (String) data.get("kefu_icon_url3");
         String kefuIconType = (String) data.get("kefu_icon_type");
@@ -355,7 +355,7 @@ public class AdminConfigController {
      * }
      */
     @GetMapping("/config/kefu_icon")
-    @Operation(summary = "获取客服图标")
+    @Operation(summary = "Get Customer Service Icon")
     public ApiResult<Map<String, String>> getKefuIcon() {
         Map<String, String> result = adminConfigService.getKefuIcon();
         return ApiResult.ok(result);

@@ -95,7 +95,7 @@ public class KefuServiceController {
      * Request Body:
      * {
      *   "title": "Welcome Message",                // 必填
-     *   "message": "您好，有什么可以帮您？",  // 必填
+     *   "message": "Hello, how can we assist you?",  // required
      *   "cate_id": 1,                    // 可选
      *   "sort": 0                        // 可选
      * }
@@ -122,7 +122,7 @@ public class KefuServiceController {
      * Request Body:
      * {
      *   "title": "Welcome Message",                // 必填
-     *   "message": "您好，有什么可以帮您？",  // 必填
+     *   "message": "Hello, how can we assist you?",  // required
      *   "cate_id": 1,                    // 可选
      *   "sort": 0                        // 可选
      * }
@@ -221,14 +221,14 @@ public class KefuServiceController {
      *
      * Request Body:
      * {
-     *   "name": "常用话术",  // 必填
+     *   "name": "Standard Script",  // required
      *   "sort": 0          // 可选
      * }
      *
      * Response: 修改成功
      */
     @PutMapping("/cate/{id}")
-    @Operation(summary = "更新分类")
+    @Operation(summary = "Update Category")
     public ApiResult<String> updateCate(@PathVariable Integer id, @RequestBody Map<String, Object> data) {
         // 从JWT token中获取当前客服信息
         Long userId = UserContext.getUserId();
@@ -247,7 +247,7 @@ public class KefuServiceController {
      * Response: 删除成功
      */
     @DeleteMapping("/cate/{id}")
-    @Operation(summary = "删除分类")
+    @Operation(summary = "Delete Category")
     public ApiResult<String> deleteCate(@PathVariable Integer id) {
         // 从JWT token中获取当前客服信息
         Long userId = UserContext.getUserId();

@@ -39,80 +39,80 @@ public class ExampleService {
     public List<BaseComponent> createServiceForm(Map<String, Object> formData) {
         List<BaseComponent> field = new ArrayList<>();
 
-        // 1. 分组下拉选择
+        // 1. Group selector
         List<OptionComponent> groupOptions = getGroupOptions();
-        field.add(builder.select("group_id", "请选择分组",
+        field.add(builder.select("group_id", "Select Group",
                 formData.getOrDefault("group_id", 0))
                 .options(groupOptions));
 
-        // 2. 客服头像（FrameImage组件）
-        field.add(builder.frameImage("avatar", "客服头像",
+        // 2. Agent avatar (FrameImage component)
+        field.add(builder.frameImage("avatar", "Agent Avatar",
                 "/admin/widget/images/index?fodder=avatar",
                 (String) formData.getOrDefault("avatar", ""))
                 .icon("ios-add")
                 .width("950px")
                 .height("420px"));
 
-        // 3. 客服名称
-        field.add(builder.input("nickname", "客服名称",
+        // 3. Agent name
+        field.add(builder.input("nickname", "Agent Name",
                 (String) formData.getOrDefault("nickname", ""))
                 .col(24)
                 .required());
 
-        // 4. 手机号码
-        field.add(builder.input("phone", "手机号码",
+        // 4. Phone number
+        field.add(builder.input("phone", "Phone Number",
                 (String) formData.getOrDefault("phone", ""))
                 .col(24)
                 .required());
 
-        // 5. 登录账号和密码（根据是否编辑决定必填）
+        // 5. Login account and password (required depending on edit mode)
         if (!formData.isEmpty()) {
-            // 编辑模式
-            field.add(builder.input("account", "登录账号",
+            // edit mode
+            field.add(builder.input("account", "Login Account",
                     (String) formData.getOrDefault("account", ""))
                     .col(24)
                     .required());
-            field.add(builder.input("password", "登录密码")
+            field.add(builder.input("password", "Login Password")
                     .type("password")
                     .col(24));
-            field.add(builder.input("true_password", "确认密码")
+            field.add(builder.input("true_password", "Confirm Password")
                     .type("password")
                     .col(24));
         } else {
-            // 新增模式
-            field.add(builder.input("account", "登录账号")
+            // create mode
+            field.add(builder.input("account", "Login Account")
                     .col(24)
                     .required());
-            field.add(builder.input("password", "登录密码")
+            field.add(builder.input("password", "Login Password")
                     .type("password")
                     .col(24)
                     .required());
-            field.add(builder.input("true_password", "确认密码")
+            field.add(builder.input("true_password", "Confirm Password")
                     .type("password")
                     .col(24)
                     .required());
         }
 
-        // 6. 欢迎语
-        field.add(builder.textarea("welcome_words", "欢迎语",
+        // 6. Welcome message
+        field.add(builder.textarea("welcome_words", "Welcome Message",
                 (String) formData.getOrDefault("welcome_words", "")));
 
-        // 7. 自动回复开关
-        field.add(builder.switches("auto_reply", "自动回复",
+        // 7. Auto-reply toggle
+        field.add(builder.switches("auto_reply", "Auto Reply",
                 (int) formData.getOrDefault("auto_reply", 0))
                 .falseValue(0)
                 .trueValue(1)
-                .openStr("打开")
-                .closeStr("关闭")
+                .openStr("Enabled")
+                .closeStr("Disabled")
                 .size("large"));
 
-        // 8. 客服状态开关
-        field.add(builder.switches("status", "客服状态",
+        // 8. Agent status toggle
+        field.add(builder.switches("status", "Agent Status",
                 (int) formData.getOrDefault("status", 0))
                 .falseValue(0)
                 .trueValue(1)
-                .openStr("打开")
-                .closeStr("关闭")
+                .openStr("Enabled")
+                .closeStr("Disabled")
                 .size("large"));
 
         return field;
@@ -123,7 +123,7 @@ public class ExampleService {
      */
     public Map<String, Object> create() {
         return FormHelper.createForm(
-                "添加客服",
+                "Add Customer Service Agent",
                 createServiceForm(Map.of()),
                 "/chat/kefu",
                 "POST"
@@ -135,7 +135,7 @@ public class ExampleService {
      */
     public Map<String, Object> edit(int id, Map<String, Object> serviceInfo) {
         return FormHelper.createForm(
-                "编辑客服",
+                "Edit Customer Service Agent",
                 createServiceForm(serviceInfo),
                 "/chat/kefu/" + id,
                 "PUT"
@@ -147,9 +147,9 @@ public class ExampleService {
      */
     private List<OptionComponent> getGroupOptions() {
         List<OptionComponent> options = new ArrayList<>();
-        options.add(new OptionComponent(0, "默认分组", false));
-        options.add(new OptionComponent(1, "售前客服", false));
-        options.add(new OptionComponent(2, "售后客服", false));
+        options.add(new OptionComponent(0, "Default Group", false));
+        options.add(new OptionComponent(1, "Pre-sales Support", false));
+        options.add(new OptionComponent(2, "After-sales Support", false));
         return options;
     }
 }

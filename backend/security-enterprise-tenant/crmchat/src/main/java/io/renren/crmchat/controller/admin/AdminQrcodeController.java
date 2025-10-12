@@ -44,7 +44,7 @@ public class AdminQrcodeController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "limit", defaultValue = "15") Integer limit) {
 
-        log.info("获取二维码列表 - name: {}, page: {}, limit: {}", name, page, limit);
+        log.info("Fetching QR code list - name: {}, page: {}, limit: {}", name, page, limit);
 
         // 构建查询条件
         QueryWrapper<QrcodeEntity> queryWrapper = new QueryWrapper<>();
@@ -103,7 +103,7 @@ public class AdminQrcodeController {
         result.put("list", list);
         result.put("count", count);
 
-        log.info("查询到 {} 条二维码记录", list.size());
+        log.info("Found {} QR code records", list.size());
 
         return new Result<Map<String, Object>>().ok(result);
     }
@@ -114,7 +114,7 @@ public class AdminQrcodeController {
      */
     @PostMapping
     public Result<String> save(@RequestBody QrcodeEntity qrcode) {
-        log.info("创建二维码 - name: {}", qrcode.getName());
+        log.info("Creating QR code - name: {}", qrcode.getName());
         qrcodeMapper.insert(qrcode);
         return new Result<String>().ok("Saved successfully");
     }
@@ -125,7 +125,7 @@ public class AdminQrcodeController {
      */
     @PutMapping("/{id}")
     public Result<String> update(@PathVariable Integer id, @RequestBody QrcodeEntity qrcode) {
-        log.info("更新二维码 - id: {}, name: {}", id, qrcode.getName());
+        log.info("Updating QR code - id: {}, name: {}", id, qrcode.getName());
         qrcode.setId(id);
         qrcodeMapper.updateById(qrcode);
         return new Result<String>().ok("Modified successfully");
@@ -137,7 +137,7 @@ public class AdminQrcodeController {
      */
     @DeleteMapping("/{id}")
     public Result<String> delete(@PathVariable Integer id) {
-        log.info("删除二维码 - id: {}", id);
+        log.info("Deleting QR code - id: {}", id);
         if (id == null) {
             return new Result<String>().error("Missing required parameter");
         }

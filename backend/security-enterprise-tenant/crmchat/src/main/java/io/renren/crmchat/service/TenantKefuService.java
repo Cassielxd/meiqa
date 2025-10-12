@@ -864,7 +864,7 @@ public class TenantKefuService {
         }
 
         // 验证租户权限
-        TenantGuard.ensureOwnedByCurrentTenant(serviceInfo.getAppid(), "客服不存在");
+        TenantGuard.ensureOwnedByCurrentTenant(serviceInfo.getAppid(), "Support agent does not exist.");
 
         // 验证客服账号状态
         if (serviceInfo.getAccount() == null || serviceInfo.getAccount().isEmpty() ||
