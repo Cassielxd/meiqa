@@ -28,7 +28,6 @@
 </style>
 <script>
     import './user.less'
-    import { AccountLogout } from '@/api/account'
     import { removeCookies } from '@/libs/util'
     import { Modal } from 'iview'
     export default {
@@ -66,16 +65,13 @@
                     title: '退出登录确认',
                     content: '您确定退出当前账户吗？',
                     onOk () {
-                        AccountLogout().then(res => {
-                            that.$Message.success('您已成功退出')
-                            that.$router.replace('/tenant/login')
-                            localStorage.clear()
-                            removeCookies('tenant_token')
-                            removeCookies('expires_time')
-                            removeCookies('uuid')
-                            // window.location.reload()
-                        }).catch(res => {
-                        })
+                        // 直接清除本地session，无需调用后端API（JWT无状态）
+                        that.$Message.success('您已成功退出')
+                        localStorage.clear()
+                        removeCookies('tenant_token')
+                        removeCookies('expires_time')
+                        removeCookies('uuid')
+                        that.$router.replace('/tenant/login')
                     }
                 })
             },

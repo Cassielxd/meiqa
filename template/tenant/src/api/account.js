@@ -1,5 +1,3 @@
-
-
 import request from '@/libs/request'
 
 /*
@@ -13,24 +11,20 @@ export function AccountLogin(data) {
     })
 }
 
-
-
-
 /**
  * 退出登陆
  * @constructor
  */
 export function AccountLogout() {
     return request({
-        url: '/setting/admin/logout',
-        method: 'get'
+        url: '/system/admin/logout',
+        method: 'post'
     })
 }
 
 /*
 * 获取验证码图片
 */
-
 export function captcha_pro() {
     return request({
         url: '/captcha_pro',

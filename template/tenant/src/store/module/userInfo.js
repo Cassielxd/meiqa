@@ -1,4 +1,3 @@
-
 import { getStaticMenusData } from '@/data/static-menus'
 
 export default {

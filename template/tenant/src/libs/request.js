@@ -77,8 +77,19 @@ service.interceptors.response.use(
         }
     },
     error => {
-        Message.error(error.msg)
-        return Promise.reject(error)
+        // 【安全增强】处理HTTP 401未授权响应
+        if (error.response && error.response.status === 401) {
+            console.warn('[认证失败] HTTP 401 - 清除会话并跳转登录页');
+            localStorage.clear();
+            removeCookies('tenant_token');
+            removeCookies('expires_time');
+            removeCookies('uuid');
+            router.replace({ path: '/tenant/login' });
+            return Promise.reject(error);
+        }
+
+        Message.error(error.msg);
+        return Promise.reject(error);
     }
 )
 

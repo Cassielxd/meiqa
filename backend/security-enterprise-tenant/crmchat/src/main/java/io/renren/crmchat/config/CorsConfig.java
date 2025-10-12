@@ -1,5 +1,6 @@
 package io.renren.crmchat.config;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -27,14 +28,20 @@ public class CorsConfig {
      * - 允许所有请求头：包括自定义的 Authorization 头
      * - 暴露所有响应头：前端可以读取服务器返回的所有头信息
      * - 预检请求缓存3600秒：减少 OPTIONS 请求频率
+     * - 【安全修复】Order=0确保CORS头部添加到所有响应（包括401）
      */
     @Bean
-    public CorsFilter corsFilter() {
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        // 允许所有来源（租户网站可能在任何域名）
-        config.addAllowedOriginPattern("*");
+        // 【安全修复】当allowCredentials=true时，不能使用通配符
+        // 允许本地开发环境的所有端口
+        config.addAllowedOriginPattern("http://localhost:*");
+        config.addAllowedOriginPattern("http://127.0.0.1:*");
+        // 允许租户自定义域名（生产环境需要配置具体域名）
+        config.addAllowedOriginPattern("http://*");
+        config.addAllowedOriginPattern("https://*");
 
         // 允许携带凭证（Cookie, Authorization header）
         config.setAllowCredentials(true);
@@ -45,8 +52,10 @@ public class CorsConfig {
         // 允许所有HTTP方法
         config.addAllowedMethod("*");
 
-        // 暴露所有响应头（前端可以读取）
-        config.addExposedHeader("*");
+        // 【安全修复】暴露必要的响应头，让前端能读取401状态码
+        config.addExposedHeader("Content-Type");
+        config.addExposedHeader("Authorization");
+        config.addExposedHeader("Authori-zation");
 
         // 预检请求缓存时间（秒）
         config.setMaxAge(3600L);
@@ -54,6 +63,12 @@ public class CorsConfig {
         // 应用到所有路径
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsFilter(source);
+        // 【安全修复】创建FilterRegistrationBean并设置order=0
+        // 确保CORS filter在AuthenticationFilter(order=1)之前执行
+        FilterRegistrationBean<CorsFilter> registration = new FilterRegistrationBean<>(new CorsFilter(source));
+        registration.setOrder(0);
+        registration.setName("corsFilter");
+
+        return registration;
     }
 }

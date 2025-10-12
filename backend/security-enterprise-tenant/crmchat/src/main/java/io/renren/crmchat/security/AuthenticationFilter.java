@@ -1,11 +1,15 @@
 package io.renren.crmchat.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.crmchat.common.constant.ApiConstants;
+import io.renren.crmchat.common.constant.TenantStatus;
 import io.renren.crmchat.common.result.ApiResult;
 import io.renren.crmchat.dao.SystemAdminMapper;
+import io.renren.crmchat.dao.TenantsMapper;
 import io.renren.crmchat.entity.SystemAdminEntity;
+import io.renren.crmchat.entity.TenantsEntity;
 import io.renren.crmchat.service.AdminApplicationService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +22,7 @@ import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -34,6 +39,7 @@ public class AuthenticationFilter implements Filter {
     private final JwtUtils jwtUtils;
     private final ObjectMapper objectMapper;
     private final SystemAdminMapper systemAdminMapper;
+    private final TenantsMapper tenantsMapper;
     private final AdminApplicationService adminApplicationService;
 
     /**
@@ -136,6 +142,35 @@ public class AuthenticationFilter implements Filter {
             String username = jwt.getClaim("username").asString();
             String appid = jwt.getClaim("appid").asString();
 
+            // 【安全增强】验证租户状态（方案1实现）
+            // 如果不是管理员登录，需要验证租户账号是否存在、启用且未过期
+            if (!"10000".equals(appid)) {
+                TenantsEntity tenant = tenantsMapper.selectOne(
+                    new QueryWrapper<TenantsEntity>().eq("appid", appid)
+                );
+
+                if (tenant == null) {
+                    log.warn("[安全验证] 租户不存在或已被删除, appid={}, userId={}", appid, userId);
+                    returnUnauthorized(httpResponse, "租户不存在或已被删除，请联系管理员");
+                    return;
+                }
+
+                TenantStatus status = TenantStatus.fromCode(tenant.getStatus());
+                if (status != TenantStatus.APPROVED) {
+                    log.warn("[安全验证] 租户状态异常, appid={}, status={}, userId={}", appid, status, userId);
+                    returnUnauthorized(httpResponse, "租户已被禁用或状态异常，请联系管理员");
+                    return;
+                }
+
+                if (isTenantExpired(tenant.getExpireAt())) {
+                    log.warn("[安全验证] 租户已过期, appid={}, expireAt={}, userId={}", appid, tenant.getExpireAt(), userId);
+                    returnUnauthorized(httpResponse, "租户已过期，请联系管理员续费");
+                    return;
+                }
+
+                log.debug("[安全验证] 租户状态验证通过, appid={}, userId={}", appid, userId);
+            }
+
             user.setUserId(userId);
             user.setUsername(username);
             user.setAppid(appid);
@@ -209,5 +244,15 @@ public class AuthenticationFilter implements Filter {
 
         String jsonResponse = objectMapper.writeValueAsString(result);
         response.getWriter().write(jsonResponse);
+    }
+
+    /**
+     * 判断租户是否过期
+     */
+    private boolean isTenantExpired(Timestamp expireAt) {
+        if (expireAt == null) {
+            return false; // null 表示永久有效
+        }
+        return System.currentTimeMillis() >= expireAt.getTime();
     }
 }

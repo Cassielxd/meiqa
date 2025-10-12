@@ -38,6 +38,7 @@ public class AdminTenantService {
     private final ValidationService validationService;
     private final PasswordService passwordService;
     private final AdminApplicationService adminApplicationService;
+    private final ChatCacheService chatCacheService;
 
     /**
      * 获取租户列表（带分页和搜索）
@@ -356,6 +357,7 @@ public class AdminTenantService {
     /**
      * 更新租户状态
      * PHP Reference: TenantServices.php::updateTenantStatus()
+     * 【安全增强】禁用租户时清除缓存，确保立即生效
      *
      * @param id 租户ID
      * @param status 状态（0-禁用，1-启用）
@@ -373,6 +375,8 @@ public class AdminTenantService {
             throw new CrmChatException("Status parameter error: must be 0 or 1");
         }
 
+        String appid = tenant.getAppid();
+
         // 3. 更新状态
         tenant.setStatus(status);
         tenant.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
@@ -382,13 +386,24 @@ public class AdminTenantService {
         if (result <= 0) {
             throw new CrmChatException("Failed to update status");
         }
+
+        // 5. 【安全增强】如果禁用租户，清除其所有缓存
+        // 这样可以确保禁用立即生效，租户无法通过缓存继续访问
+        if (status == 0 && appid != null && !appid.isBlank()) {
+            try {
+                chatCacheService.invalidateAllTenantCache(appid);
+            } catch (Exception e) {
+                System.err.println("禁用租户时清除缓存失败: appid=" + appid + ", error=" + e.getMessage());
+            }
+        }
     }
 
     /**
-     * 删除租户（软删除）
+     * 删除租户（物理删除）
      * PHP Reference: TenantServices.php::deleteTenant()
      *
-     * 注意: 这是软删除，设置 is_del=1，不是物理删除
+     * 注意: 这是物理删除，会彻底删除租户记录
+     * 【安全增强】删除时清除租户所有缓存，防止已删除租户继续访问系统
      *
      * @param id 租户ID
      */
@@ -400,6 +415,8 @@ public class AdminTenantService {
             throw new CrmChatException("Tenant does not exist");
         }
 
+        String appid = tenant.getAppid();
+
         // 2. 物理删除（实体类暂无is_del字段，使用物理删除）
         // TODO: 如果数据库有is_del字段，需要先在TenantsEntity中添加该字段，然后改为软删除
         int result = tenantsMapper.deleteById(id);
@@ -407,8 +424,17 @@ public class AdminTenantService {
             throw new CrmChatException("Failed to delete tenant");
         }
 
-        // 3. TODO: 可选 - 清除相关缓存（如果有使用 Redis 缓存租户信息）
-        // cacheService.clear("tenant:" + id);
+        // 3. 【安全增强】清除租户所有缓存
+        // 包括：用户画像、在线客服、系统配置等
+        // 这样可以确保已删除租户无法通过缓存继续访问系统
+        if (appid != null && !appid.isBlank()) {
+            try {
+                chatCacheService.invalidateAllTenantCache(appid);
+            } catch (Exception e) {
+                // 缓存清除失败不影响删除操作，只记录日志
+                System.err.println("清除租户缓存失败: appid=" + appid + ", error=" + e.getMessage());
+            }
+        }
     }
 
     /**

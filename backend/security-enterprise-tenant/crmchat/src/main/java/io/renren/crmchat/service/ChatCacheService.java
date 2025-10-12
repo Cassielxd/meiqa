@@ -243,6 +243,37 @@ public class ChatCacheService {
         redisUtils.delete(redisKey(appid, "profile", String.valueOf(userId)));
     }
 
+    /**
+     * 清除指定租户的所有缓存（用于租户删除/禁用时）
+     * 包括：用户画像、在线客服列表、系统配置等
+     *
+     * @param appid 租户appid
+     */
+    public void invalidateAllTenantCache(String appid) {
+        if (appid == null || appid.isBlank()) {
+            log.warn("尝试清除租户缓存但appid为空");
+            return;
+        }
+
+        log.info("[缓存清理] 开始清除租户缓存, appid: {}", appid);
+
+        // 1. 清除本地缓存中所有与该租户相关的数据
+        localCache.keySet().removeIf(key -> key.contains("::" + appid + "::"));
+
+        // 2. 清除Redis中已知的租户相关缓存
+        try {
+            // 清除在线客服列表缓存
+            redisUtils.delete(redisKey(appid, "service", "online_list"));
+
+            // 清除游客头像配置缓存
+            redisUtils.delete(redisKey(appid, "config", "tourist_avatar"));
+
+            log.info("[缓存清理] 租户缓存清除成功, appid: {}", appid);
+        } catch (Exception e) {
+            log.error("[缓存清理] 清除租户Redis缓存失败, appid: {}, error: {}", appid, e.getMessage(), e);
+        }
+    }
+
     private void cacheUserProfile(String appid, UserProfile profile) {
         if (appid == null || appid.isBlank() || profile == null) {
             return;
