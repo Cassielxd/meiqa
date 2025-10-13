@@ -139,11 +139,23 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 66px;
-  padding: 0 0 0 15px;
-  background: linear-gradient(270deg, #1890FF 0%, #3875EA 100%);
-  color: #fff;
+  height: 70px;
+  padding: 0 24px 0 20px;
+  background: linear-gradient(135deg, #F5F6F8 0%, #EBEDEF 100%);
+  color: #1F2937;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.12), transparent);
+  }
 
   .left-wrapper {
     position: relative;
@@ -165,14 +177,26 @@ export default {
 
       // margin-left: 30px;
       img {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
+        width: 44px;
+        height: 44px;
+        margin-right: 12px;
         border-radius: 50%;
+        box-shadow: 0 0 0 3px white, 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+
+        &:hover {
+          transform: scale(1.08);
+          box-shadow: 0 0 0 4px white, 0 6px 16px rgba(0, 0, 0, 0.2), 0 0 0 6px rgba(79, 70, 229, 0.1);
+        }
       }
 
       span {
         font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: #1F2937;
       }
 
       .status-box {
@@ -183,26 +207,52 @@ export default {
       .status {
         display: flex;
         align-items: center;
-        padding: 0 10px;
-        margin-left: 5px;
-        background: #EAFFEB;
-        color: rgba(0, 0, 0, 0.65);
-        border-radius: 9px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background: white;
+        backdrop-filter: blur(10px);
+        color: #1F2937;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #E5E7EB;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+        &:hover {
+          background: #F9FAFB;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
         .dot {
-          width: 6px;
-          height: 6px;
-          margin-right: 3px;
+          width: 8px;
+          height: 8px;
+          margin-right: 6px;
           border-radius: 50%;
-          background: #48D452;
+          background: #10B981;
+          box-shadow: 0 0 8px #10B981, 0 0 0 2px rgba(255, 255, 255, 0.3);
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
         &.off {
-          background: #F3F3F3;
+          background: #F3F4F6;
 
           .dot {
-            background: #999999;
+            background: #9CA3AF;
+            box-shadow: 0 0 0 2px white;
+            animation: none;
           }
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
         }
       }
 
@@ -210,29 +260,45 @@ export default {
         z-index: 50;
         position: absolute;
         left: 5px;
-        bottom: -75px;
-        width: 120px;
-        background: #fff;
-        color: #333;
-        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
-        border-radius: 5px;
+        bottom: -85px;
+        width: 140px;
+        background: white;
+        backdrop-filter: blur(20px);
+        color: #374151;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        border: 1px solid #E5E7EB;
+        overflow: hidden;
+        animation: dropdown-slide 0.2s ease-out;
 
         .item {
           position: relative;
           display: flex;
           align-items: center;
-          padding: 7px 10px 7px 30px;
+          padding: 10px 12px 10px 32px;
           cursor: pointer;
+          transition: all 0.15s ease;
+          font-size: 14px;
+
+          &:hover {
+            background: #F3F4F6;
+          }
+
+          &:active {
+            background: #E5E7EB;
+          }
 
           i {
             width: 10px;
             height: 10px;
             margin-right: 8px;
             border-radius: 50%;
-            background: #999999;
+            background: #9CA3AF;
+            box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.2);
 
             &.green {
-              background: #48D452;
+              background: #10B981;
+              box-shadow: 0 0 8px rgba(16, 185, 129, 0.4), 0 0 0 2px rgba(16, 185, 129, 0.2);
             }
           }
 
@@ -241,8 +307,20 @@ export default {
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 12px;
+            font-size: 14px;
+            color: #4F46E5;
           }
+        }
+      }
+
+      @keyframes dropdown-slide {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
     }

@@ -549,9 +549,14 @@ export default {
 
 .right-wrapper {
   width: 280px;
+  background: #FAFBFC;
 
   .user-wrapper {
-    padding: 0 8px;
+    padding: 8px;
+    background: #F5F6F8;
+    border-radius: 12px;
+    margin: 12px 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 
     .user {
       display: flex;
@@ -581,7 +586,7 @@ export default {
       .label {
         margin-left: 5px;
         font-size: 12px;
-        border-radius: 2px;
+        border-radius: 8px;
         padding: 2px 5px;
 
         &.H5 {
@@ -646,9 +651,11 @@ color #6440C2, &.routine {
       .label-item {
         margin-right: 8px;
         margin-bottom: 8px;
-        padding: 0 5px;
+        padding: 4px 10px;
         color: #1890FF;
         background: rgba(24, 144, 255, 0.1);
+        border-radius: 12px;
+        font-size: 13px;
       }
     }
 
@@ -699,6 +706,15 @@ color #6440C2, &.routine {
 
     /deep/ .ivu-input {
       border-radius: 17px;
+      background: #F3F4F6;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+
+      &:focus {
+        background: #FAFBFC;
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
     }
   }
 
@@ -709,6 +725,10 @@ color #6440C2, &.routine {
 
   .order-item {
     margin-bottom: 18px;
+    background: #F5F6F8;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 
     .head {
       display: flex;
@@ -717,6 +737,7 @@ color #6440C2, &.routine {
       height: 36px;
       padding: 0 10px;
       background: #F5F5F5;
+      border-radius: 8px;
       font-size: 13px;
 
       .left {
@@ -754,7 +775,8 @@ color #6440C2, &.routine {
             display: block;
             width: 100%;
             height: 100%;
-            border-radius: 2px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
           }
         }
 
@@ -851,6 +873,15 @@ color #6440C2, &.routine {
 
     /deep/ .ivu-input {
       border-radius: 17px;
+      background: #F3F4F6;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+
+      &:focus {
+        background: #FAFBFC;
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
     }
   }
 
@@ -860,6 +891,16 @@ color #6440C2, &.routine {
     .list-item {
       display: flex;
       margin-top: 15px;
+      padding: 10px;
+      background: #F5F6F8;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
 
       .img-box {
         width: 60px;
@@ -869,7 +910,8 @@ color #6440C2, &.routine {
           display: block;
           width: 100%;
           height: 100%;
-          border-radius: 2px;
+          border-radius: 10px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
       }
 
@@ -906,12 +948,25 @@ color #6440C2, &.routine {
 }
 
 .label-box {
+  >>> .ivu-modal {
+    border-radius: 16px;
+  }
+
+  >>> .ivu-modal-content {
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
   >>> .ivu-modal-header {
     padding: 0;
     border: 0;
     background: #fff;
     height: 50px;
-    border-radius: 6px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  >>> .ivu-modal-body {
+    border-radius: 0 0 16px 16px;
   }
 
   .label-head {
@@ -921,6 +976,17 @@ color #6440C2, &.routine {
     font-size: 13px;
     color: #333333;
     border-bottom: 1px solid #F0F0F0;
+  }
+}
+
+.none-radius {
+  >>> .ivu-modal {
+    border-radius: 14px;
+  }
+
+  >>> .ivu-modal-content {
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   }
 }
 </style>

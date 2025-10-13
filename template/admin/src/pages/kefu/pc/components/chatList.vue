@@ -1,41 +1,7 @@
 <template>
   <div class="chatList">
     <div class="search_box">
-      <Input prefix="ios-search" :placeholder="$t('kefu.search')" @on-enter="bindSearch" @on-change="inputChange">
-      <Icon slot="prepend" type="ios-search" />
-      <Poptip v-model="visible" slot="append" placement="right-start" width="350" @on-popper-show="onPopperShow">
-          <Icon type="ios-funnel-outline" />
-          <Tabs v-model="tabOn" slot="content">
-              <TabPane :label="$t('kefu.search')" name="1">
-                  <div class="item-group">
-                      <div v-for="item in labelList" :key="item.id" class="item">
-                        <div class="item-title">{{ item.name }}</div>
-                        <div class="cell-group">
-                            <span v-for="cell in item.label" :key="cell.id" :class="{ on: cell.id == item.labelOn }" class="cell" @click="item.labelOn = (cell.id == item.labelOn ? -1 : cell.id)">{{ cell.label }}</span>
-                        </div>
-                    </div>
-                  </div>
-                  <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">{{$t('kefu.cancel')}}</Button>
-                      <Button type="primary" @click="onFilter">{{$t('kefu.confirm')}}</Button>
-                  </div>
-              </TabPane>
-              <TabPane :label="$t('kefu.search')" name="2">
-                  <div class="item-group">
-                      <div class="item">
-                        <div class="cell-group">
-                            <span v-for="cell in userGroupList" :key="cell.id" :class="{ on: cell.groupOn }" class="cell" @click="cell.groupOn = !cell.groupOn">{{ cell.group_name }}</span>
-                        </div>
-                    </div>
-                  </div>
-                  <div class="button-group">
-                      <Button type="primary" ghost @click="visible = false">{{$t('kefu.cancel')}}</Button>
-                      <Button type="primary" @click="onFilter">{{$t('kefu.confirm')}}</Button>
-                  </div>
-              </TabPane>
-          </Tabs>
-      </Poptip>
-      </Input>
+      <Input :placeholder="$t('kefu.search')" @on-enter="bindSearch" @on-change="inputChange" />
     </div>
     <div class="tab-head">
       <div class="item" :class="{active:item.key == hdTabCur}" v-for="(item, index) in hdTab" :key="index" @click="changeTab(item)">{{item.title}}</div>
@@ -455,36 +421,50 @@ export default {
   flex-direction: column;
   width: 320px;
   height: 742px;
-  border-right: 1px solid #ECECEC;
+  border-right: 1px solid #E5E7EB;
+  background: #FAFBFC;
 
   .tab-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 50px;
+    height: 52px;
     flex-shrink: 0;
     padding: 0 52px;
     font-size: 14px;
-    color: #000000;
+    color: #374151;
+    background: #F5F6F8;
+    border-bottom: 1px solid #E5E7EB;
 
     .item {
       position: relative;
       cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+
+      &:hover {
+        color: #4F46E5;
+        background: #F3F4F6;
+        transform: translateY(-1px);
+      }
 
       &:after {
         display: none;
         content: ' ';
         position: absolute;
         left: 50%;
-        bottom: -15px;
+        bottom: -16px;
         transform: translateX(-50%);
-        height: 2px;
+        height: 3px;
         width: 100%;
-        background: #1890FF;
+        background: linear-gradient(90deg, #4F46E5 0%, #8B5CF6 100%);
+        border-radius: 3px 3px 0 0;
       }
 
       &.active {
-        color: #1890FF;
+        color: #4F46E5;
 
         &:after {
           display: block;
@@ -503,41 +483,87 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 10px;
-    height: 74px;
+    padding: 12px 12px;
+    height: 78px;
     box-sizing: border-box;
     border-left: 3px solid transparent;
     cursor: pointer;
+    transition: all 0.2s ease;
+    background: #F5F6F8;
+    margin: 2px 8px;
+    border-radius: 8px;
+
+    &:hover {
+      background: linear-gradient(90deg, #FAFBFC 0%, #F9FAFB 100%);
+      transform: translateX(3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
 
     &.active {
-      background: #EFF0F1;
-      border-left: 3px solid #1890FF;
+      background: linear-gradient(90deg, #EEF2FF 0%, #F9FAFB 100%);
+      border-left-color: #4F46E5;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15), 0 2px 6px rgba(79, 70, 229, 0.1);
+      transform: translateX(5px);
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #4F46E5 0%, #8B5CF6 100%);
+        border-radius: 0 4px 4px 0;
+        box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+      }
     }
 
     .avatar {
       position: relative;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
 
       img {
         display: block;
         width: 100%;
         height: 100%;
         border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      &:hover img {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(79, 70, 229, 0.1);
+        transform: scale(1.05);
       }
 
       .status {
         position: absolute;
-        right: 3px;
+        right: 0;
         bottom: 0;
-        width: 8px;
-        height: 8px;
-        background: #48D452;
-        border: 1px solid #fff;
+        width: 10px;
+        height: 10px;
+        background: #10B981;
+        border: 2px solid #fff;
         border-radius: 50%;
+        box-shadow: 0 0 0 2px white, 0 0 8px rgba(16, 185, 129, 0.4);
+        animation: status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
         &.off {
-          background: #999999;
+          background: #9CA3AF;
+          box-shadow: 0 0 0 2px white;
+          animation: none;
+        }
+      }
+
+      @keyframes status-pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
         }
       }
     }
@@ -562,8 +588,10 @@ export default {
           color: #3875EA;
           font-size: 12px;
           background: #D8E5FF;
-          border-radius: 2px;
-          padding: 1px 5px;
+          border-radius: 10px;
+          padding: 2px 8px;
+          font-weight: 500;
+          letter-spacing: 0.3px;
 
           &.H5 {
             background: #FAF1D0;
@@ -595,10 +623,36 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      color: #8E959E;
+      color: #9CA3AF;
+      font-size: 12px;
+
+      .time {
+        font-weight: 500;
+      }
 
       .num {
-        margin-right: 12px;
+        margin-top: 4px;
+
+        /deep/ .ivu-badge-count {
+          background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+          box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+          animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          font-weight: 600;
+          font-size: 11px;
+          min-width: 18px;
+          height: 18px;
+          line-height: 18px;
+          padding: 0 5px;
+        }
+
+        @keyframes badge-pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
       }
     }
   }
@@ -609,7 +663,35 @@ export default {
 }
 
 .search_box {
-  margin: 10px 5px 0 5px;
+  margin: 12px 12px 8px 12px;
+
+  /deep/ .ivu-input-wrapper {
+    .ivu-input {
+      border-radius: 10px;
+      background: #F3F4F6;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      padding: 8px 12px;
+      font-size: 14px;
+
+      &:focus {
+        background: #FAFBFC;
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      &::placeholder {
+        color: #9CA3AF;
+      }
+    }
+
+    .ivu-input-prefix, .ivu-input-suffix {
+      i {
+        color: #6B7280;
+        font-size: 16px;
+      }
+    }
+  }
 }
 
 .ivu-input-wrapper {

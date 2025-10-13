@@ -101,7 +101,7 @@
             </div>
             <div class="textarea-box" style="position:relative;">
               <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="Please enter text content" @on-enter="sendText" style="font-size:14px" /> -->
-              <div ref="editable" class="editable" contenteditable="true" @keydown.enter="sendText" @keydown="handleInput" @paste="handlePaste" @input="handleInput"></div>
+              <div ref="editable" class="editable" contenteditable="true" :data-placeholder="'输入消息，按 Enter 发送'" @keydown.enter="sendText" @keydown="handleInput" @paste="handlePaste" @input="handleInput"></div>
               <div class="send-btn">
                 <Button class="btns" type="primary" :disabled="disabled" @click.stop="sendText">{{$t('kefu.send')}}</Button>
               </div>
@@ -728,7 +728,7 @@ textarea.ivu-input {
   padding-top: 30px;
   height: 100%;
   display: flex;
-  background: #ccc;
+  background: #F3F4F6;
   overflow: scroll;
 }
 
@@ -736,9 +736,12 @@ textarea.ivu-input {
   display: flex;
   flex-direction: column;
   width: 1200px;
-  height: 808px;
+  height: 820px;
   margin: 0 auto;
   background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 
   .container {
     flex: 1;
@@ -747,22 +750,45 @@ textarea.ivu-input {
     .chat-content {
       width: 600px;
       height: 100%;
-      border-right: 1px solid #ECECEC;
+      border-right: 1px solid #E5E7EB;
       display: flex;
       flex-direction: column;
+      background: #FAFBFC;
 
       .chat-body {
         max-height: 530px;
         flex: 1;
+        background: #F3F4F6;
+        padding: 16px;
 
         .chat-item {
-          margin-bottom: 10px;
+          margin-bottom: 16px;
+          animation: message-slide-in 0.3s ease-out;
+
+          @keyframes message-slide-in {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
 
           .time {
+            display: inline-block;
             text-align: center;
-            color: #999999;
-            font-size: 14px;
-            margin: 18px 0;
+            color: #6B7280;
+            font-size: 12px;
+            margin: 16px 0;
+            font-weight: 500;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 999px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(4px);
           }
 
           .flex-box {
@@ -772,50 +798,86 @@ textarea.ivu-input {
           .avatar {
             width: 40px;
             height: 40px;
-            margin-right: 16px;
+            margin-right: 12px;
+            flex-shrink: 0;
 
             img {
               display: block;
               width: 100%;
               height: 100%;
               border-radius: 50%;
+              object-fit: cover;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.6);
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            &:hover img {
+              transform: scale(1.08);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 0 5px rgba(79, 70, 229, 0.1);
             }
           }
 
           .msg-wrapper {
-            max-width: 320px;
-            background: #F5F5F5;
-            border-radius: 10px;
-            color: #000000;
+            max-width: 360px;
+            background: #F5F6F8;
+            border-radius: 18px 18px 18px 4px;
+            color: #1F2937;
             font-size: 14px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            position: relative;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+            }
 
             .txt-wrapper {
               word-break: break-all;
             }
 
             .pad16 {
-              padding: 9px;
+              padding: 12px 14px;
             }
 
             .img-wraper img {
               max-width: 100%;
               height: auto;
               display: block;
+              border-radius: 12px;
+            }
+
+            &::after {
+              content: '';
+              position: absolute;
+              left: -6px;
+              bottom: 10px;
+              width: 12px;
+              height: 12px;
+              background: inherit;
+              transform: rotate(45deg);
+              border-bottom: 1px solid rgba(0,0,0,0.04);
+              border-left: 1px solid rgba(0,0,0,0.04);
             }
 
             .order-wrapper {
               display: flex;
               width: 320px;
+              background: #F9FAFB;
+              border-radius: 12px;
+              padding: 10px;
 
               .img-box {
-                width: 60px;
-                height: 60px;
+                width: 64px;
+                height: 64px;
 
                 img {
                   width: 100%;
                   height: 100%;
-                  border-radius: 5px;
+                  border-radius: 10px;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 }
               }
 
@@ -858,16 +920,33 @@ textarea.ivu-input {
 
               .avatar {
                 margin-right: 0;
-                margin-left: 16px;
+                margin-left: 12px;
               }
 
               .msg-wrapper {
-                background: #CDE0FF;
+                background: linear-gradient(135deg, #E0E7FF 0%, #D4D9F7 100%);
+                border-radius: 18px 18px 4px 18px;
+                color: #312E81;
+                box-shadow: 0 2px 12px rgba(79, 70, 229, 0.15), 0 1px 3px rgba(79, 70, 229, 0.08);
+                border: 1px solid rgba(79, 70, 229, 0.1);
+
+                &:hover {
+                  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2), 0 2px 6px rgba(79, 70, 229, 0.12);
+                }
+
+                &::after {
+                  left: auto;
+                  right: -6px;
+                  border-left: none;
+                  border-right: 1px solid rgba(79, 70, 229, 0.12);
+                }
               }
             }
 
             &.gary .msg-wrapper {
-              background: #f5f5f5;
+              background: #F3F4F6;
+              color: #6B7280;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             }
           }
         }
@@ -877,14 +956,21 @@ textarea.ivu-input {
           display: flex;
           flex-direction: column;
         height: 214px;
-        border-top: 1px solid #ECECEC;
+        border-top: none;
+        background: #F9FAFB;
+        border-radius: 0 0 16px 0;
 
         .chat-btn-wrapper {
           position: relative;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 15px 0;
+          padding: 12px 16px;
+          background: #F5F6F8;
+          border-bottom: 1px solid #E5E7EB;
+          border-radius: 12px;
+          margin: 10px 16px 8px 16px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 
           .left-wrapper {
             display: flex;
@@ -893,12 +979,29 @@ textarea.ivu-input {
             .icon-item {
               display: flex;
               align-items: center;
-              margin-left: 20px;
+              justify-content: center;
+              width: 38px;
+              height: 38px;
+              margin-left: 6px;
+              border-radius: 10px;
               cursor: pointer;
+              transition: all 0.2s ease;
+              background: #F9FAFB;
+
+              &:hover {
+                background: #E5E7EB;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+              }
+
+              &:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+              }
 
               .iconfont {
-                font-size: 22px;
-                color: #333333;
+                font-size: 20px;
+                color: #6B7280;
               }
             }
           }
@@ -923,11 +1026,13 @@ textarea.ivu-input {
               z-index: 60;
               position: absolute;
               right: 1px;
-              bottom: 43px;
-              width: 140px;
-              background: #fff;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              bottom: 50px;
+              width: 160px;
+              background: #F5F6F8;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
               padding: 16px;
+              border-radius: 14px;
+              border: 1px solid #E5E7EB;
             }
 
             .transfer-bg {
@@ -943,20 +1048,33 @@ textarea.ivu-input {
 
           .emoji-box {
             position: absolute;
-            left: 0;
-            top: 0;
-            transform: translateY(-100%);
+            left: 16px;
+            bottom: 60px;
             display: flex;
             flex-wrap: wrap;
-            width: 60%;
-            padding: 15px 9px;
-            box-shadow: 0px 0px 13px 1px rgba(0, 0, 0, 0.1);
-            background: #fff;
+            width: 400px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: #F5F6F8;
+            border-radius: 16px;
+            border: 1px solid #E5E7EB;
 
             .emoji-item {
-              margin-right: 13px;
+              margin-right: 8px;
               margin-bottom: 8px;
               cursor: pointer;
+              padding: 6px;
+              border-radius: 8px;
+              transition: all 0.15s ease;
+
+              &:hover {
+                background: #F3F4F6;
+                transform: scale(1.1);
+              }
+
+              &:active {
+                transform: scale(0.95);
+              }
 
               &:nth-child(10n) {
                 margin-right: 0;
@@ -974,15 +1092,34 @@ textarea.ivu-input {
 
         .editable {
             flex: 1;
-            padding: 4px 7px;
+            padding: 14px 18px;
             overflow-x: hidden;
             overflow-y: auto;
             font-size: 14px;
-            line-height: 1.5;
-            color: #515a6e;
+            line-height: 1.6;
+            color: #374151;
+            border-radius: 14px;
+            margin: 0 16px 10px 16px;
+            background: #F3F4F6;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+
+            // contenteditable 占位符
+            &:empty:before {
+                content: attr(data-placeholder);
+                color: #9CA3AF;
+            }
 
             &:focus-visible {
                 outline: 0;
+                background: #FAFBFC;
+                border-color: #4F46E5;
+                box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+            }
+
+            &::placeholder {
+                color: #9CA3AF;
             }
 
             /deep/ img {
@@ -998,21 +1135,43 @@ textarea.ivu-input {
 
 .send-btn {
   position: absolute;
-  right: 0;
-  bottom: 10px;
+  right: 24px;
+  bottom: 18px;
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
-  margin-right: 10px;
 
-  // width: 80px;
   .btns {
-    width: 100%;
-    background: #3875EA;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35), 0 2px 6px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+
+    &:hover {
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.45), 0 4px 10px rgba(79, 70, 229, 0.25);
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
 
     &[disabled] {
-      background: #CCCCCC;
-      color: #fff;
+      background: #D1D5DB;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      color: #9CA3AF;
+      cursor: not-allowed;
+      transform: none;
     }
   }
 }
@@ -1063,6 +1222,7 @@ textarea.ivu-input {
 
 .right_menu {
   position: relative;
+  background: #FAFBFC;
 
   .crmchat_link {
     position: absolute;
