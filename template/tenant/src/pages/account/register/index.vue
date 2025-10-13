@@ -363,24 +363,59 @@ export default {
 <style scoped lang="stylus">
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #86efac 0%, #10b981 45%, #3b82f6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  animation: float 20s infinite ease-in-out;
+}
+
+.register-page::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+  animation: float 25s infinite ease-in-out reverse;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
 }
 
 .register-container {
-  max-width: 480px;
+  max-width: 500px;
   width: 100%;
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -390,36 +425,48 @@ export default {
 
 .logo-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
   color: #fff;
 }
 
 .logo-img {
-  height: 60px;
-  margin-bottom: 24px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  height: 70px;
+  margin-bottom: 28px;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+  transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
 }
 
 .welcome-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.8px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .welcome-subtitle {
-  font-size: 16px;
+  font-size: 17px;
   margin: 0;
   opacity: 0.95;
   font-weight: 400;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 48px 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 52px 44px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .input-wrapper {
@@ -430,42 +477,48 @@ export default {
 
 .input-icon {
   position: absolute;
-  left: 16px;
-  font-size: 18px;
-  color: #a0aec0;
+  left: 18px;
+  font-size: 19px;
+  color: #9ca3af;
   z-index: 1;
-  transition: color 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input-wrapper:focus-within .input-icon {
-  color: #667eea;
+  color: #10b981;
+  transform: scale(1.1);
 }
 
 >>> .modern-input {
-  padding-left: 48px !important;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding-left: 52px !important;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
   font-size: 15px;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafafa;
 }
 
 >>> .modern-input input {
-  padding-left: 48px;
+  padding-left: 52px;
+  background: transparent;
 }
 
 >>> .modern-input:hover {
-  border-color: #cbd5e0;
+  border-color: #d1d5db;
+  background: #fff;
 }
 
 >>> .modern-input:focus,
 >>> .ivu-input-focused .modern-input {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #10b981;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  transform: translateY(-1px);
 }
 
 .captcha-row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 
 .flex-1 {
@@ -474,41 +527,80 @@ export default {
 
 .send-code-btn {
   height: 46px;
-  min-width: 120px;
-  border-radius: 12px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-width: 130px;
+  border-radius: 14px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.send-code-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.send-code-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .send-code-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 .send-code-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: #9ca3af;
+  box-shadow: none;
 }
 
 .captcha-img-wrapper {
-  width: 120px;
+  width: 130px;
   height: 46px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f7fafc;
+  background: #fafafa;
+  position: relative;
+}
+
+.captcha-img-wrapper::after {
+  content: '点击刷新';
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 9px;
+  color: #6b7280;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .captcha-img-wrapper:hover {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #10b981;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  transform: translateY(-1px);
+}
+
+.captcha-img-wrapper:hover::after {
+  opacity: 1;
 }
 
 .captcha-img {
@@ -519,45 +611,65 @@ export default {
 
 .captcha-loading {
   font-size: 12px;
-  color: #a0aec0;
+  color: #9ca3af;
 }
 
 .register-btn {
-  height: 52px;
-  margin-top: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 56px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.register-btn:hover::before {
+  left: 100%;
 }
 
 .register-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 .register-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
 >>> .ivu-form-item {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 >>> .ivu-form-item-error-tip {
   font-size: 13px;
-  padding-top: 6px;
+  padding-top: 8px;
+  color: #ef4444;
+  font-weight: 500;
 }
 
 .footer-links {
   text-align: center;
-  margin-top: 24px;
+  margin-top: 28px;
   font-size: 14px;
-  color: #718096;
+  color: #6b7280;
 }
 
 .link-text {
@@ -565,48 +677,67 @@ export default {
 }
 
 .link-primary {
-  color: #667eea;
-  font-weight: 600;
+  color: #10b981;
+  font-weight: 700;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.link-primary::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #10b981;
+  transition: width 0.3s;
+}
+
+.link-primary:hover::after {
+  width: 100%;
 }
 
 .link-primary:hover {
-  color: #764ba2;
-  text-decoration: underline;
+  color: #059669;
 }
 
 .page-footer {
   text-align: center;
-  margin-top: 32px;
-  color: #fff;
+  margin-top: 36px;
+  color: rgba(255, 255, 255, 0.95);
   font-size: 13px;
-  opacity: 0.9;
   line-height: 1.6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 响应式设计 */
 @media (max-width: 640px) {
   .form-card {
-    padding: 32px 24px;
-    border-radius: 12px;
+    padding: 36px 28px;
+    border-radius: 20px;
   }
 
   .welcome-title {
-    font-size: 28px;
+    font-size: 30px;
   }
 
   .logo-img {
-    height: 50px;
+    height: 60px;
   }
 
   .register-btn {
-    height: 48px;
+    height: 52px;
   }
 
   .send-code-btn {
-    min-width: 100px;
+    min-width: 110px;
     font-size: 13px;
+  }
+
+  .captcha-img-wrapper {
+    width: 110px;
   }
 }
 </style>
