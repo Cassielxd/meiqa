@@ -53,6 +53,37 @@ public class TenantServiceSpeechcraftCateController {
     }
 
     /**
+     * 获取创建分类表单配置
+     * GET /api/tenant/chat/speechcraftcate/create
+     *
+     * PHP Reference: ServiceSpeechcraftCate.php::create()
+     *
+     * 返回FormBuilder格式的表单配置，用于前端渲染表单
+     *
+     * Response:
+     * {
+     *   "rules": [
+     *     {"type": "input", "field": "name", "title": "分类名称", "value": "", "validate": [...]},
+     *     {"type": "inputNumber", "field": "sort", "title": "排序", "value": 0}
+     *   ],
+     *   "title": "添加分类",
+     *   "action": "/chat/speechcraftcate",
+     *   "method": "POST",
+     *   "info": "",
+     *   "status": true
+     * }
+     */
+    @GetMapping("/create")
+    @Operation(summary = "Get Create Category Form Configuration")
+    public ApiResult<Map<String, Object>> getCreateForm() {
+        String appid = requireAppid();
+        log.info("[租户API] chat/speechcraftcate/create - appid={}", appid);
+
+        Map<String, Object> formConfig = tenantServiceSpeechcraftCateService.getCreateForm();
+        return ApiResult.ok(formConfig);
+    }
+
+    /**
      * 获取快捷回复分类详情
      * GET /api/tenant/chat/speechcraftcate/:id
      */
@@ -68,6 +99,41 @@ public class TenantServiceSpeechcraftCateController {
 
         ChatServiceSpeechcraftCateEntity cate = tenantServiceSpeechcraftCateService.getCateDetail(id);
         return ApiResult.ok(cate);
+    }
+
+    /**
+     * 获取编辑分类表单配置
+     * GET /api/tenant/chat/speechcraftcate/:id/edit
+     *
+     * PHP Reference: ServiceSpeechcraftCate.php::edit()
+     *
+     * 返回FormBuilder格式的表单配置，包含现有分类数据
+     *
+     * Response:
+     * {
+     *   "rules": [
+     *     {"type": "input", "field": "name", "title": "分类名称", "value": "现有名称", "validate": [...]},
+     *     {"type": "inputNumber", "field": "sort", "title": "排序", "value": 10}
+     *   ],
+     *   "title": "修改分类",
+     *   "action": "/chat/speechcraftcate/1",
+     *   "method": "PUT",
+     *   "info": "",
+     *   "status": true
+     * }
+     */
+    @GetMapping("/{id}/edit")
+    @Operation(summary = "Get Edit Category Form Configuration")
+    public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
+        if (id == null || id <= 0) {
+            return ApiResult.fail("Missing parameters");
+        }
+
+        String appid = requireAppid();
+        log.info("[租户API] chat/speechcraftcate/edit - appid={}, id={}", appid, id);
+
+        Map<String, Object> formConfig = tenantServiceSpeechcraftCateService.getEditForm(id);
+        return ApiResult.ok(formConfig);
     }
 
     /**

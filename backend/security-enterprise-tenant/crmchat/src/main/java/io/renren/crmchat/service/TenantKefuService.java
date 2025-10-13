@@ -561,7 +561,9 @@ public class TenantKefuService {
         newKefu.setOnline(0);
         newKefu.setIsApp(0);
         newKefu.setIsBackstage(0);
-        newKefu.setUniqid(java.util.UUID.randomUUID().toString());
+        // PHP uses empty string initially, or md5(time().uniqid()) which is 32 chars
+        // Remove hyphens from UUID to fit varchar(35): 36 chars -> 32 chars
+        newKefu.setUniqid(java.util.UUID.randomUUID().toString().replace("-", ""));
 
         int currentTime = (int) (System.currentTimeMillis() / 1000);
         newKefu.setAddTime(currentTime);

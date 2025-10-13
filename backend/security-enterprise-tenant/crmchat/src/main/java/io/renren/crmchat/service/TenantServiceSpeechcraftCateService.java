@@ -39,6 +39,7 @@ import java.util.Map;
 public class TenantServiceSpeechcraftCateService {
 
     private final ChatServiceSpeechcraftCateMapper chatServiceSpeechcraftCateMapper;
+    private final io.renren.crmchat.formbuilder.FormBuilder formBuilder;
 
     /**
      * 获取分类列表
@@ -218,5 +219,118 @@ public class TenantServiceSpeechcraftCateService {
         if (result <= 0) {
             throw new io.renren.crmchat.exception.CrmChatException("Failed to delete");
         }
+    }
+
+    /**
+     * 获取创建分类表单配置
+     * GET /api/tenant/chat/speechcraftcate/create
+     *
+     * PHP Reference: ChatServiceSpeechcraftCateServices.php::createForm()
+     *
+     * PHP代码：
+     * public function serviceSpeechcraftCateForm(array $data = [])
+     * {
+     *     $f[] = FormBuilder::input('name', '分类名称', $data['name'] ?? '')->required();
+     *     $f[] = FormBuilder::number('sort', '排序', (int)($data['sort'] ?? 0));
+     *     return $f;
+     * }
+     *
+     * public function createForm()
+     * {
+     *     return create_form('添加分类', $this->serviceSpeechcraftCateForm(), $this->url('chat/speechcraftcate'), 'POST');
+     * }
+     *
+     * @return 表单配置
+     */
+    public Map<String, Object> getCreateForm() {
+        // 构建表单字段
+        List<Map<String, Object>> rules = new java.util.ArrayList<>();
+
+        // PHP: FormBuilder::input('name', '分类名称', $data['name'] ?? '')->required();
+        Map<String, Object> nameRule = new java.util.HashMap<>();
+        nameRule.put("type", "input");
+        nameRule.put("field", "name");
+        nameRule.put("title", "分类名称");
+        nameRule.put("value", "");
+        Map<String, Object> nameValidate = new java.util.HashMap<>();
+        nameValidate.put("required", true);
+        nameValidate.put("message", "请输入分类名称");
+        nameValidate.put("trigger", "blur");
+        nameRule.put("validate", new Object[]{nameValidate});
+
+        // PHP: FormBuilder::number('sort', '排序', (int)($data['sort'] ?? 0));
+        Map<String, Object> sortRule = new java.util.HashMap<>();
+        sortRule.put("type", "inputNumber");
+        sortRule.put("field", "sort");
+        sortRule.put("title", "排序");
+        sortRule.put("value", 0);
+
+        rules.add(nameRule);
+        rules.add(sortRule);
+
+        // PHP: return create_form('添加分类', $this->serviceSpeechcraftCateForm(), $this->url('chat/speechcraftcate'), 'POST');
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("rules", rules);
+        result.put("title", "添加分类");
+        result.put("action", "/chat/speechcraftcate");
+        result.put("method", "POST");
+        result.put("info", "");
+        result.put("status", true);
+
+        return result;
+    }
+
+    /**
+     * 获取编辑分类表单配置
+     * GET /api/tenant/chat/speechcraftcate/:id/edit
+     *
+     * PHP Reference: ChatServiceSpeechcraftCateServices.php::editForm()
+     *
+     * @param id 分类ID
+     * @return 表单配置
+     */
+    public Map<String, Object> getEditForm(Integer id) {
+        // 获取现有分类数据
+        ChatServiceSpeechcraftCateEntity cate = chatServiceSpeechcraftCateMapper.selectById(id);
+        if (cate == null) {
+            throw new io.renren.crmchat.exception.CrmChatException("分类没有查询到");
+        }
+        TenantGuard.ensureOwnedByCurrentTenant(cate.getAppid(), "分类没有查询到");
+
+        // 构建表单字段（使用现有数据填充）
+        List<Map<String, Object>> rules = new java.util.ArrayList<>();
+
+        // PHP: FormBuilder::input('name', '分类名称', $data['name'] ?? '')->required();
+        Map<String, Object> nameRule = new java.util.HashMap<>();
+        nameRule.put("type", "input");
+        nameRule.put("field", "name");
+        nameRule.put("title", "分类名称");
+        nameRule.put("value", cate.getName() != null ? cate.getName() : "");
+        Map<String, Object> nameValidate = new java.util.HashMap<>();
+        nameValidate.put("required", true);
+        nameValidate.put("message", "请输入分类名称");
+        nameValidate.put("trigger", "blur");
+        nameRule.put("validate", new Object[]{nameValidate});
+
+        // PHP: FormBuilder::number('sort', '排序', (int)($data['sort'] ?? 0));
+        Map<String, Object> sortRule = new java.util.HashMap<>();
+        sortRule.put("type", "inputNumber");
+        sortRule.put("field", "sort");
+        sortRule.put("title", "排序");
+        sortRule.put("value", cate.getSort() != null ? cate.getSort() : 0);
+
+        rules.add(nameRule);
+        rules.add(sortRule);
+
+        // PHP: return create_form('修改分类', $this->serviceSpeechcraftCateForm($cateInfo->toArray()), $this->url('chat/speechcraftcate/' . $id), 'PUT');
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("rules", rules);
+        result.put("title", "修改分类");
+        result.put("action", "/chat/speechcraftcate/" + id);
+        result.put("method", "PUT");
+        result.put("info", "");
+        result.put("status", true);
+
+        return result;
     }
 }

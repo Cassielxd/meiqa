@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,20 +42,59 @@ public class AdminServiceGroupService {
     /**
      * 获取客服组表单
      * PHP Reference: ServiceGroup.php::create()
+     *
+     * PHP代码：
+     * return $this->services->from((int)$id);
+     *
+     * from() 方法返回格式：
+     * {
+     *   "rules": [...],      // FormBuilder 规则
+     *   "title": "修改组名",  // 表单标题
+     *   "action": "/chat/group/1",  // 提交URL
+     *   "method": "POST",    // 提交方法
+     *   "info": "",         // 信息
+     *   "status": true      // 状态
+     * }
      */
     public Map<String, Object> getGroupForm(Integer id, String appid) {
         Map<String, Object> result = new HashMap<>();
 
+        // 1. 如果是编辑，获取现有数据
+        ChatServiceGroupEntity group = null;
         if (id != null && id > 0) {
-            ChatServiceGroupEntity group = chatServiceGroupMapper.selectById(id);
+            group = chatServiceGroupMapper.selectById(id);
             if (group == null || !group.getAppid().equals(appid)) {
                 throw new CrmChatException("Group does not exist");
             }
-            result.put("group", group);
-        } else {
-            // 创建表单,返回空form_rules
-            result.put("form_rules", new Object[0]);
         }
+
+        // 2. 构建 FormBuilder 规则
+        // PHP: FormBuilder::input('name', '组名', $data['name'] ?? '')
+        // PHP: FormBuilder::number('sort', '排序', $data['sort'] ?? 0)
+        List<Map<String, Object>> rules = new ArrayList<>();
+
+        Map<String, Object> nameRule = new HashMap<>();
+        nameRule.put("type", "input");
+        nameRule.put("field", "name");
+        nameRule.put("title", "组名");
+        nameRule.put("value", group != null ? group.getName() : "");
+
+        Map<String, Object> sortRule = new HashMap<>();
+        sortRule.put("type", "inputNumber");  // PHP: lcfirst(basename('InputNumber')) = 'inputNumber'
+        sortRule.put("field", "sort");
+        sortRule.put("title", "排序");
+        sortRule.put("value", group != null ? group.getSort() : 0);
+
+        rules.add(nameRule);
+        rules.add(sortRule);
+
+        // 3. 构建返回结果（PHP create_form 格式）
+        result.put("rules", rules);
+        result.put("title", id != null && id > 0 ? "修改组名" : "添加分组");
+        result.put("action", "/chat/group/" + (id != null ? id : 0));
+        result.put("method", "POST");
+        result.put("info", "");
+        result.put("status", true);
 
         return result;
     }

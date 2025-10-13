@@ -436,6 +436,34 @@ public class TenantKefuController {
         return ApiResult.ok(formConfig);
     }
 
+    /**
+     * 创建客服（与create方法相同，但路径不同）
+     * POST /api/tenant/chat/kefu
+     *
+     * PHP Reference: Service.php::save()
+     * PHP Route: POST /chat/kefu
+     *
+     * Request Body: 与 /create 相同
+     *
+     * Response: { "code": 0, "msg": "客服添加成功", "data": { "id": 1 } }
+     */
+    @PostMapping
+    @Operation(summary = "创建客服")
+    public ApiResult<String> save(@RequestBody Map<String, Object> data) {
+
+        // 从UserContext获取当前租户的appid
+        String tenantAppid = io.renren.crmchat.security.UserContext.getAppid();
+        if (tenantAppid == null || tenantAppid.isEmpty()) {
+            return ApiResult.fail("Unable to retrieve tenant information, please log in again");
+        }
+
+        log.info("[租户API] kefu/save - appid={}", tenantAppid);
+
+        Integer newId = tenantKefuService.createKefu(data);
+
+        return ApiResult.ok("Customer service representative added successfully", "success");
+    }
+
     @PostMapping("/create")
     @Operation(summary = "Create Customer Service Agent")
     public ApiResult<Map<String, Object>> create(@RequestBody Map<String, Object> data) {
