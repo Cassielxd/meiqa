@@ -6,14 +6,19 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.renren.crmchat.interceptor.AdminLogInterceptor;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -22,11 +27,62 @@ import java.util.TimeZone;
  *
  * @author CRMChat Team
  */
+@Slf4j
 @Configuration
-@AllArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    /**
+     * 文件上传根目录
+     */
+    @Value("${file.upload.path:./uploads}")
+    private String uploadBasePath;
+
     private final AdminLogInterceptor adminLogInterceptor;
+
+    public WebMvcConfig(AdminLogInterceptor adminLogInterceptor) {
+        this.adminLogInterceptor = adminLogInterceptor;
+    }
+
+    /**
+     * 配置静态资源映射
+     * 将HTTP请求路径映射到文件系统的uploads目录
+     *
+     * PHP参考：public目录下直接访问uploads文件夹
+     * HTTP路径格式：/tenant/attach/2025-10-13/xxx.png
+     * 映射到物理路径：uploads/tenant/attach/2025-10-13/xxx.png
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 获取绝对路径
+        String absoluteUploadPath = Paths.get(uploadBasePath).toAbsolutePath().normalize().toString();
+
+        // 确保路径以文件URL格式结尾
+        String fileUrl = "file:///" + absoluteUploadPath.replace("\\", "/");
+        if (!fileUrl.endsWith("/")) {
+            fileUrl += "/";
+        }
+
+        log.info("Configuring static resource mapping:");
+        log.info("  Upload base path: {}", absoluteUploadPath);
+        log.info("  File URL: {}", fileUrl);
+
+        // 映射租户上传文件（tenant、admin、merchant等appId）
+        // 例如：http://localhost:20108/tenant/attach/2025-10-13/xxx.png
+        // 映射到：file:///path/to/uploads/tenant/attach/2025-10-13/xxx.png
+        registry.addResourceHandler("/tenant/**")
+                .addResourceLocations(fileUrl + "tenant/")
+                .setCachePeriod(3600);
+
+        registry.addResourceHandler("/admin/**")
+                .addResourceLocations(fileUrl + "admin/")
+                .setCachePeriod(3600);
+
+        registry.addResourceHandler("/merchant/**")
+                .addResourceLocations(fileUrl + "merchant/")
+                .setCachePeriod(3600);
+
+        log.info("Static resource handlers configured for: /tenant/**, /admin/**, /merchant/**");
+    }
 
     /**
      * 添加拦截器

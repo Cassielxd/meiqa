@@ -32,6 +32,15 @@ public class TenantQrcodeController {
         return ApiResult.ok(result);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get QR Code Form Configuration")
+    public ApiResult<Map<String, Object>> getQrcodeForm(@PathVariable Integer id) {
+
+        String appid = requireAppid();
+        Map<String, Object> formConfig = tenantQrcodeService.getForm(appid, id);
+        return ApiResult.ok(formConfig);
+    }
+
     @PostMapping("/{id}")
     @Operation(summary = "Save/Update QR Code")
     public ApiResult<String> saveQrcode(

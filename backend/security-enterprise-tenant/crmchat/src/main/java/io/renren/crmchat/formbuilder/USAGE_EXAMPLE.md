@@ -178,7 +178,7 @@ public class ApplicationController {
     "method": "POST",
     "rule": [
       {
-        "type": "frameInputs",
+        "type": "frame",
         "field": "icon",
         "title": "应用图标",
         "value": "",
@@ -264,7 +264,7 @@ public class ApplicationController {
     "method": "PUT",
     "rule": [
       {
-        "type": "frameInputs",
+        "type": "frame",
         "field": "icon",
         "title": "应用图标",
         "value": "/uploads/icon.png",
@@ -454,7 +454,7 @@ export default {
 
       <!-- FrameImage -->
       <FrameImageUpload
-        v-if="item.type === 'frameInputs'"
+        v-if="item.type === 'frame'"
         v-model="formData[item.field]"
         :src="item.props.src"
         :max-length="item.props.maxLength"

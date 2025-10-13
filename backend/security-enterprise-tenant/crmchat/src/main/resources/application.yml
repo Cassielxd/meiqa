@@ -72,3 +72,16 @@ crmchat:
 renren:
   redis:
     open: true
+
+# File Upload Configuration
+file:
+  upload:
+    # 文件上传路径（使用绝对路径或相对于项目根目录）
+    # Windows: E:/crmchat/uploads 或 ./uploads
+    # Linux: /var/www/crmchat/uploads 或 ./uploads
+    path: ${FILE_UPLOAD_PATH:./uploads}
+    # 文件访问域名
+    domain: ${FILE_UPLOAD_DOMAIN:http://localhost:20108}
+  storage:
+    # 存储类型: local, oss, cos, qiniu
+    type: ${FILE_STORAGE_TYPE:local}

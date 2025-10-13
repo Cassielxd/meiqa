@@ -54,6 +54,7 @@ public class TenantKefuService {
     private final PasswordService passwordService;
     private final TenantsMapper tenantsMapper;
     private final io.renren.crmchat.service.common.TokenService tokenService;
+    private final io.renren.crmchat.formbuilder.FormBuilder formBuilder;
 
     /**
      * 更新客服
@@ -582,7 +583,7 @@ public class TenantKefuService {
     }
 
     /**
-     * 获取创建客服表单配置 (MVP固定schema版本)
+     * 获取创建客服表单配置
      * PHP Reference: ChatServiceServices.php::createKefuForTent()
      *
      * @return 表单配置
@@ -592,124 +593,75 @@ public class TenantKefuService {
         String tenantAppid = io.renren.crmchat.security.UserContext.getAppid();
 
         // 获取客服分组选项
-        QueryWrapper<ChatServiceGroupEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("appid", tenantAppid);
-        wrapper.orderByAsc("sort");
-        List<ChatServiceGroupEntity> groups = chatServiceGroupMapper.selectList(wrapper);
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> groupOptions = getGroupOptions(tenantAppid);
 
-        // 构建分组选项
-        java.util.List<java.util.Map<String, Object>> groupOptions = new java.util.ArrayList<>();
-        groupOptions.add(java.util.Map.of("value", 0, "label", "Please select a group"));
-        for (ChatServiceGroupEntity group : groups) {
-            groupOptions.add(java.util.Map.of("value", group.getId(), "label", group.getName()));
-        }
+        // 构建表单字段（一比一还原PHP createServiceFormForTent方法）
+        List<io.renren.crmchat.formbuilder.components.BaseComponent> field = new java.util.ArrayList<>();
 
-        // 构建form-create规则 (参照PHP createServiceFormForTent方法)
-        java.util.List<java.util.Map<String, Object>> rules = new java.util.ArrayList<>();
+        // PHP: $field[] = $this->builder->select('group_id', '请选择分组', $formData['group_id'] ?? 0)->options($seervice->getOptions());
+        field.add(formBuilder.select("group_id", "请选择分组", 0)
+            .options(groupOptions));
 
-        // 分组选择
-        rules.add(java.util.Map.of(
-            "type", "select",
-            "field", "group_id",
-            "title", "Please select a group",
-            "value", 0,
-            "options", groupOptions
-        ));
+        // PHP: $field[] = $this->builder->frameImage('avatar', '客服头像', $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true), $formData['avatar'] ?? '')->icon('ios-add')->width('950px')->height('420px');
+        field.add(formBuilder.frameImage("avatar", "客服头像", "/tenant/widget.images/index.html?fodder=avatar", "")
+            .icon("ios-add")
+            .width("950px")
+            .height("420px"));
 
-        // 客服头像
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "avatar",
-            "title", "Customer Service Avatar",
-            "value", "",
-            "props", java.util.Map.of("placeholder", "Please enter avatar URL")
-        ));
+        // PHP: $field[] = $this->builder->i
+        // nput('nickname', '客服名称', $formData['nickname'] ?? '')->col(24)->required();
+        field.add(formBuilder.input("nickname", "客服名称", "")
+            .col(24)
+            .required());
 
-        // 客服名称
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "nickname",
-            "title", "Customer Service Name",
-            "value", "",
-            "props", java.util.Map.of("placeholder", "Please enter customer service name"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter customer service name"))
-        ));
+        // PHP: $field[] = $this->builder->input('phone', '手机号码', $formData['phone'] ?? '')->col(24)->required();
+        field.add(formBuilder.input("phone", "手机号码", "")
+            .col(24)
+            .required());
 
-        // 手机号码
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "phone",
-            "title", "Phone Number",
-            "value", "",
-            "props", java.util.Map.of("placeholder", "Please enter phone number"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter phone number"))
-        ));
+        // PHP: else { $field[] = $this->builder->input('account', '登录账号')->col(24)->required(); }
+        field.add(formBuilder.input("account", "登录账号", "")
+            .col(24)
+            .required());
 
-        // 登录账号
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "account",
-            "title", "Login Account",
-            "value", "",
-            "props", java.util.Map.of("placeholder", "Please enter login account"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter login account"))
-        ));
+        // PHP: $field[] = $this->builder->input('password', '登录密码')->type('password')->col(24)->required();
+        field.add(formBuilder.input("password", "登录密码", "")
+            .type("password")
+            .col(24)
+            .required());
 
-        // 登录密码
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "password",
-            "title", "Login Password",
-            "value", "",
-            "props", java.util.Map.of("type", "password", "placeholder", "Please enter login password"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter login password"))
-        ));
+        // PHP: $field[] = $this->builder->input('true_password', '确认密码')->type('password')->col(24)->required();
+        field.add(formBuilder.input("true_password", "确认密码", "")
+            .type("password")
+            .col(24)
+            .required());
 
-        // 确认密码
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "true_password",
-            "title", "Confirm Password",
-            "value", "",
-            "props", java.util.Map.of("type", "password", "placeholder", "Please enter password again"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter password again"))
-        ));
+        // PHP: $field[] = $this->builder->textarea('welcome_words', '欢迎语', $formData['welcome_words'] ?? '');
+        field.add(formBuilder.textarea("welcome_words", "欢迎语", ""));
 
-        // 欢迎语
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "welcome_words",
-            "title", "Welcome Message",
-            "value", "",
-            "props", java.util.Map.of("type", "textarea", "placeholder", "Please enter welcome message")
-        ));
+        // PHP: $field[] = $this->builder->switches('auto_reply', '自动回复', (int)($formData['auto_reply'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        field.add(formBuilder.switches("auto_reply", "自动回复", 0)
+            .falseValue(0)
+            .trueValue(1)
+            .openStr("打开")
+            .closeStr("关闭")
+            .size("large"));
 
-        // 自动回复
-        rules.add(java.util.Map.of(
-            "type", "switch",
-            "field", "auto_reply",
-            "title", "Auto Reply",
-            "value", 0
-        ));
+        // PHP: $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        field.add(formBuilder.switches("status", "客服状态", 0)
+            .falseValue(0)
+            .trueValue(1)
+            .openStr("打开")
+            .closeStr("关闭")
+            .size("large"));
 
-        // 客服状态
-        rules.add(java.util.Map.of(
-            "type", "switch",
-            "field", "status",
-            "title", "Customer Service Status",
-            "value", 1
-        ));
-
-        // 返回PHP create_form函数相同的格式
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
-        result.put("rules", rules);
-        result.put("title", "Add Customer Service Agent");
-        result.put("action", "/chat/kefu/create");
-        result.put("method", "POST");
-        result.put("info", "");
-        result.put("status", true);
-
-        return result;
+        // PHP: return create_form('添加客服', $this->createServiceFormForTent(), $this->url('/chat/kefu'), 'POST');
+        return io.renren.crmchat.formbuilder.FormHelper.createForm(
+            "添加客服",
+            field,
+            "/chat/kefu",
+            "POST"
+        );
     }
 
     /**
@@ -732,121 +684,72 @@ public class TenantKefuService {
         }
 
         // 获取客服分组选项
-        QueryWrapper<ChatServiceGroupEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("appid", tenantAppid);
-        wrapper.orderByAsc("sort");
-        List<ChatServiceGroupEntity> groups = chatServiceGroupMapper.selectList(wrapper);
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> groupOptions = getGroupOptions(tenantAppid);
 
-        // 构建分组选项
-        java.util.List<java.util.Map<String, Object>> groupOptions = new java.util.ArrayList<>();
-        groupOptions.add(java.util.Map.of("value", 0, "label", "Please select a group"));
-        for (ChatServiceGroupEntity group : groups) {
-            groupOptions.add(java.util.Map.of("value", group.getId(), "label", group.getName()));
-        }
+        // 构建表单字段（一比一还原PHP createServiceFormForTent方法，使用现有数据填充）
+        List<io.renren.crmchat.formbuilder.components.BaseComponent> field = new java.util.ArrayList<>();
 
-        // 构建form-create规则（与create类似，但填充现有值，密码可选）
-        java.util.List<java.util.Map<String, Object>> rules = new java.util.ArrayList<>();
+        // PHP: $field[] = $this->builder->select('group_id', '请选择分组', $formData['group_id'] ?? 0)->options($seervice->getOptions());
+        field.add(formBuilder.select("group_id", "请选择分组", kefu.getGroupId() != null ? kefu.getGroupId() : 0)
+            .options(groupOptions));
 
-        // 分组选择
-        rules.add(java.util.Map.of(
-            "type", "select",
-            "field", "group_id",
-            "title", "Please select a group",
-            "value", kefu.getGroupId() != null ? kefu.getGroupId() : 0,
-            "options", groupOptions
-        ));
+        // PHP: $field[] = $this->builder->frameImage('avatar', '客服头像', $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true), $formData['avatar'] ?? '')->icon('ios-add')->width('950px')->height('420px');
+        field.add(formBuilder.frameImage("avatar", "客服头像", "/tenant/widget.images/index.html?fodder=avatar", kefu.getAvatar() != null ? kefu.getAvatar() : "")
+            .icon("ios-add")
+            .width("950px")
+            .height("420px"));
 
-        // 客服头像
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "avatar",
-            "title", "Customer Service Avatar",
-            "value", kefu.getAvatar() != null ? kefu.getAvatar() : "",
-            "props", java.util.Map.of("placeholder", "Please enter avatar URL")
-        ));
+        // PHP: $field[] = $this->builder->input('nickname', '客服名称', $formData['nickname'] ?? '')->col(24)->required();
+        field.add(formBuilder.input("nickname", "客服名称", kefu.getNickname() != null ? kefu.getNickname() : "")
+            .col(24)
+            .required());
 
-        // 客服名称
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "nickname",
-            "title", "Customer Service Name",
-            "value", kefu.getNickname() != null ? kefu.getNickname() : "",
-            "props", java.util.Map.of("placeholder", "Please enter customer service name"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter customer service name"))
-        ));
+        // PHP: $field[] = $this->builder->input('phone', '手机号码', $formData['phone'] ?? '')->col(24)->required();
+        field.add(formBuilder.input("phone", "手机号码", kefu.getPhone() != null ? kefu.getPhone() : "")
+            .col(24)
+            .required());
 
-        // 手机号码
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "phone",
-            "title", "Phone Number",
-            "value", kefu.getPhone() != null ? kefu.getPhone() : "",
-            "props", java.util.Map.of("placeholder", "Please enter phone number"),
-            "validate", java.util.List.of(java.util.Map.of("required", true, "message", "Please enter phone number"))
-        ));
+        // PHP: if ($formData) { $field[] = $this->builder->input('account', '登录账号', $formData['account'] ?? '')->col(24)->required(); }
+        field.add(formBuilder.input("account", "登录账号", kefu.getAccount() != null ? kefu.getAccount() : "")
+            .col(24)
+            .required());
 
-        // 登录账号（只读，不可修改）
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "account",
-            "title", "Login Account",
-            "value", kefu.getAccount() != null ? kefu.getAccount() : "",
-            "props", java.util.Map.of("placeholder", "Login Account", "disabled", true)
-        ));
+        // PHP: $field[] = $this->builder->input('password', '登录密码')->type('password')->col(24);
+        field.add(formBuilder.input("password", "登录密码", "")
+            .type("password")
+            .col(24));
 
-        // 登录密码（可选，留空表示不修改）
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "password",
-            "title", "Login Password",
-            "value", "",
-            "props", java.util.Map.of("type", "password", "placeholder", "Leave blank to keep current password")
-        ));
+        // PHP: $field[] = $this->builder->input('true_password', '确认密码')->type('password')->col(24);
+        field.add(formBuilder.input("true_password", "确认密码", "")
+            .type("password")
+            .col(24));
 
-        // 确认密码（可选）
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "true_password",
-            "title", "Confirm Password",
-            "value", "",
-            "props", java.util.Map.of("type", "password", "placeholder", "Leave blank to keep current password")
-        ));
+        // PHP: $field[] = $this->builder->textarea('welcome_words', '欢迎语', $formData['welcome_words'] ?? '');
+        field.add(formBuilder.textarea("welcome_words", "欢迎语", kefu.getWelcomeWords() != null ? kefu.getWelcomeWords() : ""));
 
-        // 欢迎语
-        rules.add(java.util.Map.of(
-            "type", "input",
-            "field", "welcome_words",
-            "title", "Welcome Message",
-            "value", kefu.getWelcomeWords() != null ? kefu.getWelcomeWords() : "",
-            "props", java.util.Map.of("type", "textarea", "placeholder", "Please enter welcome message")
-        ));
+        // PHP: $field[] = $this->builder->switches('auto_reply', '自动回复', (int)($formData['auto_reply'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        field.add(formBuilder.switches("auto_reply", "自动回复", kefu.getAutoReply() != null ? kefu.getAutoReply() : 0)
+            .falseValue(0)
+            .trueValue(1)
+            .openStr("打开")
+            .closeStr("关闭")
+            .size("large"));
 
-        // 自动回复
-        rules.add(java.util.Map.of(
-            "type", "switch",
-            "field", "auto_reply",
-            "title", "Auto Reply",
-            "value", kefu.getAutoReply() != null && kefu.getAutoReply() == 1
-        ));
+        // PHP: $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
+        field.add(formBuilder.switches("status", "客服状态", kefu.getStatus() != null ? kefu.getStatus() : 0)
+            .falseValue(0)
+            .trueValue(1)
+            .openStr("打开")
+            .closeStr("关闭")
+            .size("large"));
 
-        // 客服状态
-        rules.add(java.util.Map.of(
-            "type", "switch",
-            "field", "status",
-            "title", "Customer Service Status",
-            "value", kefu.getStatus() != null && kefu.getStatus() == 1
-        ));
-
-        // 构建完整配置
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
-        result.put("rules", rules);
-        result.put("title", "Edit Customer Service Agent");
-        result.put("action", "/chat/kefu/" + id);
-        result.put("method", "PUT");
-        result.put("info", "");
-        result.put("status", true);
-
-        return result;
+        // PHP: return create_form('编辑客服', $this->createServiceForm($serviceInfo->toArray()), $this->url('/chat/kefu/' . $id), 'PUT');
+        return io.renren.crmchat.formbuilder.FormHelper.createForm(
+            "编辑客服",
+            field,
+            "/chat/kefu/" + id,
+            "PUT"
+        );
     }
 
     /**
@@ -1079,6 +982,30 @@ public class TenantKefuService {
 
         chatUserMapper.insert(newUser);
         return newUser.getId();
+    }
+
+    /**
+     * 获取分组选项列表
+     * PHP: $seervice->getOptions()
+     */
+    private List<io.renren.crmchat.formbuilder.components.OptionComponent> getGroupOptions(String appid) {
+        QueryWrapper<ChatServiceGroupEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("appid", appid);
+        wrapper.orderByAsc("sort");
+        List<ChatServiceGroupEntity> groups = chatServiceGroupMapper.selectList(wrapper);
+
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> options = new java.util.ArrayList<>();
+        options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(0, "请选择分组", false));
+
+        for (ChatServiceGroupEntity group : groups) {
+            options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(
+                group.getId(),
+                group.getName(),
+                false
+            ));
+        }
+
+        return options;
     }
 
     private void syncChatUserAfterUpdate(ChatServiceEntity kefu) {

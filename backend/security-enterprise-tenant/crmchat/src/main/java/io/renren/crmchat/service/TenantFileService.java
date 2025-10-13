@@ -45,24 +45,26 @@ public class TenantFileService {
     private final SystemAttachmentCategoryMapper attachmentCategoryMapper;
     private final SystemAttachmentMapper systemAttachmentMapper;
     private final FileService fileService;
+    private final io.renren.crmchat.formbuilder.FormBuilder formBuilder;
 
     /**
      * 获取附件分类列表
      * GET /api/tenant/file/category
      *
-     * PHP Reference: AttachmentCategory.php::index()
+     * PHP Reference: AttachmentCategory.php::index() -> SystemAttachmentCategoryServices::getAll()
      *
      * 业务逻辑:
      * 1. 接收过滤参数（name）
      * 2. 查询所有分类或按name模糊搜索
-     * 3. 返回分类列表
+     * 3. 转换为树形结构（添加 title、children、expand 字段）
+     * 4. 返回分类列表
      *
      * @param filters 过滤条件（name）
-     * @return 分类列表
+     * @return 树形分类列表
      */
     public List<SystemAttachmentCategoryEntity> getFileCategoryList(Map<String, Object> filters) {
         // PHP: $where = $this->request->getMore([['name', '']]);
-        // PHP: return $this->success($this->service->getAll($where));
+        // PHP: $categoryList = $this->dao->getList($where);
 
         QueryWrapper<SystemAttachmentCategoryEntity> wrapper = new QueryWrapper<>();
 
@@ -71,7 +73,140 @@ public class TenantFileService {
             wrapper.like("name", filters.get("name").toString());
         }
 
-        return attachmentCategoryMapper.selectList(wrapper);
+        List<SystemAttachmentCategoryEntity> categoryList = attachmentCategoryMapper.selectList(wrapper);
+
+        // PHP: $list = $this->tidyMenuTier($categoryList);
+        // 转换为树形结构
+        return buildCategoryTree(categoryList, 0);
+    }
+
+    /**
+     * 构建分类树形结构
+     * PHP Reference: SystemAttachmentCategoryServices::tidyMenuTier()
+     *
+     * @param menusList 扁平分类列表
+     * @param pid 父级ID
+     * @return 树形结构列表
+     */
+    private List<SystemAttachmentCategoryEntity> buildCategoryTree(List<SystemAttachmentCategoryEntity> menusList, Integer pid) {
+        List<SystemAttachmentCategoryEntity> navList = new ArrayList<>();
+
+        for (SystemAttachmentCategoryEntity menu : menusList) {
+            // PHP: $menu['title'] = $menu['name'];
+            menu.setTitle(menu.getName());
+
+            // PHP: if ($menu['pid'] == $pid)
+            if (menu.getPid().equals(pid)) {
+                // PHP: $menu['children'] = $this->tidyMenuTier($menusList, $menu['id']);
+                List<SystemAttachmentCategoryEntity> children = buildCategoryTree(menusList, menu.getId());
+                menu.setChildren(children);
+
+                // PHP: if ($menu['children']) $menu['expand'] = true;
+                if (children != null && !children.isEmpty()) {
+                    menu.setExpand(true);
+                }
+
+                navList.add(menu);
+            }
+        }
+
+        return navList;
+    }
+
+    /**
+     * 获取创建附件分类表单配置
+     * GET /api/tenant/file/category/create?id=
+     *
+     * PHP Reference: SystemAttachmentCategoryServices::createForm()
+     *
+     * @param pid 父级分类ID
+     * @return 表单配置
+     */
+    public Map<String, Object> getFileCategoryCreateForm(Integer pid) {
+        // PHP: create_form('添加分类', $this->form(['pid' => $pid]), Url::buildUrl('/file/category'), 'POST');
+
+        // 获取分类选项列表
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> categoryOptions = getCategoryOptions();
+
+        List<io.renren.crmchat.formbuilder.components.BaseComponent> fields = new java.util.ArrayList<>();
+
+        // PHP: Form::select('pid', '上级分类', (int)($info['pid'] ?? ''))->setOptions($this->getCateList(['pid' => 0]))->filterable(1)
+        fields.add(formBuilder.select("pid", "上级分类", pid != null ? pid : 0)
+            .options(categoryOptions)
+            .filterable());
+
+        // PHP: Form::input('name', '分类名称', $info['name'] ?? '')->maxlength(30)
+        fields.add(formBuilder.input("name", "分类名称", "")
+            .maxlength(30));
+
+        return io.renren.crmchat.formbuilder.FormHelper.createForm(
+            "添加分类",
+            fields,
+            "/file/category",
+            "POST"
+        );
+    }
+
+    /**
+     * 获取编辑附件分类表单配置
+     * GET /api/tenant/file/category/:id/edit
+     *
+     * PHP Reference: SystemAttachmentCategoryServices::editForm()
+     *
+     * @param id 分类ID
+     * @return 表单配置
+     */
+    public Map<String, Object> getFileCategoryEditForm(Integer id) {
+        // PHP: $info = $this->dao->get($id);
+        SystemAttachmentCategoryEntity category = attachmentCategoryMapper.selectById(id);
+        if (category == null) {
+            throw new io.renren.crmchat.exception.CrmChatException("Category does not exist");
+        }
+
+        // 获取分类选项列表
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> categoryOptions = getCategoryOptions();
+
+        List<io.renren.crmchat.formbuilder.components.BaseComponent> fields = new java.util.ArrayList<>();
+
+        // PHP: Form::select('pid', '上级分类', (int)($info['pid'] ?? ''))->setOptions($this->getCateList(['pid' => 0]))->filterable(1)
+        fields.add(formBuilder.select("pid", "上级分类", category.getPid())
+            .options(categoryOptions)
+            .filterable());
+
+        // PHP: Form::input('name', '分类名称', $info['name'] ?? '')->maxlength(30)
+        fields.add(formBuilder.input("name", "分类名称", category.getName())
+            .maxlength(30));
+
+        return io.renren.crmchat.formbuilder.FormHelper.createForm(
+            "编辑分类",
+            fields,
+            "/file/category/" + id,
+            "PUT"
+        );
+    }
+
+    /**
+     * 获取分类选项列表（用于下拉选择）
+     * PHP: $this->getCateList(['pid' => 0])
+     */
+    private List<io.renren.crmchat.formbuilder.components.OptionComponent> getCategoryOptions() {
+        QueryWrapper<SystemAttachmentCategoryEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("pid", 0); // 只获取顶级分类
+        List<SystemAttachmentCategoryEntity> categories = attachmentCategoryMapper.selectList(wrapper);
+
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> options = new java.util.ArrayList<>();
+        // 添加默认选项
+        options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(0, "顶级分类", false));
+
+        for (SystemAttachmentCategoryEntity category : categories) {
+            options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(
+                category.getId(),
+                category.getName(),
+                false
+            ));
+        }
+
+        return options;
     }
 
     /**
@@ -210,30 +345,91 @@ public class TenantFileService {
      * 获取图片附件列表
      * GET /api/tenant/file/file
      *
-     * PHP Reference: Attachment.php::index()
+     * PHP Reference: Attachment.php::index() -> SystemAttachmentServices::getImageList()
      *
      * 业务逻辑:
-     * 1. 接收pid参数（分类ID）
-     * 2. 查询指定分类下的所有附件
-     * 3. 返回附件列表
+     * 1. 接收 pid、page、limit 参数
+     * 2. 查询指定分类下的附件（带分页）
+     * 3. 添加 module_type = 1 过滤
+     * 4. 按 att_id DESC 排序
+     * 5. 处理 URL（添加 site_url 前缀）
+     * 6. 统计总数
+     * 7. 返回 {list, count}
      *
-     * @param filters 过滤条件（pid）
-     * @return 附件列表
+     * @param filters 过滤条件（pid, page, limit）
+     * @return {list: 附件列表, count: 总数}
      */
-    public List<SystemAttachmentEntity> getFileList(Map<String, Object> filters) {
-        // PHP: $where = $this->request->getMore([['pid', 0]]);
-        // PHP: return $this->success($this->service->getImageList($where));
+    public Map<String, Object> getFileList(Map<String, Object> filters) {
+        // PHP: [$page, $limit] = $this->getPageValue();
+        int page = filters.containsKey("page") ? Integer.parseInt(filters.get("page").toString()) : 1;
+        int limit = filters.containsKey("limit") ? Integer.parseInt(filters.get("limit").toString()) : 18;
 
+        // PHP: $list = $this->dao->getList($where, $page, $limit);
         QueryWrapper<SystemAttachmentEntity> wrapper = new QueryWrapper<>();
 
         // 过滤条件：pid
-        if (filters.containsKey("pid") && filters.get("pid") != null && !filters.get("pid").toString().isEmpty()) {
+        if (filters.containsKey("pid") && filters.get("pid") != null) {
             wrapper.eq("pid", Integer.parseInt(filters.get("pid").toString()));
         } else {
             wrapper.eq("pid", 0); // 默认查询顶级分类
         }
 
-        return systemAttachmentMapper.selectList(wrapper);
+        // PHP: ->where('module_type', 1)->order('att_id DESC')
+        wrapper.eq("module_type", 1);
+        wrapper.orderByDesc("att_id");
+
+        // 计算分页偏移量
+        int offset = (page - 1) * limit;
+        wrapper.last("LIMIT " + offset + ", " + limit);
+
+        List<SystemAttachmentEntity> list = systemAttachmentMapper.selectList(wrapper);
+
+        // PHP: $site_url = sys_config('site_url');
+        // PHP: foreach ($list as &$item) { ... }
+        String siteUrl = getSiteUrl();
+        if (siteUrl != null && !siteUrl.isEmpty()) {
+            for (SystemAttachmentEntity item : list) {
+                // 处理 satt_dir（缩略图路径）
+                if (item.getSattDir() != null && !item.getSattDir().isEmpty()) {
+                    if (!item.getSattDir().startsWith("http") && !item.getSattDir().contains(siteUrl)) {
+                        item.setSattDir(siteUrl + item.getSattDir());
+                    }
+                }
+                // 处理 att_dir（原图路径）
+                if (item.getAttDir() != null && !item.getAttDir().isEmpty()) {
+                    if (!item.getAttDir().startsWith("http") && !item.getAttDir().contains(siteUrl)) {
+                        item.setAttDir(siteUrl + item.getAttDir());
+                    }
+                }
+            }
+        }
+
+        // PHP: $where['module_type'] = 1;
+        // PHP: $count = $this->dao->count($where);
+        QueryWrapper<SystemAttachmentEntity> countWrapper = new QueryWrapper<>();
+        if (filters.containsKey("pid") && filters.get("pid") != null) {
+            countWrapper.eq("pid", Integer.parseInt(filters.get("pid").toString()));
+        } else {
+            countWrapper.eq("pid", 0);
+        }
+        countWrapper.eq("module_type", 1);
+        Long count = systemAttachmentMapper.selectCount(countWrapper);
+
+        // PHP: return compact('list', 'count');
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("count", count.intValue()); // 转换为int确保JSON序列化为数字
+        return result;
+    }
+
+    /**
+     * 获取网站 URL 配置
+     * PHP: sys_config('site_url')
+     */
+    private String getSiteUrl() {
+        // TODO: 从系统配置获取 site_url
+        // 暂时返回空，实际应该从配置表读取
+        return "";
     }
 
     /**

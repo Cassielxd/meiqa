@@ -26,9 +26,9 @@ import java.util.UUID;
 public class LocalFileStorage implements FileStorageStrategy {
 
     /**
-     * 上传根目录（从配置读取，默认：/uploads）
+     * 上传根目录（从配置读取，默认：./uploads）
      */
-    @Value("${file.upload.path:/uploads}")
+    @Value("${file.upload.path:./uploads}")
     private String uploadBasePath;
 
     /**
@@ -49,21 +49,34 @@ public class LocalFileStorage implements FileStorageStrategy {
         String fullPath = savePath + "/" + fileName;
 
         try {
-            // 2. 确保目录存在
-            Path directory = Paths.get(savePath);
-            if (!Files.exists(directory)) {
-                Files.createDirectories(directory);
-                log.info("Created upload directory: {}", savePath);
+            // 2. 构建目标文件路径
+            Path targetPath = Paths.get(fullPath);
+            File targetFile = targetPath.toFile();
+
+            // 3. 确保父目录存在（使用 File.mkdirs() 更可靠）
+            File parentDir = targetFile.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                boolean created = parentDir.mkdirs();
+                if (created) {
+                    log.info("Created upload directory: {}", parentDir.getAbsolutePath());
+                } else {
+                    log.warn("Failed to create directory or directory already exists: {}", parentDir.getAbsolutePath());
+                }
             }
 
-            // 3. 保存文件
-            Path targetPath = Paths.get(fullPath);
-            file.transferTo(targetPath.toFile());
-            log.info("File uploaded successfully: {}", fullPath);
+            // 4. 保存文件
+            file.transferTo(targetFile);
+            log.info("File uploaded successfully: {}", targetFile.getAbsolutePath());
 
-            // 4. 返回访问URL
-            String relativePath = fullPath.replace(uploadBasePath, "");
-            return getFileUrl(relativePath);
+            // 5. 返回访问URL（使用相对于uploadBasePath的路径）
+            // 从完整路径中提取相对路径：/{appId}/{module}/{date}/{filename}
+            Path baseAbsolutePath = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+            Path fileAbsolutePath = targetFile.toPath().toAbsolutePath().normalize();
+            Path relativePath = baseAbsolutePath.relativize(fileAbsolutePath);
+
+            // 确保使用正斜杠（URL格式）
+            String relativePathStr = "/" + relativePath.toString().replace("\\", "/");
+            return getFileUrl(relativePathStr);
 
         } catch (IOException e) {
             log.error("File upload failed: {}", e.getMessage(), e);
@@ -127,11 +140,17 @@ public class LocalFileStorage implements FileStorageStrategy {
      *
      * @param appId  租户ID
      * @param module 模块名称
-     * @return 完整保存路径
+     * @return 完整保存路径（绝对路径）
      */
     private String buildSavePath(String appId, String module) {
         String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        return uploadBasePath + "/" + appId + "/" + module + "/" + dateDir;
+
+        // 构建相对路径
+        String relativePath = uploadBasePath + "/" + appId + "/" + module + "/" + dateDir;
+
+        // 转换为绝对路径（确保路径一致性）
+        Path absolutePath = Paths.get(relativePath).toAbsolutePath().normalize();
+        return absolutePath.toString();
     }
 
     /**

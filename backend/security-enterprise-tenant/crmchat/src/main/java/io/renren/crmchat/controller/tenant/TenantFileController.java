@@ -50,7 +50,7 @@ public class TenantFileController {
      */
     @GetMapping("/category")
     @Operation(summary = "Get Attachment Category List")
-    public ApiResult<List<SystemAttachmentCategoryEntity>> categoryList(
+    public ApiResult<Map<String, Object>> categoryList(
             @RequestParam(required = false) String name) {
 
         // 构建过滤条件
@@ -60,7 +60,11 @@ public class TenantFileController {
         }
 
         List<SystemAttachmentCategoryEntity> list = tenantFileService.getFileCategoryList(filters);
-        return ApiResult.ok(list);
+
+        // 包装为 {list: []} 格式以匹配前端期望
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        return ApiResult.ok(result);
     }
 
     /**
@@ -87,6 +91,46 @@ public class TenantFileController {
 
         SystemAttachmentCategoryEntity category = tenantFileService.getFileCategoryDetail(id);
         return ApiResult.ok(category);
+    }
+
+    /**
+     * 获取创建附件分类表单
+     * GET /api/tenant/file/category/create?id=
+     *
+     * PHP Reference: AttachmentCategory.php::create()
+     *
+     * Query Parameters:
+     * - id: 父级分类ID（可选，默认0）
+     *
+     * Response: FormBuilder 表单配置
+     */
+    @GetMapping("/category/create")
+    @Operation(summary = "获取创建附件分类表单")
+    public ApiResult<Map<String, Object>> getCategoryCreateForm(
+            @RequestParam(required = false, defaultValue = "0") Integer id) {
+
+        Map<String, Object> formConfig = tenantFileService.getFileCategoryCreateForm(id);
+        return ApiResult.ok(formConfig);
+    }
+
+    /**
+     * 获取编辑附件分类表单
+     * GET /api/tenant/file/category/:id/edit
+     *
+     * PHP Reference: AttachmentCategory.php::edit()
+     *
+     * Response: FormBuilder 表单配置
+     */
+    @GetMapping("/category/{id}/edit")
+    @Operation(summary = "获取编辑附件分类表单")
+    public ApiResult<Map<String, Object>> getCategoryEditForm(@PathVariable Integer id) {
+
+        if (id == null || id <= 0) {
+            return ApiResult.fail("Invalid parameters");
+        }
+
+        Map<String, Object> formConfig = tenantFileService.getFileCategoryEditForm(id);
+        return ApiResult.ok(formConfig);
     }
 
     /**
@@ -169,41 +213,76 @@ public class TenantFileController {
      *
      * Query Parameters:
      * - pid: 分类ID（可选，默认0）
+     * - page: 页码（可选，默认1）
+     * - limit: 每页数量（可选，默认20）
      *
      * Response:
-     * [
-     *   {
-     *     "att_id": 1,
-     *     "name": "image.jpg",
-     *     "real_name": "image.jpg",
-     *     "att_dir": "/uploads/image.jpg",
-     *     "satt_dir": "/uploads/thumb_image.jpg",
-     *     "att_size": "102400",
-     *     "att_type": "image/jpeg",
-     *     "image_type": 1,
-     *     "pid": 0,
-     *     "time": 1672531200
-     *   }
-     * ]
+     * {
+     *   "list": [
+     *     {
+     *       "att_id": 1,
+     *       "name": "image.jpg",
+     *       "real_name": "image.jpg",
+     *       "att_dir": "/uploads/image.jpg",
+     *       "satt_dir": "/uploads/thumb_image.jpg",
+     *       "att_size": "102400",
+     *       "att_type": "image/jpeg",
+     *       "image_type": 1,
+     *       "pid": 0,
+     *       "time": 1672531200
+     *     }
+     *   ],
+     *   "count": 100
+     * }
      */
     @GetMapping("/file")
     @Operation(summary = "获取图片附件列表")
-    public ApiResult<List<SystemAttachmentEntity>> fileList(
-            @RequestParam(required = false) Integer pid) {
+    public ApiResult<Map<String, Object>> fileList(
+            @RequestParam(required = false, defaultValue = "0") Integer pid,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "18") Integer limit) {
+
+        // PHP: $where = $this->request->getMore([['pid', 0]]);
+        // PHP: return $this->success($this->service->getImageList($where));
 
         // 构建过滤条件
         Map<String, Object> filters = new HashMap<>();
-        if (pid != null) {
-            filters.put("pid", pid);
-        }
+        filters.put("pid", pid);
+        filters.put("page", page);
+        filters.put("limit", limit);
 
-        List<SystemAttachmentEntity> list = tenantFileService.getFileList(filters);
-        return ApiResult.ok(list);
+        Map<String, Object> result = tenantFileService.getFileList(filters);
+        return ApiResult.ok(result);
     }
 
     /**
-     * 上传图片
-     * POST /api/tenant/file/upload/:upload_type?
+     * 上传图片（不带 upload_type 参数）
+     * POST /api/tenant/file/upload
+     *
+     * PHP Reference: Attachment.php::upload()
+     * PHP Route: Route::post('upload/[:upload_type]', 'Attachment/upload')
+     *
+     * Form Data:
+     * - file: 文件字段（必填）
+     * - pid: 分类ID（可选，默认0）
+     *
+     * Response:
+     * {
+     *   "src": "/uploads/20250101/image.jpg"
+     * }
+     */
+    @PostMapping("/upload")
+    @Operation(summary = "Upload Image (Default Type)")
+    public ApiResult<Map<String, Object>> uploadDefault(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "pid", required = false, defaultValue = "0") Integer pid) {
+
+        return uploadWithType(0, file, pid);
+    }
+
+    /**
+     * 上传图片（带 upload_type 参数）
+     * POST /api/tenant/file/upload/:upload_type
      *
      * PHP Reference: Attachment.php::upload()
      *
@@ -213,22 +292,15 @@ public class TenantFileController {
      *
      * Response:
      * {
-     *   "src": "/uploads/20250101/image.jpg",
-     *   "att_id": 1,
-     *   "name": "image.jpg",
-     *   "att_dir": "/uploads/20250101/image.jpg",
-     *   "satt_dir": "/uploads/20250101/thumb_image.jpg",
-     *   "att_size": "102400",
-     *   "att_type": "image/jpeg",
-     *   "image_type": 1
+     *   "src": "/uploads/20250101/image.jpg"
      * }
      */
     @PostMapping("/upload/{upload_type}")
-    @Operation(summary = "Upload Image")
-    public ApiResult<Map<String, Object>> upload(
-            @Parameter(description = "Upload Type: 0-Auto, 1-Local, 2-OSS") @PathVariable(value = "upload_type", required = false) Integer uploadType,
+    @Operation(summary = "Upload Image (Specific Type)")
+    public ApiResult<Map<String, Object>> uploadWithType(
+            @Parameter(description = "Upload Type: 0-Auto, 1-Local, 2-OSS") @PathVariable("upload_type") Integer uploadType,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "pid", required = false) Integer pid) {
+            @RequestParam(value = "pid", required = false, defaultValue = "0") Integer pid) {
 
         if (file == null || file.isEmpty()) {
             return ApiResult.fail("Please select a file to upload");
@@ -238,12 +310,15 @@ public class TenantFileController {
             uploadType = 0; // 默认自动选择
         }
 
-        if (pid == null) {
-            pid = 0; // 默认分类
-        }
-
+        // PHP: $res = $this->service->upload((int)$pid, $file, $upload_type, $type);
+        // PHP: return $this->success('上传成功', ['src' => $res]);
         Map<String, Object> result = tenantFileService.uploadFile(file, pid, uploadType);
-        return ApiResult.ok("Uploaded successfully", result);
+
+        // PHP 只返回 src 字段
+        Map<String, Object> response = new HashMap<>();
+        response.put("src", result.get("att_dir")); // PHP 返回的是文件路径
+
+        return ApiResult.ok("Uploaded successfully", response);
     }
 
     /**

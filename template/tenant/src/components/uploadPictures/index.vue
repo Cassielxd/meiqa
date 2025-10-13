@@ -161,7 +161,7 @@ export default {
     },
     // 上传头部token
     getToken() {
-      this.header["Authori-zation"] = "Bearer " + getCookies("token");
+      this.header["Authori-zation"] = "Bearer " + getCookies("tenant_token");
     },
     // 树状图
     renderContent(h, { root, node, data }) {

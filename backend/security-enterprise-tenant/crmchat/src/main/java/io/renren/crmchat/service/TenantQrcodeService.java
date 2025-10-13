@@ -2,6 +2,9 @@ package io.renren.crmchat.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import io.renren.crmchat.mapper.QrcodeMapper;
 import io.renren.crmchat.dao.ChatServiceMapper;
 import io.renren.crmchat.entity.QrcodeEntity;
@@ -42,6 +45,7 @@ public class TenantQrcodeService {
 
     private final QrcodeMapper qrcodeMapper;
     private final ChatServiceMapper chatServiceMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取二维码列表
@@ -132,6 +136,107 @@ public class TenantQrcodeService {
         result.put("list", list);
         result.put("count", count);
         return result;
+    }
+
+    /**
+     * 获取二维码表单配置
+     * GET /api/tenant/chat/qrcode/:id
+     *
+     * PHP Reference:
+     * - Controller: Qrcode.php::create()
+     * - Service: QrcodeServices.php::getForm()
+     *
+     * 业务逻辑:
+     * 1. 如果id>0，获取现有二维码数据
+     * 2. 获取客服列表作为下拉选项
+     * 3. 使用FormBuilder构建表单配置
+     * 4. 返回表单配置JSON
+     *
+     * @param appid 应用ID
+     * @param id    二维码ID（0表示创建新的）
+     * @return FormBuilder表单配置
+     */
+    public Map<String, Object> getForm(String appid, Integer id) {
+        // PHP: $codeInfo = [];
+        // PHP: if ($id) {
+        //     $codeInfo = $this->dao->get($id);
+        //     if (!$codeInfo) {
+        //         throw new ValidateException('修改的二维码不存在');
+        //     }
+        //     $codeInfo = $codeInfo->toArray();
+        // }
+
+        String name = "";
+        List<Integer> userIds = new ArrayList<>();
+        Integer sort = 0;
+
+        if (id != null && id > 0) {
+            QrcodeEntity qrcode = qrcodeMapper.selectById(id);
+            if (qrcode == null) {
+                throw new CrmChatException("QR code to be modified does not exist");
+            }
+            TenantGuard.ensureOwnedByCurrentTenant(qrcode.getAppid(), "QR code does not exist");
+
+            name = qrcode.getName() != null ? qrcode.getName() : "";
+            userIds = qrcode.getUserIds() != null ? qrcode.getUserIds() : new ArrayList<>();
+            sort = qrcode.getSort() != null ? qrcode.getSort() : 0;
+        }
+
+        // PHP: $service = app()->make(ChatServiceServices::class);
+        // PHP: $data = $service->getKefuSelect(['appid' => $appid]);
+
+        // 获取客服列表作为下拉选项
+        QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("appid", appid);
+        wrapper.eq("status", 1); // 只获取启用的客服
+        wrapper.select("id", "nickname", "account");
+
+        List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
+
+        // 构建options数组
+        List<Map<String, Object>> options = new ArrayList<>();
+        for (ChatServiceEntity kefu : kefuList) {
+            Map<String, Object> option = new HashMap<>();
+            option.put("label", kefu.getNickname() != null ? kefu.getNickname() : kefu.getAccount());
+            option.put("value", kefu.getId());
+            options.add(option);
+        }
+
+        // PHP: $rule = [
+        //     FormBuilder::input('name', '二维码名称', $codeInfo['name'] ?? '')->required(),
+        //     FormBuilder::select('user_ids', '选择客服', $codeInfo['user_ids'] ?? [])
+        //         ->required()->options($data)->multiple(true),
+        //     FormBuilder::number('sort', '排序', $codeInfo['sort'] ?? 0),
+        // ];
+
+        // 使用FormBuilder构建表单组件
+        List<BaseComponent> components = new ArrayList<>();
+
+        // input字段：name
+        components.add(
+            formBuilder.input("name", "二维码名称", name)
+                .required()
+        );
+
+        // select字段：user_ids (多选客服)
+        components.add(
+            formBuilder.select("user_ids", "选择客服", userIds)
+                .options(options)
+                .multiple()
+                .required()
+        );
+
+        // number字段：sort
+        components.add(
+            formBuilder.inputNumber("sort", "排序", sort)
+        );
+
+        // PHP: return create_form($id ? '编辑二维码' : '添加二维码', $rule, '/chat/qrcode/' . $id);
+
+        String title = (id != null && id > 0) ? "编辑二维码" : "添加二维码";
+        String action = "/api/tenant/chat/qrcode/" + (id != null && id > 0 ? id : 0);
+
+        return FormHelper.createForm(title, components, action, "POST");
     }
 
     /**
