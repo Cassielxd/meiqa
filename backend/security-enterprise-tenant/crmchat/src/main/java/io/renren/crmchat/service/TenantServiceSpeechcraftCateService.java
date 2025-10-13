@@ -51,7 +51,7 @@ public class TenantServiceSpeechcraftCateService {
      * 1. owner_id=0（系统分类）
      * 2. type=1（快捷回复分类）
      * 3. 支持name模糊查询
-     * 4. appid隔离
+     * 4. appid隔离（多租户）
      *
      * @param filters      过滤条件
      * @return 分类列表
@@ -61,9 +61,12 @@ public class TenantServiceSpeechcraftCateService {
         // PHP: $where['type'] = 1;
         // PHP: $where['appid'] = $appid;
 
+        String appid = io.renren.crmchat.security.TenantSecurityUtils.requireAppid();
+
         QueryWrapper<ChatServiceSpeechcraftCateEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("owner_id", 0);
         wrapper.eq("type", 1);
+        wrapper.eq("appid", appid);  // 多租户隔离
 
         // name模糊查询
         if (filters.containsKey("name") && filters.get("name") != null && !filters.get("name").toString().isEmpty()) {
@@ -110,8 +113,8 @@ public class TenantServiceSpeechcraftCateService {
      *
      * 业务逻辑:
      * 1. 验证name非空
-     * 2. 验证name唯一性
-     * 3. 设置type=1, owner_id=0, add_time
+     * 2. 验证name唯一性（在当前租户下）
+     * 3. 设置type=1, owner_id=0, add_time, appid
      *
      * @param data         分类数据
      * @return 新创建的分类ID
@@ -125,20 +128,29 @@ public class TenantServiceSpeechcraftCateService {
 
         String name = data.get("name").toString();
 
+        // PHP: $appid = $this->request->tenantAppid();
+        String appid = io.renren.crmchat.security.TenantSecurityUtils.requireAppid();
+
         // 2. PHP: if ($this->services->count(['name' => $data['name']])) return $this->fail('分类已存在');
+        // 注意：验证name唯一性时需要加上appid条件（多租户隔离）
         QueryWrapper<ChatServiceSpeechcraftCateEntity> checkWrapper = new QueryWrapper<>();
         checkWrapper.eq("name", name);
         checkWrapper.eq("type", 1);
+        checkWrapper.eq("appid", appid);
         Long count = chatServiceSpeechcraftCateMapper.selectCount(checkWrapper);
         if (count > 0) {
             throw new io.renren.crmchat.exception.CrmChatException("Category already exists");
         }
 
-        // 3. 创建分类
+        // 3. PHP: $data['appid'] = $appid;
+        //         $data['type'] = 1;
+        //         $data['add_time'] = time();
+        //         $this->services->save($data);
         ChatServiceSpeechcraftCateEntity cate = new ChatServiceSpeechcraftCateEntity();
         cate.setName(name);
         cate.setType(1);
         cate.setOwnerId(0);
+        cate.setAppid(appid);
         cate.setAddTime((int) (System.currentTimeMillis() / 1000));
 
         if (data.containsKey("sort") && data.get("sort") != null) {
