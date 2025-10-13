@@ -5,7 +5,7 @@
         <div class="fenlei">
             <div class="code-content-wrap">
                <textarea id="NormalCodeTextareatoken3" class="code textarea" rows="5">
-{{tokeninfo.token_md5}}
+{{tokeninfo.tokenMd5}}
       </textarea>
                 <div class="other-wrap">
                     <a @click="getCopy('NormalCodeTextareatoken3')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>

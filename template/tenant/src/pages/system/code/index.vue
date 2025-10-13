@@ -79,8 +79,9 @@ export default {
   methods: {
     // 获取token
     getAdminAppCustomer() {
+
       adminAppCustomer().then(res => {
-        debugger
+
         if(res.status == 200) {
           if(res.data) {
             this.token = res.data;
