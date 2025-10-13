@@ -50,4 +50,12 @@ public class TenantRegisterDTO implements Serializable {
     @NotBlank(message = "Please enter confirmation password")
     @JsonProperty("confirm_pwd")
     private String confirmPwd;
+
+    @Schema(description = "Image Captcha Code", example = "1234", required = true)
+    @NotBlank(message = "Please enter image captcha")
+    private String imgcode;
+
+    @Schema(description = "Image Captcha Key", example = "abc123", required = true)
+    @NotBlank(message = "Please enter captcha key")
+    private String key;
 }

@@ -79,6 +79,18 @@ service.interceptors.response.use(
     error => {
         // 【安全增强】处理HTTP 401未授权响应
         if (error.response && error.response.status === 401) {
+            const currentPath = router.currentRoute.path;
+
+            // 如果当前在注册页面，不重定向，只清除token
+            if (currentPath === '/tenant/register') {
+                console.warn('[注册页面] HTTP 401 - 清除过期token但不重定向');
+                localStorage.clear();
+                removeCookies('tenant_token');
+                removeCookies('expires_time');
+                removeCookies('uuid');
+                return Promise.reject(error);
+            }
+
             console.warn('[认证失败] HTTP 401 - 清除会话并跳转登录页');
             localStorage.clear();
             removeCookies('tenant_token');

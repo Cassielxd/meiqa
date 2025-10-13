@@ -72,3 +72,24 @@ export function AccountRegister(data) {
         data
     })
 }
+
+/**
+ * 发送注册邮件验证码
+ */
+export function sendRegisterCaptcha(email) {
+    return request({
+        url: '/send_captcha',
+        method: 'post',
+        data: { email }
+    })
+}
+
+/**
+ * 获取简单图形验证码（租户注册用）
+ */
+export function getSimpleCaptcha() {
+    return request({
+        url: '/captcha_pro',
+        method: 'get'
+    })
+}

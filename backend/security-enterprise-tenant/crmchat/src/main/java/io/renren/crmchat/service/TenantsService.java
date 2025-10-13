@@ -6,7 +6,7 @@ import io.renren.crmchat.dao.TenantsMapper;
 import io.renren.crmchat.dto.tenant.TenantRegisterDTO;
 import io.renren.crmchat.entity.TenantsEntity;
 import io.renren.crmchat.exception.CrmChatException;
-import io.renren.crmchat.service.common.CaptchaService;
+import io.renren.crmchat.service.CaptchaService;
 import io.renren.crmchat.service.common.PasswordService;
 import io.renren.crmchat.service.common.TokenService;
 import io.renren.crmchat.service.common.ValidationService;
@@ -26,14 +26,29 @@ import java.util.Map;
  * 对齐 PHP 端业务逻辑。
  */
 @Service
-@AllArgsConstructor
 public class TenantsService {
 
     private final TenantsMapper tenantsMapper;
     private final PasswordService passwordService;
     private final TokenService tokenService;
     private final ValidationService validationService;
-    private final CaptchaService captchaService;
+    private final io.renren.crmchat.service.common.CaptchaService emailCaptchaService;
+    private final CaptchaService imageCaptchaService;
+
+    public TenantsService(
+            TenantsMapper tenantsMapper,
+            PasswordService passwordService,
+            TokenService tokenService,
+            ValidationService validationService,
+            io.renren.crmchat.service.common.CaptchaService emailCaptchaService,
+            CaptchaService imageCaptchaService) {
+        this.tenantsMapper = tenantsMapper;
+        this.passwordService = passwordService;
+        this.tokenService = tokenService;
+        this.validationService = validationService;
+        this.emailCaptchaService = emailCaptchaService;
+        this.imageCaptchaService = imageCaptchaService;
+    }
 
     /**
      * 租户登录
@@ -128,8 +143,14 @@ public class TenantsService {
         }
         validationService.validateEmail(email);
 
-        if (!captchaService.verifyCaptcha(email, registerDTO.getCaptcha())) {
-            throw new CrmChatException("Verification code is incorrect or expired, please get a new one");
+        // 验证图片验证码
+        if (!imageCaptchaService.verifySimpleCaptcha(registerDTO.getKey(), registerDTO.getImgcode())) {
+            throw new CrmChatException("Image captcha is incorrect or expired, please refresh and try again");
+        }
+
+        // 验证邮件验证码
+        if (!emailCaptchaService.verifyCaptcha(email, registerDTO.getCaptcha())) {
+            throw new CrmChatException("Email verification code is incorrect or expired, please get a new one");
         }
 
         QueryWrapper<TenantsEntity> accountWrapper = new QueryWrapper<>();
@@ -176,7 +197,7 @@ public class TenantsService {
             throw new CrmChatException("Registration failed, please try again");
         }
 
-        captchaService.clearCaptcha(email);
+        emailCaptchaService.clearCaptcha(email);
 
         Map<String, Object> result = new HashMap<>();
         result.put("tenant_id", tenant.getId());
@@ -233,7 +254,7 @@ public class TenantsService {
             throw new CrmChatException("This email is already registered");
         }
 
-        String captcha = captchaService.sendCaptcha(email);
+        String captcha = emailCaptchaService.sendCaptcha(email);
 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "success");

@@ -173,4 +173,148 @@ public class CaptchaServiceImpl implements CaptchaService {
             return "";
         }
     }
+
+    /**
+     * 简单图形验证码缓存
+     * Key: captcha_record_{key}, Value: {code, expireTime}
+     */
+    private final Map<String, SimpleCaptchaData> simpleCaptchaCache = new ConcurrentHashMap<>();
+
+    /**
+     * 简单验证码数据结构
+     */
+    private static class SimpleCaptchaData {
+        String code;
+        long expireTime;
+
+        SimpleCaptchaData(String code) {
+            this.code = code;
+            this.expireTime = System.currentTimeMillis() + 5 * 60 * 1000; // 5分钟过期
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() > expireTime;
+        }
+    }
+
+    @Override
+    public Map<String, Object> createSimpleCaptcha() {
+        // 清理过期缓存
+        simpleCaptchaCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 生成唯一key
+            String key = UUID.randomUUID().toString().replace("-", "");
+
+            // 生成4位数字验证码
+            Random random = new Random();
+            String code = String.format("%04d", random.nextInt(10000));
+
+            // 缓存验证码
+            simpleCaptchaCache.put("captcha_record_" + key, new SimpleCaptchaData(code));
+
+            // 生成验证码图片
+            String base64Image = generateCaptchaImage(code);
+
+            result.put("img", base64Image);
+            result.put("key", key);
+
+            log.info("生成简单验证码 key: {}, code: {}", key, code);
+        } catch (Exception e) {
+            log.error("Failed to generate simple captcha", e);
+            result.put("error", "Failed to generate captcha");
+        }
+
+        return result;
+    }
+
+    /**
+     * 生成验证码图片
+     * 参考PHP: Captcha::create()
+     */
+    private String generateCaptchaImage(String code) {
+        try {
+            int width = 120;
+            int height = 40;
+
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+
+            // 设置抗锯齿
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // 随机背景色
+            Random random = new Random();
+            g.setColor(new Color(random.nextInt(55) + 200, random.nextInt(55) + 200, random.nextInt(55) + 200));
+            g.fillRect(0, 0, width, height);
+
+            // 绘制干扰线
+            for (int i = 0; i < 5; i++) {
+                g.setColor(new Color(random.nextInt(150), random.nextInt(150), random.nextInt(150)));
+                int x1 = random.nextInt(width);
+                int y1 = random.nextInt(height);
+                int x2 = random.nextInt(width);
+                int y2 = random.nextInt(height);
+                g.drawLine(x1, y1, x2, y2);
+            }
+
+            // 绘制验证码字符
+            g.setFont(new Font("Arial", Font.BOLD, 28));
+            char[] chars = code.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                // 随机颜色
+                g.setColor(new Color(random.nextInt(150), random.nextInt(150), random.nextInt(150)));
+
+                // 随机旋转角度
+                int angle = random.nextInt(30) - 15;
+                int x = 20 + i * 25;
+                int y = 28;
+
+                // 旋转并绘制字符
+                g.rotate(Math.toRadians(angle), x, y);
+                g.drawString(String.valueOf(chars[i]), x, y);
+                g.rotate(-Math.toRadians(angle), x, y);
+            }
+
+            // 绘制干扰点
+            for (int i = 0; i < 50; i++) {
+                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+                g.fillOval(random.nextInt(width), random.nextInt(height), 2, 2);
+            }
+
+            g.dispose();
+
+            // 转Base64
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            ImageIO.write(image, "PNG", baos);
+            byte[] imageBytes = baos.toByteArray();
+            return "data:image/png;base64," + Base64.getEncoder().encodeToString(imageBytes);
+        } catch (Exception e) {
+            log.error("Failed to generate captcha image", e);
+            return "";
+        }
+    }
+
+    @Override
+    public boolean verifySimpleCaptcha(String key, String code) {
+        if (key == null || key.trim().isEmpty() || code == null || code.trim().isEmpty()) {
+            return false;
+        }
+
+        // 获取缓存的验证码
+        String cacheKey = "captcha_record_" + key;
+        SimpleCaptchaData captchaData = simpleCaptchaCache.get(cacheKey);
+
+        if (captchaData == null || captchaData.isExpired()) {
+            return false; // 验证码不存在或已过期
+        }
+
+        // 验证成功后删除缓存
+        simpleCaptchaCache.remove(cacheKey);
+
+        // 不区分大小写比较
+        return captchaData.code.equalsIgnoreCase(code);
+    }
 }

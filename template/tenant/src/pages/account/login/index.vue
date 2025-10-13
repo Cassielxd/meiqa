@@ -97,6 +97,29 @@
               size="large"
             />
           </FormItem>
+          <!-- 邮件验证码 -->
+          <FormItem prop="captcha">
+            <div class="code">
+              <Input
+                type="text"
+                v-model="registerForm.captcha"
+                prefix="ios-keypad-outline"
+                placeholder="请输入邮件验证码"
+                size="large"
+                style="flex: 1; margin-right: 10px;"
+              />
+              <Button
+                type="primary"
+                size="large"
+                :disabled="sendingCode || countdown > 0"
+                :loading="sendingCode"
+                @click="handleSendEmailCode"
+                style="min-width: 120px;"
+              >
+                {{ sendingCode ? '发送中...' : countdown > 0 ? `${countdown}秒` : '发送验证码' }}
+              </Button>
+            </div>
+          </FormItem>
           <FormItem prop="code">
             <div class="code">
               <Input
@@ -149,7 +172,7 @@
   </div>
 </template>
 <script>
-import { AccountLogin, AccountRegister, loginInfoApi, captcha_pro } from '@/api/account';
+import { AccountLogin, AccountRegister, loginInfoApi, captcha_pro, sendRegisterCaptcha } from '@/api/account';
 import { getWorkermanUrl } from '@/api/kefu';
 import { getStaticMenusAPI, getTransformedMenus } from '@/data/static-menus';
 // import mixins from '../mixins'
@@ -176,6 +199,9 @@ export default {
       isRegister: false, // 控制登录/注册页面切换
       autoLogin: true,
       imgcode: '',
+      sendingCode: false, // 发送邮件验证码状态
+      countdown: 0, // 倒计时秒数
+      countdownTimer: null, // 倒计时定时器
       formInline: {
         username: '',
         password: '',
@@ -193,6 +219,7 @@ export default {
         contact_phone:"",
         password: '',
         confirm_pwd: '',
+        captcha: '', // 邮件验证码
         code: '',
         key: '',
       },
@@ -212,6 +239,10 @@ export default {
         confirm_pwd: [
           { required: true, message: '请确认密码', trigger: 'blur' },
           { validator: this.validateConfirmPassword, trigger: 'blur' }
+        ],
+        captcha: [
+          { required: true, message: '请输入邮件验证码', trigger: 'blur' },
+          { len: 6, message: '验证码必须是6位', trigger: 'blur' }
         ],
         code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
       },
@@ -419,7 +450,8 @@ export default {
     handleRegister(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
-          this.$refs.verify.show()
+          // 直接注册，不使用滑动验证码（与登录保持一致）
+          this.closeRegisterModel({ captchaVerification: '' });
         }
       });
     },
@@ -437,6 +469,7 @@ export default {
         pwd: this.registerForm.password,
         confirm_pwd: this.registerForm.confirm_pwd,
         contact_phone: this.registerForm.contact_phone,
+        captcha: this.registerForm.captcha, // 邮件验证码
         imgcode: this.registerForm.code,
         key: this.registerForm.key,
         captchaType: 'blockPuzzle',
@@ -477,8 +510,10 @@ export default {
     resetRegisterForm() {
       this.registerForm = {
         email: '',
+        contact_phone: '',
         password: '',
-        confirmPassword: '',
+        confirm_pwd: '',
+        captcha: '',
         code: '',
         key: '',
       };
@@ -486,6 +521,12 @@ export default {
       if (this.$refs.registerForm) {
         this.$refs.registerForm.resetFields();
       }
+      // 清理倒计时
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer);
+        this.countdownTimer = null;
+      }
+      this.countdown = 0;
     },
     // 验证确认密码
     validateConfirmPassword(rule, value, callback) {
@@ -495,6 +536,67 @@ export default {
         callback(new Error('两次输入的密码不一致'));
       } else {
         callback();
+      }
+    },
+    // 发送邮件验证码
+    async handleSendEmailCode() {
+      if (this.sendingCode) {
+        return;
+      }
+
+      // 验证邮箱
+      if (!this.registerForm.email) {
+        this.$Message.error('请先输入邮箱');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.registerForm.email)) {
+        this.$Message.error('请输入正确的邮箱格式');
+        return;
+      }
+
+      this.sendingCode = true;
+      let closeLoading = this.$Message.loading({
+        content: '正在发送验证码...',
+        duration: 0
+      });
+
+      try {
+        await sendRegisterCaptcha(this.registerForm.email);
+        if (typeof closeLoading === 'function') {
+          closeLoading();
+          closeLoading = null;
+        }
+
+        this.$Message.success('验证码已发送，请查收邮件！');
+
+        // 开始倒计时
+        if (this.countdownTimer) {
+          clearInterval(this.countdownTimer);
+          this.countdownTimer = null;
+        }
+        this.countdown = 60;
+        this.countdownTimer = setInterval(() => {
+          this.countdown--;
+          if (this.countdown <= 0) {
+            clearInterval(this.countdownTimer);
+            this.countdownTimer = null;
+          }
+        }, 1000);
+      } catch (err) {
+        if (typeof closeLoading === 'function') {
+          closeLoading();
+          closeLoading = null;
+        }
+
+        this.$Message.error(err.msg || '发送验证码失败');
+      } finally {
+        if (typeof closeLoading === 'function') {
+          closeLoading();
+          closeLoading = null;
+        }
+        this.sendingCode = false;
       }
     },
   },
@@ -508,6 +610,11 @@ export default {
   beforeDestroy: function () {
     window.removeEventListener('resize', this.handleResize);
     document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
+    // 清理倒计时定时器
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
   },
 };
 </script>

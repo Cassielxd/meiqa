@@ -121,4 +121,17 @@ public class CaptchaController {
     public ApiResult<Map<String, Object>> kefuAjCheck(@RequestBody Map<String, String> request) {
         return ajCheck(request);
     }
+
+    /**
+     * 获取简单图形验证码 - Tenant使用
+     * GET /api/tenant/captcha_pro
+     * PHP参考: Login::captcha() -> Captcha::create([], true)
+     * Response: {"img":"data:image/png;base64,...","key":"xxx"}
+     */
+    @GetMapping("/api/tenant/captcha_pro")
+    @Operation(summary = "Get Simple Image CAPTCHA (Tenant Path)")
+    public ApiResult<Map<String, Object>> getTenantCaptchaPro() {
+        Map<String, Object> result = captchaService.createSimpleCaptcha();
+        return ApiResult.ok(result);
+    }
 }

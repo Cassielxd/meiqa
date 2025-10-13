@@ -32,6 +32,29 @@ spring:
         max-idle: 8
         min-idle: 0
 
+  # Mail配置
+  mail:
+    host: smtp.163.com
+    port: 465
+    username: kanssa008@163.com
+    password: RYSX83954mDAixzJ
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+            fallback: false
+          starttls:
+            enable: false
+            required: false
+          connectiontimeout: 30000
+          timeout: 30000
+          writetimeout: 30000
+
 # MyBatis Plus配置
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml

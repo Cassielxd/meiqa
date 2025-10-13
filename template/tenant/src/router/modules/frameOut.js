@@ -12,6 +12,16 @@ export default [
 		},
 		component: () => import('@/pages/account/login')
 	},
+	// 注册
+	{
+		path: '/tenant/register',
+		name: 'register',
+		meta: {
+			title: '注册',
+			hideInMenu: true
+		},
+		component: () => import('@/pages/account/register')
+	},
 	// 客服
 	{
 		path: '/kefu',

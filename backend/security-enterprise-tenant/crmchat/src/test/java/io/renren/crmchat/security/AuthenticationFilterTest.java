@@ -51,13 +51,19 @@ class AuthenticationFilterTest {
     @Mock
     private SystemAdminMapper systemAdminMapper;
 
+    @Mock
+    private io.renren.crmchat.dao.TenantsMapper tenantsMapper;
+
+    @Mock
+    private io.renren.crmchat.service.AdminApplicationService adminApplicationService;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
-        authenticationFilter = new AuthenticationFilter(jwtUtils, objectMapper, systemAdminMapper);
+        authenticationFilter = new AuthenticationFilter(jwtUtils, objectMapper, systemAdminMapper, tenantsMapper, adminApplicationService);
     }
 
     // ==================== P0安全修复验证: 白名单精确匹配 ====================

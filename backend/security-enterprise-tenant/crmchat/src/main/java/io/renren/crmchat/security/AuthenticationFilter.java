@@ -55,6 +55,7 @@ public class AuthenticationFilter implements Filter {
             "/api/tenant/login",
             "/api/tenant/register",
             "/api/tenant/send_captcha",
+            "/api/tenant/captcha_pro",
             "/api/tenant/login/info",
             "/api/tenant/ajcaptcha",
             "/api/tenant/ajcheck",
