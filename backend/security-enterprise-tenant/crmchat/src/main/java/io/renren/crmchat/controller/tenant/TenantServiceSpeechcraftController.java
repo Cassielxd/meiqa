@@ -40,32 +40,39 @@ public class TenantServiceSpeechcraftController {
      * - title: 标题（可选，模糊查询）
      * - message: 内容（可选，模糊查询）
      * - cate_id: 分类ID（可选）
+     * - page: 页码（可选，默认1）
+     * - limit: 每页数量（可选，默认20）
      * - appid: 租户appid（必填）
      *
      * Response:
-     * [
-     *   {
-     *     "id": 1,
-     *     "title": "Welcome Message",
-     *     "message": "您好，有什么可以帮您？",
-     *     "cate_id": 1,
-     *     "sort": 0,
-     *     "add_time": 1234567890,
-     *     "kefu_id": 0,
-     *     "appid": "202517350001234"
-     *   }
-     * ]
+     * {
+     *   "list": [
+     *     {
+     *       "id": 1,
+     *       "title": "Welcome Message",
+     *       "message": "您好，有什么可以帮您？",
+     *       "cate_id": 1,
+     *       "sort": 0,
+     *       "add_time": 1234567890,
+     *       "kefu_id": 0,
+     *       "appid": "202517350001234"
+     *     }
+     *   ],
+     *   "count": 1
+     * }
      */
     @GetMapping
     @Operation(summary = "Get Quick Reply List")
-    public ApiResult<List<ChatServiceSpeechcraftEntity>> getSpeechcraftList(
+    public ApiResult<Map<String, Object>> getSpeechcraftList(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String message,
-            @RequestParam(required = false) String cate_id) {
+            @RequestParam(required = false) String cate_id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
 
         String appid = requireAppid();
-        log.info("[租户API] chat/speechcraft/list - appid={}, title={}, message={}, cate_id={}",
-                 appid, title, message, cate_id);
+        log.info("[租户API] chat/speechcraft/list - appid={}, title={}, message={}, cate_id={}, page={}, limit={}",
+                 appid, title, message, cate_id, page, limit);
 
         Map<String, Object> filters = new HashMap<>();
         if (title != null && !title.trim().isEmpty()) {
@@ -78,9 +85,10 @@ public class TenantServiceSpeechcraftController {
             filters.put("cate_id", cate_id);
         }
 
-        List<ChatServiceSpeechcraftEntity> list = tenantServiceSpeechcraftService.getSpeechcraftList(filters);
-        log.info("[租户API] chat/speechcraft/list - appid={}, count={}", appid, list.size());
-        return ApiResult.ok(list);
+        // PHP returns {list: [...], count: X}
+        Map<String, Object> result = tenantServiceSpeechcraftService.getSpeechcraftList(filters, page, limit);
+        log.info("[租户API] chat/speechcraft/list - appid={}, count={}", appid, result.get("count"));
+        return ApiResult.ok(result);
     }
 
     /**
@@ -88,16 +96,9 @@ public class TenantServiceSpeechcraftController {
      * GET /api/tenant/chat/speechcraft/:id
      *
      * PHP Reference: ServiceSpeechcraft.php::read()
-     *
-     * Response:
-     * {
-     *   "id": 1,
-     *   "title": "Welcome Message",
-     *   "message": "您好，有什么可以帮您？",
-     *   ...
-     * }
+     * IMPORTANT: Regex [0-9]+ to avoid route conflicts with /create and /{id}/edit
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9]+}")
     @Operation(summary = "Get Quick Reply Details")
     public ApiResult<ChatServiceSpeechcraftEntity> getSpeechcraftDetail(@PathVariable Integer id) {
 
@@ -113,20 +114,46 @@ public class TenantServiceSpeechcraftController {
     }
 
     /**
+     * 获取创建快捷回复表单配置
+     * GET /api/tenant/chat/speechcraft/create
+     *
+     * PHP Reference: ServiceSpeechcraft.php::create()
+     */
+    @GetMapping("/create")
+    @Operation(summary = "Get Create Speechcraft Form Configuration")
+    public ApiResult<Map<String, Object>> getCreateForm() {
+        String appid = requireAppid();
+        log.info("[租户API] chat/speechcraft/create - appid={}", appid);
+
+        Map<String, Object> formConfig = tenantServiceSpeechcraftService.getCreateForm();
+        return ApiResult.ok(formConfig);
+    }
+
+    /**
+     * 获取编辑快捷回复表单配置
+     * GET /api/tenant/chat/speechcraft/:id/edit
+     *
+     * PHP Reference: ServiceSpeechcraft.php::edit()
+     */
+    @GetMapping("/{id:[0-9]+}/edit")
+    @Operation(summary = "Get Edit Speechcraft Form Configuration")
+    public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
+        if (id == null || id <= 0) {
+            return ApiResult.fail("Missing parameters");
+        }
+
+        String appid = requireAppid();
+        log.info("[租户API] chat/speechcraft/edit - appid={}, id={}", appid, id);
+
+        Map<String, Object> formConfig = tenantServiceSpeechcraftService.getEditForm(id);
+        return ApiResult.ok(formConfig);
+    }
+
+    /**
      * 创建快捷回复
      * POST /api/tenant/chat/speechcraft
      *
      * PHP Reference: ServiceSpeechcraft.php::save()
-     *
-     * Request Body:
-     * {
-     *   "title": "Welcome Message",                // 必填
-     *   "message": "您好，有什么可以帮您？",  // 必填
-     *   "cate_id": 1,                    // 可选
-     *   "sort": 0                        // 可选
-     * }
-     *
-     * Response: { "code": 0, "msg": "Quick reply created successfully" }
      */
     @PostMapping
     @Operation(summary = "创建快捷回复")
@@ -143,18 +170,8 @@ public class TenantServiceSpeechcraftController {
      * PUT /api/tenant/chat/speechcraft/:id
      *
      * PHP Reference: ServiceSpeechcraft.php::update()
-     *
-     * Request Body:
-     * {
-     *   "title": "Welcome Message",                // 必填
-     *   "message": "您好，有什么可以帮您？",  // 必填
-     *   "cate_id": 1,                    // 可选
-     *   "sort": 0                        // 可选
-     * }
-     *
-     * Response: { "code": 0, "msg": "修改成功" }
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{id:[0-9]+}")
     @Operation(summary = "更新快捷回复")
     public ApiResult<String> updateSpeechcraft(
             @PathVariable Integer id,
@@ -176,10 +193,8 @@ public class TenantServiceSpeechcraftController {
      * DELETE /api/tenant/chat/speechcraft/:id
      *
      * PHP Reference: ServiceSpeechcraft.php::delete()
-     *
-     * Response: { "code": 0, "msg": "删除成功" }
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:[0-9]+}")
     @Operation(summary = "删除快捷回复")
     public ApiResult<String> deleteSpeechcraft(@PathVariable Integer id) {
 

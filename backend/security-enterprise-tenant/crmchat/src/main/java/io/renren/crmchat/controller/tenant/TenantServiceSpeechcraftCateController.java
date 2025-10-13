@@ -33,10 +33,14 @@ public class TenantServiceSpeechcraftCateController {
     /**
      * 获取快捷回复分类列表
      * GET /api/tenant/chat/speechcraftcate
+     *
+     * PHP Reference: ServiceSpeechcraftCate.php::index()
+     * PHP Returns: compact('data', 'count') = {data: [...], count: X}
+     * Frontend Expects: res.data.data (nested structure)
      */
     @GetMapping
     @Operation(summary = "Get Quick Reply Category List")
-    public ApiResult<List<ChatServiceSpeechcraftCateEntity>> getCateList(
+    public ApiResult<Map<String, Object>> getCateList(
             @RequestParam(required = false) String name) {
 
         String appid = requireAppid();
@@ -48,8 +52,35 @@ public class TenantServiceSpeechcraftCateController {
         }
 
         List<ChatServiceSpeechcraftCateEntity> list = tenantServiceSpeechcraftCateService.getCateList(filters);
+
+        // PHP: return compact('data', 'count');
+        // Wrap list in object to match PHP format
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("count", list.size());
+
         log.info("[租户API] chat/speechcraftcate/list - appid={}, count={}", appid, list.size());
-        return ApiResult.ok(list);
+        return ApiResult.ok(result);
+    }
+
+    /**
+     * 获取快捷回复分类详情
+     * GET /api/tenant/chat/speechcraftcate/:id
+     *
+     * IMPORTANT: Must be placed AFTER /create and /{id}/edit to avoid route conflicts
+     */
+    @GetMapping("/{id:[0-9]+}")
+    @Operation(summary = "Get Quick Reply Category Details")
+    public ApiResult<ChatServiceSpeechcraftCateEntity> getCateDetail(@PathVariable Integer id) {
+        if (id == null || id <= 0) {
+            return ApiResult.fail("Missing parameters");
+        }
+
+        String appid = requireAppid();
+        log.info("[租户API] chat/speechcraftcate/read - appid={}, id={}", appid, id);
+
+        ChatServiceSpeechcraftCateEntity cate = tenantServiceSpeechcraftCateService.getCateDetail(id);
+        return ApiResult.ok(cate);
     }
 
     /**
@@ -84,24 +115,6 @@ public class TenantServiceSpeechcraftCateController {
     }
 
     /**
-     * 获取快捷回复分类详情
-     * GET /api/tenant/chat/speechcraftcate/:id
-     */
-    @GetMapping("/{id}")
-    @Operation(summary = "Get Quick Reply Category Details")
-    public ApiResult<ChatServiceSpeechcraftCateEntity> getCateDetail(@PathVariable Integer id) {
-        if (id == null || id <= 0) {
-            return ApiResult.fail("Missing parameters");
-        }
-
-        String appid = requireAppid();
-        log.info("[租户API] chat/speechcraftcate/read - appid={}, id={}", appid, id);
-
-        ChatServiceSpeechcraftCateEntity cate = tenantServiceSpeechcraftCateService.getCateDetail(id);
-        return ApiResult.ok(cate);
-    }
-
-    /**
      * 获取编辑分类表单配置
      * GET /api/tenant/chat/speechcraftcate/:id/edit
      *
@@ -122,7 +135,7 @@ public class TenantServiceSpeechcraftCateController {
      *   "status": true
      * }
      */
-    @GetMapping("/{id}/edit")
+    @GetMapping("/{id:[0-9]+}/edit")
     @Operation(summary = "Get Edit Category Form Configuration")
     public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
         if (id == null || id <= 0) {
