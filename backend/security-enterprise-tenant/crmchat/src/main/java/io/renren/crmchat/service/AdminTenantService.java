@@ -370,9 +370,9 @@ public class AdminTenantService {
             throw new CrmChatException("Tenant does not exist");
         }
 
-        // 2. 验证状态值
-        if (status != 0 && status != 1) {
-            throw new CrmChatException("Status parameter error: must be 0 or 1");
+        // 2. 验证状态值（0=待审核, 1=已批准, 2=已拒绝, 3=已禁用）
+        if (status < 0 || status > 3) {
+            throw new CrmChatException("Status parameter error: must be 0, 1, 2, or 3");
         }
 
         String appid = tenant.getAppid();
@@ -387,13 +387,14 @@ public class AdminTenantService {
             throw new CrmChatException("Failed to update status");
         }
 
-        // 5. 【安全增强】如果禁用租户，清除其所有缓存
-        // 这样可以确保禁用立即生效，租户无法通过缓存继续访问
-        if (status == 0 && appid != null && !appid.isBlank()) {
+        // 5. 【安全增强】如果租户状态变为非批准状态（待审核/已拒绝/已禁用），清除其所有缓存
+        // 这样可以确保状态变更立即生效，非批准租户无法通过缓存继续访问
+        // status: 0=待审核, 1=已批准, 2=已拒绝, 3=已禁用
+        if (status != 1 && appid != null && !appid.isBlank()) {
             try {
                 chatCacheService.invalidateAllTenantCache(appid);
             } catch (Exception e) {
-                System.err.println("Failed to clear cache while disabling tenant: appid=" + appid + ", error=" + e.getMessage());
+                System.err.println("Failed to clear cache while changing tenant status: appid=" + appid + ", status=" + status + ", error=" + e.getMessage());
             }
         }
     }

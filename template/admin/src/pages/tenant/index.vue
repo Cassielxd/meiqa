@@ -13,8 +13,10 @@
             <FormItem label="状态：">
               <Select v-model="searchForm.status" placeholder="请选择状态" @on-change="getList" clearable>
                 <Option value="">全部</Option>
-                <Option value="1">正常</Option>
-                <Option value="0">禁用</Option>
+                <Option value="0">待审核</Option>
+                <Option value="1">已批准</Option>
+                <Option value="2">已拒绝</Option>
+                <Option value="3">已禁用</Option>
               </Select>
             </FormItem>
           </Col>
@@ -56,26 +58,32 @@
       >
         <!-- 状态列 -->
         <template slot-scope="{ row }" slot="status">
-          <i-switch
-            v-model="row.status"
+          <Select
             :value="row.status"
-            :true-value="1"
-            :false-value="0"
-            @on-change="toggleStatus(row)"
-            size="large"
+            @on-change="handleStatusChange(row, $event)"
+            size="small"
+            style="width: 110px"
           >
-            <span slot="open">正常</span>
-            <span slot="close">禁用</span>
-          </i-switch>
+            <Option :value="0">⚠️ 待审核</Option>
+            <Option :value="1">✅ 已批准</Option>
+            <Option :value="2">❌ 已拒绝</Option>
+            <Option :value="3">🚫 已禁用</Option>
+          </Select>
         </template>
 
         <!-- 到期时间列 -->
         <template slot-scope="{ row }" slot="expire_time">
           <span v-if="row.expire_at">
-            {{ row.expire_at }}
+            {{ formatTime(row.expire_at) }}
             <Tag color="warning" v-if="isExpiringSoon(row.expire_at)">即将过期</Tag>
             <Tag color="error" v-if="isExpired(row.expire_at)">已过期</Tag>
           </span>
+          <span v-else>-</span>
+        </template>
+
+        <!-- 创建时间列 -->
+        <template slot-scope="{ row }" slot="created_time">
+          <span v-if="row.created_at">{{ formatTime(row.created_at) }}</span>
           <span v-else>-</span>
         </template>
 
@@ -89,6 +97,16 @@
               <Icon type="ios-arrow-down"></Icon>
             </Button>
             <DropdownMenu slot="list">
+              <DropdownItem v-if="row.status === 0" name="approve">
+                <span style="color: #19be6b">审核通过</span>
+              </DropdownItem>
+              <DropdownItem v-if="row.status === 0" name="reject">
+                <span style="color: #ed4014">审核拒绝</span>
+              </DropdownItem>
+              <DropdownItem v-if="row.status === 1" name="disable">禁用租户</DropdownItem>
+              <DropdownItem v-if="row.status === 2 || row.status === 3" name="enable">
+                <span style="color: #19be6b">重新启用</span>
+              </DropdownItem>
               <DropdownItem name="resetPassword">重置密码</DropdownItem>
               <DropdownItem name="delete" style="color: #ed4014">删除租户</DropdownItem>
             </DropdownMenu>
@@ -221,18 +239,19 @@ export default {
           title: '状态',
           key: 'status',
           slot: 'status',
-          width: 100
+          width: 120
         },
         {
           title: '到期时间',
           key: 'expire_at',
           slot: 'expire_time',
-          minWidth: 120
+          minWidth: 200
         },
         {
           title: '创建时间',
           key: 'created_at',
-          minWidth: 120
+          slot: 'created_time',
+          minWidth: 160
         },
         {
           title: '操作',
@@ -319,16 +338,102 @@ export default {
       this.getList()
     },
 
-    // 状态切换
-    async toggleStatus(row) {
-      try {
-        await tenantUpdateStatusApi(row.id, row.status)
-        this.$Message.success('状态更新成功')
-        this.getList()
-      } catch (error) {
-        this.$Message.error('状态更新失败')
-        row.status = row.status === 1 ? 0 : 1 // 回滚状态
+    // 审核通过
+    async approveTenant(row) {
+      this.$Modal.confirm({
+        title: '确认审核',
+        content: `确定要审核通过租户 ${row.account} 吗？`,
+        onOk: async () => {
+          try {
+            await tenantUpdateStatusApi(row.id, 1)
+            this.$Message.success('审核通过')
+            this.getList()
+          } catch (error) {
+            this.$Message.error('操作失败')
+          }
+        }
+      })
+    },
+
+    // 审核拒绝
+    async rejectTenant(row) {
+      this.$Modal.confirm({
+        title: '确认拒绝',
+        content: `确定要拒绝租户 ${row.account} 的申请吗？`,
+        onOk: async () => {
+          try {
+            await tenantUpdateStatusApi(row.id, 2)
+            this.$Message.success('已拒绝')
+            this.getList()
+          } catch (error) {
+            this.$Message.error('操作失败')
+          }
+        }
+      })
+    },
+
+    // 禁用租户
+    async disableTenant(row) {
+      this.$Modal.confirm({
+        title: '确认禁用',
+        content: `确定要禁用租户 ${row.account} 吗？`,
+        onOk: async () => {
+          try {
+            await tenantUpdateStatusApi(row.id, 3)
+            this.$Message.success('已禁用')
+            this.getList()
+          } catch (error) {
+            this.$Message.error('操作失败')
+          }
+        }
+      })
+    },
+
+    // 重新启用
+    async enableTenant(row) {
+      this.$Modal.confirm({
+        title: '确认启用',
+        content: `确定要重新启用租户 ${row.account} 吗？`,
+        onOk: async () => {
+          try {
+            await tenantUpdateStatusApi(row.id, 1)
+            this.$Message.success('已启用')
+            this.getList()
+          } catch (error) {
+            this.$Message.error('操作失败')
+          }
+        }
+      })
+    },
+
+    // 状态变更
+    handleStatusChange(row, newStatus) {
+      const statusMap = {
+        0: '待审核',
+        1: '已批准',
+        2: '已拒绝',
+        3: '已禁用'
       }
+
+      this.$Modal.confirm({
+        title: '确认修改状态',
+        content: `确定要将租户 ${row.account} 的状态修改为 "${statusMap[newStatus]}" 吗？`,
+        onOk: async () => {
+          try {
+            await tenantUpdateStatusApi(row.id, newStatus)
+            this.$Message.success('状态修改成功')
+            this.getList()
+          } catch (error) {
+            this.$Message.error('状态修改失败')
+            // 失败时恢复原状态
+            this.getList()
+          }
+        },
+        onCancel: () => {
+          // 取消时恢复原状态
+          this.getList()
+        }
+      })
     },
 
     // 选择变化
@@ -396,7 +501,15 @@ export default {
 
     // 下拉菜单点击
     handleDropdownClick(name, row) {
-      if (name === 'resetPassword') {
+      if (name === 'approve') {
+        this.approveTenant(row)
+      } else if (name === 'reject') {
+        this.rejectTenant(row)
+      } else if (name === 'disable') {
+        this.disableTenant(row)
+      } else if (name === 'enable') {
+        this.enableTenant(row)
+      } else if (name === 'resetPassword') {
         this.resetPassword(row)
       } else if (name === 'delete') {
         this.deleteTenant(row)
@@ -475,6 +588,40 @@ export default {
       } catch (error) {
         this.$Message.error('获取即将过期租户失败')
       }
+    },
+
+    // 格式化时间戳
+    formatTime(timestamp) {
+      if (!timestamp) return '-'
+
+      // 如果是字符串，尝试解析
+      let date
+      if (typeof timestamp === 'string') {
+        // 如果已经是格式化的字符串（包含-或/），直接返回
+        if (timestamp.includes('-') || timestamp.includes('/')) {
+          return timestamp
+        }
+        // 如果是数字字符串，转为数字
+        timestamp = parseInt(timestamp)
+      }
+
+      // 如果是13位时间戳（毫秒）
+      if (timestamp > 9999999999) {
+        date = new Date(timestamp)
+      } else {
+        // 如果是10位时间戳（秒），转为毫秒
+        date = new Date(timestamp * 1000)
+      }
+
+      // 格式化为 YYYY-MM-DD HH:mm:ss
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
     },
 
     // 判断是否即将过期
