@@ -156,7 +156,7 @@ export default {
         title: this.formValidate.title
       }).then(res => {
         this.list = res.data.data
-        this.count = res.data.count
+        this.count = parseInt(res.data.count) || 0
       })
     },
     // 删除
