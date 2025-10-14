@@ -305,13 +305,13 @@ export default {
           id: '',
           name: this.$t('kefu.all')
         }
-        res.data.data.forEach((el, index) => {
+        res.data.forEach((el, index) => {
           el.isEdit = false
         })
-        // res.data.data.unshift(obj)
-        this.sortList = res.data.data
-        if(this.cateId === '' && res.data.data.length) {
-          this.cateId = res.data.data[0].id
+        // res.data.unshift(obj)
+        this.sortList = res.data
+        if(this.cateId === '' && res.data.length) {
+          this.cateId = res.data[0].id
         }
         this.getList()
       })

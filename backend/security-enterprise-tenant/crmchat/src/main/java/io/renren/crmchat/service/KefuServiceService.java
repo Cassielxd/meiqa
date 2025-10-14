@@ -33,6 +33,12 @@ public class KefuServiceService {
         QueryWrapper<ChatServiceSpeechcraftEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("kefu_id", kefuId);
 
+        // 多租户隔离：必须过滤当前租户的appid
+        String appid = io.renren.crmchat.security.UserContext.getAppid();
+        if (appid != null) {
+            wrapper.eq("appid", appid);
+        }
+
         if (filters.containsKey("title") && filters.get("title") != null && !filters.get("title").toString().isEmpty()) {
             wrapper.like("title", filters.get("title"));
         }
@@ -190,6 +196,12 @@ public class KefuServiceService {
 
         // PHP: 'type' => 1（快捷话术分类，不是用户标签分类）
         wrapper.eq("type", 1);
+
+        // 多租户隔离：必须过滤当前租户的appid
+        String appid = io.renren.crmchat.security.UserContext.getAppid();
+        if (appid != null) {
+            wrapper.eq("appid", appid);
+        }
 
         if (filters.containsKey("name") && filters.get("name") != null && !filters.get("name").toString().isEmpty()) {
             wrapper.like("name", filters.get("name"));
