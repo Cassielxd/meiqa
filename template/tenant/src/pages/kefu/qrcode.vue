@@ -67,7 +67,8 @@ export default {
                     key: 'user_account',
                     minWidth: 120,
                     render: (h, params) => {
-                        return h('span', params.row.user_account.join('，'));
+                        const accounts = params.row.user_account || [];
+                        return h('span', accounts.join('，'));
                     }
                 },
                 {
