@@ -29,14 +29,37 @@ public class TenantUserLabelCateController {
 
     @GetMapping
     @Operation(summary = "Get Category List")
-    public ApiResult<List<ChatUserLabelCateEntity>> getCateList() {
+    public ApiResult<Map<String, Object>> getCateList() {
 
         String appid = requireAppid();
         log.info("[租户API] user/label/cate/list - appid={}", appid);
 
-        List<ChatUserLabelCateEntity> list = tenantUserLabelCateService.getCateList();
-        log.info("[租户API] user/label/cate/list - appid={}, count={}", appid, list.size());
-        return ApiResult.ok(list);
+        Map<String, Object> result = tenantUserLabelCateService.getCateList();
+        log.info("[租户API] user/label/cate/list - appid={}, count={}", appid,
+            result.get("data") != null ? ((List<?>) result.get("data")).size() : 0);
+        return ApiResult.ok(result);
+    }
+
+    @GetMapping("/create")
+    @Operation(summary = "Get Create Form")
+    public ApiResult<Map<String, Object>> getCreateForm() {
+
+        String appid = requireAppid();
+        log.info("[租户API] user/label/cate/create - appid={}", appid);
+
+        Map<String, Object> result = tenantUserLabelCateService.getCreateForm();
+        return ApiResult.ok(result);
+    }
+
+    @GetMapping("/{id}/edit")
+    @Operation(summary = "Get Edit Form")
+    public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
+
+        String appid = requireAppid();
+        log.info("[租户API] user/label/cate/edit - appid={}, cateId={}", appid, id);
+
+        Map<String, Object> result = tenantUserLabelCateService.getEditForm(id);
+        return ApiResult.ok(result);
     }
 
     @PostMapping
@@ -82,7 +105,7 @@ public class TenantUserLabelCateController {
         return ApiResult.ok("Deleted successfully", "success");
     }
 
-    @PostMapping("/move")
+    @PostMapping({"/move", "/move_cate"})
     @Operation(summary = "Sort Move")
     public ApiResult<String> moveCate(@RequestBody Map<String, Object> data) {
 

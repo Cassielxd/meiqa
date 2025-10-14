@@ -134,7 +134,8 @@ public class TenantQrcodeService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", list);
-        result.put("count", count);
+        // 确保 count 是数字类型，不是字符串（Vue Page 组件要求 Number 类型）
+        result.put("count", (int) count);
         return result;
     }
 

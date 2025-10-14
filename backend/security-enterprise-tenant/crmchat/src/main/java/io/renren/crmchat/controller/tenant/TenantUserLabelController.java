@@ -32,20 +32,47 @@ public class TenantUserLabelController {
 
     @GetMapping
     @Operation(summary = "Get Tag List")
-    public ApiResult<List<ChatUserLabelEntity>> getLabelList(
-            @RequestParam(required = false) String cate_id) {
+    public ApiResult<Map<String, Object>> getLabelList(
+            @RequestParam(required = false) String cate_id,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "15") Integer limit) {
 
         String resolvedAppid = requireAppid();
-        log.info("[租户API] user/label/list - appid={}, cate_id={}", resolvedAppid, cate_id);
+        log.info("[租户API] user/label/list - appid={}, cate_id={}, page={}, limit={}",
+            resolvedAppid, cate_id, page, limit);
 
         Map<String, Object> filters = new HashMap<>();
         if (cate_id != null && !cate_id.trim().isEmpty()) {
             filters.put("cate_id", cate_id);
         }
 
-        List<ChatUserLabelEntity> list = tenantUserLabelService.getLabelList(filters, resolvedAppid);
-        log.info("[租户API] user/label/list - appid={}, count={}", resolvedAppid, list.size());
-        return ApiResult.ok(list);
+        Map<String, Object> result = tenantUserLabelService.getLabelListWithPagination(
+            filters, resolvedAppid, page, limit);
+        log.info("[租户API] user/label/list - appid={}, count={}", resolvedAppid,
+            result.get("count"));
+        return ApiResult.ok(result);
+    }
+
+    @GetMapping("/create")
+    @Operation(summary = "Get Create Form")
+    public ApiResult<Map<String, Object>> getCreateForm() {
+
+        String resolvedAppid = requireAppid();
+        log.info("[租户API] user/label/create - appid={}", resolvedAppid);
+
+        Map<String, Object> result = tenantUserLabelService.getCreateForm(resolvedAppid);
+        return ApiResult.ok(result);
+    }
+
+    @GetMapping("/{id}/edit")
+    @Operation(summary = "Get Edit Form")
+    public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
+
+        String resolvedAppid = requireAppid();
+        log.info("[租户API] user/label/edit - appid={}, labelId={}", resolvedAppid, id);
+
+        Map<String, Object> result = tenantUserLabelService.getEditForm(id, resolvedAppid);
+        return ApiResult.ok(result);
     }
 
     @PostMapping

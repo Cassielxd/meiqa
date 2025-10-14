@@ -4,12 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.crmchat.dao.ChatUserGroupMapper;
 import io.renren.crmchat.dao.ChatUserMapper;
 import io.renren.crmchat.entity.ChatUserGroupEntity;
+import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import io.renren.crmchat.security.TenantGuard;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,26 +50,119 @@ public class TenantUserGroupService {
 
     private final ChatUserGroupMapper chatUserGroupMapper;
     private final ChatUserMapper chatUserMapper;
+    private final FormBuilder formBuilder;
 
     /**
-     * 获取分组列表
+     * 获取分组列表（分页）
      * GET /api/tenant/user/group
      *
      * PHP Reference: Group.php::index()
      *
      * 业务逻辑:
      * 1. 根据appid查询分组列表
-     * 2. 返回所有字段
+     * 2. 支持分页
+     * 3. 返回 data 和 count 字段
      *
-     * @return 分组列表
+     * @param page  页码
+     * @param limit 每页数量
+     * @return Map<String, Object> 包含 data 和 count
      */
-    public List<ChatUserGroupEntity> getGroupList() {
+    public Map<String, Object> getGroupList(Integer page, Integer limit) {
         // PHP: $this->services->getGroupList(['*'], true, $appid)
 
         QueryWrapper<ChatUserGroupEntity> wrapper = new QueryWrapper<>();
         wrapper.orderByAsc("id");
+        List<ChatUserGroupEntity> allGroups = chatUserGroupMapper.selectList(wrapper);
 
-        return chatUserGroupMapper.selectList(wrapper);
+        // 计算分页
+        int total = allGroups.size();
+        int start = (page - 1) * limit;
+        int end = Math.min(start + limit, total);
+
+        List<ChatUserGroupEntity> paginatedList;
+        if (start >= total) {
+            paginatedList = new ArrayList<>();
+        } else {
+            paginatedList = allGroups.subList(start, end);
+        }
+
+        // 前端期望 res.data.list 和 res.data.count 结构
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", paginatedList);
+        result.put("count", total);
+        return result;
+    }
+
+    /**
+     * 获取创建表单数据
+     * GET /api/tenant/user/group/create
+     *
+     * PHP Reference: Group.php::create() -> ChatUserGroupServices::add()
+     *
+     * PHP代码:
+     * public function add()
+     * {
+     *     $field[] = FormBuilder::input('group_name', '分组名称')->required();
+     *     return create_form('添加分组', $field, $this->url('/user/group'), 'POST');
+     * }
+     */
+    public Map<String, Object> getCreateForm() {
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 分组名称输入框
+        rules.add(formBuilder.input("group_name", "分组名称", "")
+            .required()
+            .placeholder("请输入分组名称"));
+
+        return FormHelper.createForm(
+            "添加分组",
+            rules,
+            "/user/group",
+            "POST"
+        );
+    }
+
+    /**
+     * 获取编辑表单数据
+     * GET /api/tenant/user/group/:id/edit
+     *
+     * PHP Reference: Group.php::edit() -> ChatUserGroupServices::add()
+     *
+     * PHP代码:
+     * public function add(int $id = 0)
+     * {
+     *     $groupInfo = $id ? $this->services->get($id) : [];
+     *     $field[] = FormBuilder::input('group_name', '分组名称', $groupInfo['group_name'] ?? '')->required();
+     *     return create_form($id ? '修改分组' : '添加分组', $field, $this->url('/user/group' . ($id ? ('/' . $id) : '')), $id ? 'PUT' : 'POST');
+     * }
+     */
+    public Map<String, Object> getEditForm(Integer id) {
+        if (id == null || id <= 0) {
+            throw new CrmChatException("Missing required parameter");
+        }
+
+        ChatUserGroupEntity group = chatUserGroupMapper.selectById(id);
+        if (group == null) {
+            throw new CrmChatException("Group does not exist");
+        }
+        TenantGuard.ensureOwnedByCurrentTenant(group.getAppid(), "Group does not exist");
+
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 隐藏字段：id
+        rules.add(formBuilder.hidden("id", id));
+
+        // 分组名称输入框（带默认值）
+        rules.add(formBuilder.input("group_name", "分组名称", group.getGroupName())
+            .required()
+            .placeholder("请输入分组名称"));
+
+        return FormHelper.createForm(
+            "修改分组",
+            rules,
+            "/user/group/" + id,
+            "PUT"
+        );
     }
 
     /**
@@ -84,7 +183,7 @@ public class TenantUserGroupService {
     public Integer createGroup(Map<String, Object> data) {
         // 1. PHP: if (!$data['group_name']) return $this->fail('请输入分组名称');
         if (!data.containsKey("group_name") || data.get("group_name") == null || data.get("group_name").toString().trim().isEmpty()) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please enter group name");
+            throw new CrmChatException("Please enter group name");
         }
 
         String groupName = data.get("group_name").toString();
@@ -95,7 +194,7 @@ public class TenantUserGroupService {
         Long count = chatUserGroupMapper.selectCount(wrapper);
 
         if (count > 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("This group already exists");
+            throw new CrmChatException("This group already exists");
         }
 
         // 3. 保存分组
@@ -104,7 +203,7 @@ public class TenantUserGroupService {
 
         int result = chatUserGroupMapper.insert(group);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Failed to add");
+            throw new CrmChatException("Failed to add");
         }
 
         return group.getId();
@@ -129,7 +228,7 @@ public class TenantUserGroupService {
     public void updateGroup(Integer id, Map<String, Object> data) {
         // 1. PHP: if (!$data['group_name']) return $this->fail('请输入分组名称');
         if (!data.containsKey("group_name") || data.get("group_name") == null || data.get("group_name").toString().trim().isEmpty()) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please enter group name");
+            throw new CrmChatException("Please enter group name");
         }
 
         String groupName = data.get("group_name").toString();
@@ -137,7 +236,7 @@ public class TenantUserGroupService {
         // 2. PHP: if (!$this->getGroup($id)) throw new AdminException('数据不存在');
         ChatUserGroupEntity group = chatUserGroupMapper.selectById(id);
         if (group == null) {
-            throw new io.renren.crmchat.exception.CrmChatException("Data does not exist");
+            throw new CrmChatException("Data does not exist");
         }
         TenantGuard.ensureOwnedByCurrentTenant(group.getAppid(), "Data does not exist");
 
@@ -148,7 +247,7 @@ public class TenantUserGroupService {
         Long count = chatUserGroupMapper.selectCount(wrapper);
 
         if (count > 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("This group already exists");
+            throw new CrmChatException("This group already exists");
         }
 
         // 4. 更新分组
@@ -156,7 +255,7 @@ public class TenantUserGroupService {
 
         int result = chatUserGroupMapper.updateById(group);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Modification failed or nothing was changed");
+            throw new CrmChatException("Modification failed or nothing was changed");
         }
     }
 
@@ -179,7 +278,7 @@ public class TenantUserGroupService {
         // 1. 验证分组存在
         ChatUserGroupEntity group = chatUserGroupMapper.selectById(id);
         if (group == null) {
-            throw new io.renren.crmchat.exception.CrmChatException("Data does not exist");
+            throw new CrmChatException("Data does not exist");
         }
         TenantGuard.ensureOwnedByCurrentTenant(group.getAppid(), "Data does not exist");
 
@@ -189,13 +288,13 @@ public class TenantUserGroupService {
         Long userCount = chatUserMapper.selectCount(userWrapper);
 
         if (userCount > 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please remove associated user groups first");
+            throw new CrmChatException("Please remove associated user groups first");
         }
 
         // 3. 删除分组
         int result = chatUserGroupMapper.deleteById(id);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Deletion failed, please try again later");
+            throw new CrmChatException("Deletion failed, please try again later");
         }
     }
 }

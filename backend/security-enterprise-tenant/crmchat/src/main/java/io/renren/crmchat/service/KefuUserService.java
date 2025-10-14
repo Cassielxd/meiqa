@@ -180,29 +180,73 @@ public class KefuUserService {
 
     /**
      * 获取用户标签
-     * PHP Reference: User.php::getUserLabel()
+     * PHP Reference: User.php::getUserLabel() -> ChatUserLabelCateServices::getLabelAll()
+     *
+     * 业务逻辑:
+     * 1. 查询所有标签分类(type=0)
+     * 2. 查询每个分类下的标签
+     * 3. 统计每个标签的用户数量
+     * 4. 如果传入用户ID，标记该用户已有的标签为disabled=true
+     *
+     * @param id 用户ID，如果为0或null则不标记已有标签
+     * @return 标签分类列表（每个分类包含标签列表）
      */
     public List<Map<String, Object>> getUserLabel(Integer id) {
-        // 获取所有标签分类
+        // 1. 获取所有标签分类 (type=0表示用户标签分类)
         QueryWrapper<ChatUserLabelCateEntity> cateWrapper = new QueryWrapper<>();
-        cateWrapper.eq("is_show", 1);
+        cateWrapper.eq("type", 0);
         cateWrapper.orderByAsc("sort");
         List<ChatUserLabelCateEntity> categories = chatUserLabelCateMapper.selectList(cateWrapper);
 
+        // 2. 如果传入用户ID，获取该用户已有的标签ID列表
+        Set<Integer> userLabelIds = new HashSet<>();
+        if (id != null && id > 0) {
+            List<ChatUserLabelAssistEntity> userLabels = chatUserLabelAssistMapper.selectList(
+                new QueryWrapper<ChatUserLabelAssistEntity>().eq("user_id", id)
+            );
+            userLabelIds = userLabels.stream()
+                .map(ChatUserLabelAssistEntity::getLabelId)
+                .collect(Collectors.toSet());
+        }
+
+        // 3. 构建返回结果
         List<Map<String, Object>> result = new ArrayList<>();
         for (ChatUserLabelCateEntity cate : categories) {
             Map<String, Object> item = new HashMap<>();
             item.put("id", cate.getId());
             item.put("name", cate.getName());
 
-            // 获取分类下的标签
+            // 获取分类下的所有标签
             QueryWrapper<ChatUserLabelEntity> labelWrapper = new QueryWrapper<>();
-            labelWrapper.eq("label_cate", cate.getId());
-            labelWrapper.eq("is_show", 1);
+            labelWrapper.eq("cate_id", cate.getId());
             labelWrapper.orderByAsc("sort");
             List<ChatUserLabelEntity> labels = chatUserLabelMapper.selectList(labelWrapper);
 
-            item.put("labels", labels);
+            // 转换为Map列表，添加disabled标记和用户数量统计
+            List<Map<String, Object>> labelList = new ArrayList<>();
+            for (ChatUserLabelEntity label : labels) {
+                Map<String, Object> labelMap = new HashMap<>();
+                labelMap.put("id", label.getId());
+                labelMap.put("label", label.getLabel());
+                labelMap.put("cate_id", label.getCateId());
+                labelMap.put("sort", label.getSort());
+                labelMap.put("user_id", label.getUserId());
+                labelMap.put("appid", label.getAppid());
+
+                // 标记该用户是否已有此标签
+                boolean hasLabel = userLabelIds.contains(label.getId());
+                labelMap.put("disabled", hasLabel);
+
+                // 统计使用此标签的用户数量
+                Long countUser = chatUserLabelAssistMapper.selectCount(
+                    new QueryWrapper<ChatUserLabelAssistEntity>().eq("label_id", label.getId())
+                );
+                labelMap.put("count_user", countUser);
+
+                labelList.add(labelMap);
+            }
+
+            item.put("label", labelList);
             result.add(item);
         }
 

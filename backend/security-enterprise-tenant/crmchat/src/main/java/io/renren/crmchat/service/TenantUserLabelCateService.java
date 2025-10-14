@@ -4,12 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.crmchat.dao.ChatUserLabelCateMapper;
 import io.renren.crmchat.dao.ChatUserLabelMapper;
 import io.renren.crmchat.entity.ChatUserLabelCateEntity;
+import io.renren.crmchat.exception.CrmChatException;
+import io.renren.crmchat.formbuilder.FormBuilder;
+import io.renren.crmchat.formbuilder.FormHelper;
+import io.renren.crmchat.formbuilder.components.BaseComponent;
 import io.renren.crmchat.security.TenantGuard;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +49,7 @@ public class TenantUserLabelCateService {
 
     private final ChatUserLabelCateMapper chatUserLabelCateMapper;
     private final ChatUserLabelMapper chatUserLabelMapper;
+    private final FormBuilder formBuilder;
 
     /**
      * 获取分类列表
@@ -53,15 +60,80 @@ public class TenantUserLabelCateService {
      * 业务逻辑:
      * 1. 根据type=0和appid查询分类列表
      *
-     * @return 分类列表
+     * @return 分类列表（包装在Map中，前端期望res.data.data和count结构）
      */
-    public List<ChatUserLabelCateEntity> getCateList() {
+    public Map<String, Object> getCateList() {
         // PHP: $this->services->getCateList(['type' => 0, "appid" => $appid])
 
         QueryWrapper<ChatUserLabelCateEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("type", 0);
         wrapper.orderByAsc("id");
-        return chatUserLabelCateMapper.selectList(wrapper);
+        List<ChatUserLabelCateEntity> list = chatUserLabelCateMapper.selectList(wrapper);
+
+        // 前端期望 res.data.data 和 res.data.count 结构
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("count", list.size());
+        return result;
+    }
+
+    /**
+     * 获取创建表单数据
+     * GET /api/tenant/user/label/cate/create
+     *
+     * PHP Reference: LabelCate.php::create() -> ChatUserLabelCateServices::getCreateForm()
+     *
+     * @return 表单配置数据
+     */
+    public Map<String, Object> getCreateForm() {
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 分类名称输入框
+        rules.add(formBuilder.input("name", "分类名称", "")
+            .required()
+            .placeholder("请输入分类名称"));
+
+        return FormHelper.createForm(
+            "添加标签分类",
+            rules,
+            "/user/label/cate",
+            "POST"
+        );
+    }
+
+    /**
+     * 获取编辑表单数据
+     * GET /api/tenant/user/label/cate/:id/edit
+     *
+     * PHP Reference: LabelCate.php::edit() -> ChatUserLabelCateServices::getEditForm()
+     *
+     * @param id 分类ID
+     * @return 表单配置数据
+     */
+    public Map<String, Object> getEditForm(Integer id) {
+        if (id == null || id <= 0) {
+            throw new CrmChatException("Missing required parameter");
+        }
+
+        ChatUserLabelCateEntity cate = chatUserLabelCateMapper.selectById(id);
+        if (cate == null) {
+            throw new CrmChatException("Category does not exist");
+        }
+        // Category是平台级配置，不需要租户检查
+
+        List<BaseComponent> rules = new ArrayList<>();
+
+        // 分类名称输入框（带默认值）
+        rules.add(formBuilder.input("name", "分类名称", cate.getName())
+            .required()
+            .placeholder("请输入分类名称"));
+
+        return FormHelper.createForm(
+            "修改标签分类",
+            rules,
+            "/user/label/cate/" + id,
+            "PUT"
+        );
     }
 
     /**
@@ -84,7 +156,7 @@ public class TenantUserLabelCateService {
     public Integer createCate(Map<String, Object> data) {
         // 1. PHP: if (!$data['name']) return $this->fail('请输入分类名称');
         if (!data.containsKey("name") || data.get("name") == null || data.get("name").toString().trim().isEmpty()) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please enter category name");
+            throw new CrmChatException("Please enter category name");
         }
 
         String name = data.get("name").toString();
@@ -96,7 +168,7 @@ public class TenantUserLabelCateService {
         Long count = chatUserLabelCateMapper.selectCount(wrapper);
 
         if (count > 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Category name already exists");
+            throw new CrmChatException("Category name already exists");
         }
 
         // 3. PHP: $data['type'] = 0; $data['add_time'] = time(); $data["appid"] = $appid;
@@ -114,7 +186,7 @@ public class TenantUserLabelCateService {
         // 4. PHP: $res = $this->services->save($data);
         int result = chatUserLabelCateMapper.insert(cate);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Failed to add");
+            throw new CrmChatException("Failed to add");
         }
 
         // 5. PHP: $this->services->update($res->id, ['sort' => $res->id]);
@@ -142,7 +214,7 @@ public class TenantUserLabelCateService {
     public void updateCate(Integer id, Map<String, Object> data) {
         // 1. PHP: if (!$data['name']) return $this->fail('请输入分类名称');
         if (!data.containsKey("name") || data.get("name") == null || data.get("name").toString().trim().isEmpty()) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please enter category name");
+            throw new CrmChatException("Please enter category name");
         }
 
         String name = data.get("name").toString();
@@ -150,7 +222,7 @@ public class TenantUserLabelCateService {
         // 2. 验证分类存在
         ChatUserLabelCateEntity cate = chatUserLabelCateMapper.selectById(id);
         if (cate == null) {
-            throw new io.renren.crmchat.exception.CrmChatException("Missing required parameter");
+            throw new CrmChatException("Missing required parameter");
         }
         // Category是平台级配置，不需要租户检查
 
@@ -164,7 +236,7 @@ public class TenantUserLabelCateService {
 
         int result = chatUserLabelCateMapper.updateById(cate);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Failed to modify");
+            throw new CrmChatException("Failed to modify");
         }
     }
 
@@ -187,7 +259,7 @@ public class TenantUserLabelCateService {
         // 1. PHP: if (!$id) return $this->fail('缺少参数');
         ChatUserLabelCateEntity cate = chatUserLabelCateMapper.selectById(id);
         if (cate == null) {
-            throw new io.renren.crmchat.exception.CrmChatException("Missing required parameter");
+            throw new CrmChatException("Missing required parameter");
         }
         // Category是平台级配置，不需要租户检查
 
@@ -197,13 +269,13 @@ public class TenantUserLabelCateService {
         Long labelCount = chatUserLabelMapper.selectCount(labelWrapper);
 
         if (labelCount > 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please delete tags under this category first");
+            throw new CrmChatException("Please delete tags under this category first");
         }
 
         // 3. 删除分类
         int result = chatUserLabelCateMapper.deleteById(id);
         if (result <= 0) {
-            throw new io.renren.crmchat.exception.CrmChatException("Failed to delete");
+            throw new CrmChatException("Failed to delete");
         }
     }
 

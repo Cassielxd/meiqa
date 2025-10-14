@@ -693,7 +693,7 @@ public class AdminTenantService {
 
         // 1. 总租户数
         Long total = tenantsMapper.selectCount(new QueryWrapper<>());
-        stats.put("total", total);
+        stats.put("total", total.intValue());
 
         // 2. 按状态统计
         QueryWrapper<TenantsEntity> enabledWrapper = new QueryWrapper<>();

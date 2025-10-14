@@ -161,18 +161,28 @@ public class KefuServiceController {
 
     /**
      * 获取分类列表
-     * GET /api/kefu/service/cate
+     * GET /api/kefu/service/cate?type=1
      *
-     * PHP Reference: Service.php::getCateList()
+     * PHP Reference: Service.php::getCateList($type)
      *
      * Query Parameters:
+     * - type: 分类类型（可选，默认1）
+     *   - 1: 个人分类（owner_id = kefuId）
+     *   - 0: 系统分类（owner_id = 0）
      * - name: 分类名称（可选，模糊查询）
      *
-     * Response: 个人分类列表
+     * PHP逻辑:
+     * return $this->success($services->getCateList([
+     *     'owner_id' => $type ? $this->kefuId : 0,
+     *     'type' => 1
+     * ], ['id', 'name', 'sort']));
+     *
+     * Response: 分类列表（个人或系统）
      */
     @GetMapping("/cate")
     @Operation(summary = "Get Category List")
     public ApiResult<List<ChatServiceSpeechcraftCateEntity>> getCateList(
+            @RequestParam(required = false, defaultValue = "1") Integer type,
             @RequestParam(required = false) String name) {
 
         // 从JWT token中获取当前客服信息
@@ -184,7 +194,7 @@ public class KefuServiceController {
             filters.put("name", name);
         }
 
-        List<ChatServiceSpeechcraftCateEntity> list = kefuServiceService.getCateList(filters, kefuId);
+        List<ChatServiceSpeechcraftCateEntity> list = kefuServiceService.getCateList(filters, kefuId, type);
         return ApiResult.ok(list);
     }
 

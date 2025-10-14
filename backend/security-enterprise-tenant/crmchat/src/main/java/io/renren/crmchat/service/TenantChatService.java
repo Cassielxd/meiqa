@@ -132,7 +132,7 @@ public class TenantChatService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
         result.put("data", data);
 
         return result;
@@ -325,7 +325,7 @@ public class TenantChatService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
 
         return result;
     }

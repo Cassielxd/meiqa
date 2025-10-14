@@ -70,7 +70,7 @@ public class SystemGroupService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", list);
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
         return result;
     }
 

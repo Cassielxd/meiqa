@@ -109,7 +109,7 @@ public class KefuChatService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
 
         return result;
     }
@@ -232,7 +232,7 @@ public class KefuChatService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
 
         return result;
     }

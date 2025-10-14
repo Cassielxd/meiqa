@@ -166,12 +166,31 @@ public class KefuServiceService {
     }
 
     /**
-     * 获取个人快捷话术分类列表。
+     * 获取快捷话术分类列表（个人或系统）
+     *
+     * PHP Reference: Service.php::getCateList($type)
+     * PHP逻辑: $services->getCateList(['owner_id' => $type ? $this->kefuId : 0, 'type' => 1])
+     *
+     * @param filters 过滤条件（name）
+     * @param kefuId  客服ID
+     * @param type    分类类型：1=个人分类（owner_id=kefuId），0=系统分类（owner_id=0）
+     * @return 分类列表
      */
-    public List<ChatServiceSpeechcraftCateEntity> getCateList(Map<String, Object> filters, Integer kefuId) {
+    public List<ChatServiceSpeechcraftCateEntity> getCateList(Map<String, Object> filters, Integer kefuId, Integer type) {
         QueryWrapper<ChatServiceSpeechcraftCateEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("owner_id", kefuId);
+
+        // PHP: 'owner_id' => $type ? $this->kefuId : 0
+        if (type != null && type == 1) {
+            // type=1: 查询个人分类
+            wrapper.eq("owner_id", kefuId);
+        } else {
+            // type=0: 查询系统分类
+            wrapper.eq("owner_id", 0);
+        }
+
+        // PHP: 'type' => 1（快捷话术分类，不是用户标签分类）
         wrapper.eq("type", 1);
+
         if (filters.containsKey("name") && filters.get("name") != null && !filters.get("name").toString().isEmpty()) {
             wrapper.like("name", filters.get("name"));
         }

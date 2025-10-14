@@ -212,25 +212,42 @@ public class KefuAuxiliaryController {
      *
      * PHP Reference: User.php::upload()
      *
+     * PHP逻辑:
+     * 1. 接收filename参数（文件）
+     * 2. 验证参数非空
+     * 3. 检查上传频率限制（每天最多100次）
+     * 4. 上传到 store/comment 目录
+     * 5. 保存附件记录
+     * 6. 返回文件名和完整URL
+     *
      * Request: multipart/form-data
-     * - filename: 上传的文件
+     * - filename: 上传的文件（兼容file参数）
      *
      * Response:
      * {
      *   "name": "file.jpg",           // 文件名
-     *   "url": "http://...file.jpg"  // 文件URL
+     *   "url": "http://...file.jpg"  // 文件完整URL
      * }
-     *
      */
     @PostMapping("/upload")
     @Operation(summary = "File Upload")
-    public ApiResult<Map<String, Object>> upload(@RequestParam("filename") MultipartFile file) {
+    public ApiResult<Map<String, Object>> upload(
+            @RequestParam(value = "filename", required = false) MultipartFile filename,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+
+        // 兼容两种参数名：filename 和 file
+        MultipartFile uploadFile = filename != null ? filename : file;
+
+        if (uploadFile == null || uploadFile.isEmpty()) {
+            return ApiResult.fail("Invalid parameters");
+        }
+
         // 从JWT token中获取当前客服信息
         Long userId = UserContext.getUserId();
         Integer kefuId = userId != null ? userId.intValue() : null;
         String appid = UserContext.getAppid();
 
-        Map<String, Object> result = kefuAuxiliaryService.upload(kefuId, appid, file);
+        Map<String, Object> result = kefuAuxiliaryService.upload(kefuId, appid, uploadFile);
         return ApiResult.ok("Image uploaded successfully", result);
     }
 }

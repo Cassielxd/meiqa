@@ -92,7 +92,7 @@ public class TenantServiceFeedbackService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("data", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
 
         return result;
     }

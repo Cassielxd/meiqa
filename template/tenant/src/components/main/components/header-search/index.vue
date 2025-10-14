@@ -19,7 +19,7 @@
   .search .select .ivu-select-input,.search .select .ivu-select-item{font-size: 14px!important;}
 </style>
 <script>
-    import { getStaticMenusData } from '@/data/static-menus'
+    import { getStaticMenusAPI } from '@/data/static-menus'
 
     export default {
         name: 'iHeaderSearch',
@@ -38,7 +38,7 @@
         methods: {
             getMenusList () {
                 this.loading = true
-                getStaticMenusData().then(res => {
+                getStaticMenusAPI().then(res => {
                     this.loading = false
                     this.menusList = res.data
                 })

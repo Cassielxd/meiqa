@@ -30,29 +30,73 @@ public class TenantUserGroupController {
     private final TenantUserGroupService tenantUserGroupService;
 
     /**
-     * 获取分组列表
-     * GET /api/tenant/user/group
+     * 获取分组列表（分页）
+     * GET /api/tenant/user/group?page=1&limit=15
      *
      * PHP Reference: Group.php::index()
      *
      * Response:
-     * [
-     *   {
-     *     "id": 1,
-     *     "group_name": "VIP Customer",
-     *     "appid": "202517350001234"
-     *   }
-     * ]
+     * {
+     *   "list": [
+     *     {
+     *       "id": 1,
+     *       "group_name": "VIP Customer",
+     *       "appid": "202517350001234"
+     *     }
+     *   ],
+     *   "count": 10
+     * }
      */
     @GetMapping
     @Operation(summary = "Get Group List")
-    public ApiResult<List<ChatUserGroupEntity>> getGroupList() {
+    public ApiResult<Map<String, Object>> getGroupList(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "15") Integer limit) {
 
         String appid = requireAppid();
-        log.info("[租户API] user/group/list - appid={}", appid);
+        log.info("[租户API] user/group/list - appid={}, page={}, limit={}", appid, page, limit);
 
-        List<ChatUserGroupEntity> list = tenantUserGroupService.getGroupList();
-        return ApiResult.ok(list);
+        Map<String, Object> result = tenantUserGroupService.getGroupList(page, limit);
+        log.info("[租户API] user/group/list - appid={}, count={}", appid, result.get("count"));
+        return ApiResult.ok(result);
+    }
+
+    /**
+     * 获取创建表单
+     * GET /api/tenant/user/group/create
+     *
+     * PHP Reference: Group.php::create()
+     *
+     * Response: FormBuilder 表单配置
+     */
+    @GetMapping("/create")
+    @Operation(summary = "Get Create Form")
+    public ApiResult<Map<String, Object>> getCreateForm() {
+
+        String appid = requireAppid();
+        log.info("[租户API] user/group/create - appid={}", appid);
+
+        Map<String, Object> result = tenantUserGroupService.getCreateForm();
+        return ApiResult.ok(result);
+    }
+
+    /**
+     * 获取编辑表单
+     * GET /api/tenant/user/group/:id/edit
+     *
+     * PHP Reference: Group.php::edit()
+     *
+     * Response: FormBuilder 表单配置
+     */
+    @GetMapping("/{id}/edit")
+    @Operation(summary = "Get Edit Form")
+    public ApiResult<Map<String, Object>> getEditForm(@PathVariable Integer id) {
+
+        String appid = requireAppid();
+        log.info("[租户API] user/group/edit - appid={}, groupId={}", appid, id);
+
+        Map<String, Object> result = tenantUserGroupService.getEditForm(id);
+        return ApiResult.ok(result);
     }
 
     /**

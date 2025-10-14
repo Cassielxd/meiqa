@@ -81,7 +81,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations(fileUrl + "merchant/")
                 .setCachePeriod(3600);
 
-        log.info("Static resource handlers configured for: /tenant/**, /admin/**, /merchant/**");
+        // 映射租户ID目录（appid）
+        // 例如：http://localhost:20108/202517603242434426/kefu/2025-10-14/xxx.png
+        // 映射到：file:///path/to/uploads/202517603242434426/kefu/2025-10-14/xxx.png
+        // PHP逻辑：文件存储在 uploads/{appid}/{module}/{date}/文件名
+        registry.addResourceHandler("/{appid:[0-9]+}/**")
+                .addResourceLocations(fileUrl)
+                .setCachePeriod(3600);
+
+        log.info("Static resource handlers configured for: /tenant/**, /admin/**, /merchant/**, /{appid}/**");
     }
 
     /**

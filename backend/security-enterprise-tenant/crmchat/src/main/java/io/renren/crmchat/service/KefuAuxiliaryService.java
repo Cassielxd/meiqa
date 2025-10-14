@@ -440,11 +440,20 @@ public class KefuAuxiliaryService {
             contentType = "application/octet-stream";
         }
 
+        // PHP逻辑: 确保URL包含完整域名
+        // $res['dir'] = path_to_url($res['dir']);
+        // if (strpos($res['dir'], 'http') === false) $res['dir'] = $request->domain() . $res['dir'];
+        String completeUrl = fileUrl;
+        if (!fileUrl.startsWith("http://") && !fileUrl.startsWith("https://")) {
+            // 如果fileUrl不包含http协议，使用getFileUrl确保返回完整URL
+            completeUrl = fileService.getFileUrl(fileUrl);
+        }
+
         SystemAttachmentEntity attachment = new SystemAttachmentEntity();
         attachment.setName(originalFilename);
         attachment.setRealName(originalFilename);
-        attachment.setAttDir(fileUrl);
-        attachment.setSattDir(fileUrl);
+        attachment.setAttDir(completeUrl);
+        attachment.setSattDir(completeUrl);
         attachment.setAttSize(String.valueOf(fileSize));
         attachment.setAttType(contentType);
         attachment.setImageType(1);
@@ -457,7 +466,7 @@ public class KefuAuxiliaryService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("name", originalFilename);
-        result.put("url", fileUrl);
+        result.put("url", completeUrl);
         result.put("att_id", attachment.getAttId());
         result.put("att_size", attachment.getAttSize());
         result.put("att_type", attachment.getAttType());

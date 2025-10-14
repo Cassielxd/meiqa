@@ -102,7 +102,7 @@ public class KefuServiceExtensionService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", pageResult.getRecords());
-        result.put("count", pageResult.getTotal());
+        result.put("count", (int) pageResult.getTotal());
 
         return result;
     }

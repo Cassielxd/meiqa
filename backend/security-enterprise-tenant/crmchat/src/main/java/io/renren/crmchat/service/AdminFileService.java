@@ -145,12 +145,20 @@ public class AdminFileService {
         long fileSize = file.getSize();
         String contentType = file.getContentType();
 
-        // 4. 创建附件记录（PHP逻辑）
+        // 4. PHP逻辑: 确保URL包含完整域名前缀
+        // PHP: path_to_url($res['dir'])
+        // PHP: if (strpos($res['dir'], 'http') === false) $res['dir'] = $request->domain() . $res['dir'];
+        String completeUrl = filePath;
+        if (!filePath.startsWith("http://") && !filePath.startsWith("https://")) {
+            completeUrl = fileService.getFileUrl(filePath);
+        }
+
+        // 5. 创建附件记录（PHP逻辑）
         SystemAttachmentEntity attachment = new SystemAttachmentEntity();
         attachment.setName(originalFilename);
         attachment.setRealName(originalFilename);
-        attachment.setAttDir(filePath);
-        attachment.setSattDir(filePath); // 缩略图路径（简化版，与原图相同）
+        attachment.setAttDir(completeUrl);
+        attachment.setSattDir(completeUrl); // 缩略图路径（简化版，与原图相同）
         attachment.setAttSize(String.valueOf(fileSize));
         attachment.setAttType(contentType);
         attachment.setImageType(uploadType);
@@ -158,13 +166,13 @@ public class AdminFileService {
         attachment.setTime((int) (System.currentTimeMillis() / 1000));
         attachment.setPid(pid);
 
-        // 5. 保存到数据库
+        // 6. 保存到数据库
         int result = systemAttachmentMapper.insert(attachment);
         if (result <= 0) {
             throw new CrmChatException("Failed to save attachment record");
         }
 
-        // 6. 返回附件信息（PHP格式）
+        // 7. 返回附件信息（PHP格式，包含完整URL）
         Map<String, Object> response = new HashMap<>();
         response.put("att_id", attachment.getAttId());
         response.put("name", attachment.getName());

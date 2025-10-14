@@ -64,7 +64,7 @@ public class AdminSpeechcraftService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("list", result.getRecords());
-        response.put("count", result.getTotal());
+        response.put("count", (int) result.getTotal());
         return response;
     }
 
