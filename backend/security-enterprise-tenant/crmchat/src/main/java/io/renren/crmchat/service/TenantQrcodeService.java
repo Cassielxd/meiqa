@@ -189,15 +189,16 @@ public class TenantQrcodeService {
         QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("appid", appid);
         wrapper.eq("status", 1); // 只获取启用的客服
-        wrapper.select("id", "nickname", "account");
+        wrapper.select("id", "account");
 
         List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
 
         // 构建options数组
+        // PHP: field(['account as label', 'id as value'])
         List<Map<String, Object>> options = new ArrayList<>();
         for (ChatServiceEntity kefu : kefuList) {
             Map<String, Object> option = new HashMap<>();
-            option.put("label", kefu.getNickname() != null ? kefu.getNickname() : kefu.getAccount());
+            option.put("label", kefu.getAccount());  // PHP使用account作为label，不是nickname
             option.put("value", kefu.getId());
             options.add(option);
         }
@@ -234,7 +235,8 @@ public class TenantQrcodeService {
         // PHP: return create_form($id ? '编辑二维码' : '添加二维码', $rule, '/chat/qrcode/' . $id);
 
         String title = (id != null && id > 0) ? "编辑二维码" : "添加二维码";
-        String action = "/api/tenant/chat/qrcode/" + (id != null && id > 0 ? id : 0);
+        // 注意：action 使用相对路径（不包含 /api/tenant），前端会自动添加 base URL
+        String action = "/chat/qrcode/" + (id != null && id > 0 ? id : 0);
 
         return FormHelper.createForm(title, components, action, "POST");
     }
@@ -268,7 +270,7 @@ public class TenantQrcodeService {
             throw new CrmChatException("Please enter QR code name");
         }
 
-        String name = data.get("name").toString();
+        String name = data.get("name").toString().trim();
 
         // 处理user_ids
         List<Integer> userIds = new ArrayList<>();
@@ -279,6 +281,11 @@ public class TenantQrcodeService {
                         .map(obj -> Integer.parseInt(obj.toString()))
                         .collect(Collectors.toList());
             }
+        }
+
+        // 验证user_ids不为空（必填）
+        if (userIds.isEmpty()) {
+            throw new CrmChatException("Please select at least one customer service");
         }
 
         // 处理sort
@@ -305,8 +312,11 @@ public class TenantQrcodeService {
                 throw new CrmChatException("Failed to modify");
             }
         } else {
-            // 创建
+            // 创建 - 需要获取当前租户的appid
+            String appid = io.renren.crmchat.security.TenantSecurityUtils.requireAppid();
+
             QrcodeEntity qrcode = new QrcodeEntity();
+            qrcode.setAppid(appid);  // 重要：设置appid，确保租户隔离
             qrcode.setName(name);
             qrcode.setUserIds(userIds);
             qrcode.setSort(sort);

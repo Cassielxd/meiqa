@@ -88,6 +88,42 @@ public class SelectComponent extends BaseComponent {
         return this;
     }
 
+    /**
+     * 重写 required() 方法以支持多选时的数组验证
+     * 对应PHP: Select::createValidate()
+     *
+     * PHP逻辑:
+     * - multiple=true 时返回 Iview::validateArr() (type: 'array')
+     * - multiple=false 时返回 Iview::validateStr() (type: 'string')
+     */
+    @Override
+    public SelectComponent required() {
+        return required(true);
+    }
+
+    @Override
+    public SelectComponent required(boolean required) {
+        this.required = required;
+        if (required) {
+            java.util.Map<String, Object> rule = new java.util.HashMap<>();
+            rule.put("required", true);
+            rule.put("message", this.title + " is required");
+            rule.put("trigger", "change");  // PHP使用change而不是blur
+
+            // 关键：根据multiple属性设置正确的type
+            // PHP: if ($this->props['multiple'] == true) return Iview::validateArr();
+            Object multipleValue = this.props.get("multiple");
+            if (multipleValue != null && (Boolean) multipleValue) {
+                rule.put("type", "array");  // 多选时必须使用array类型
+            } else {
+                rule.put("type", "string");  // 单选时使用string类型
+            }
+
+            this.validate.add(rule);
+        }
+        return this;
+    }
+
     @Override
     public java.util.Map<String, Object> toMap() {
         java.util.Map<String, Object> map = super.toMap();
