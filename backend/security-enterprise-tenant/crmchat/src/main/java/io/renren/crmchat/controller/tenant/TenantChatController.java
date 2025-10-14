@@ -66,17 +66,26 @@ public class TenantChatController {
     @Operation(summary = "Get All Chat Users")
     public ApiResult<Map<String, Object>> getServiceRecordList(
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) String time) {
+            @RequestParam(required = false) String nickname,
+            @RequestParam(required = false) String time,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "15") Integer limit) {
 
         requireAppid();
 
         Map<String, Object> filters = new HashMap<>();
+        // Support both 'title' and 'nickname' (frontend sends 'nickname')
         if (title != null && !title.trim().isEmpty()) {
             filters.put("title", title);
+        }
+        if (nickname != null && !nickname.trim().isEmpty()) {
+            filters.put("nickname", nickname);
         }
         if (time != null && !time.trim().isEmpty()) {
             filters.put("time", time);
         }
+        filters.put("page", page);
+        filters.put("limit", limit);
 
         Map<String, Object> result = tenantChatService.getServiceRecordList(filters);
         return ApiResult.ok(result);
@@ -125,6 +134,17 @@ public class TenantChatController {
         filters.put("limit", limit);
 
         Map<String, Object> result = tenantChatService.getChatMessageList(filters);
+        return ApiResult.ok(result);
+    }
+
+    /**
+     * 调试端点：查看数据库里的实际数据
+     */
+    @GetMapping("/debug/database")
+    @Operation(summary = "Debug Database Data")
+    public ApiResult<Map<String, Object>> debugDatabase() {
+        String appid = requireAppid();
+        Map<String, Object> result = tenantChatService.debugDatabaseData(appid);
         return ApiResult.ok(result);
     }
 

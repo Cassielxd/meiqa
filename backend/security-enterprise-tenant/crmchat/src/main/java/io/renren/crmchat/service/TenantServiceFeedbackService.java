@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.renren.crmchat.dao.ChatServiceFeedbackMapper;
 import io.renren.crmchat.entity.ChatServiceFeedbackEntity;
 import io.renren.crmchat.security.TenantGuard;
+import io.renren.crmchat.security.TenantSecurityUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,10 +56,20 @@ public class TenantServiceFeedbackService {
         // PHP: $where['appid']=$appid;
         // PHP: return $this->success($this->services->getFeedbackList($where));
 
+        // 获取当前租户appid并添加过滤条件（多租户隔离）
+        String appid = TenantSecurityUtils.requireAppid();
+
         QueryWrapper<ChatServiceFeedbackEntity> wrapper = new QueryWrapper<>();
 
+        // 关键：必须按appid过滤，确保租户数据隔离
+        wrapper.eq("appid", appid);
+
+        // 前端传来的title参数，实际搜索content、rela_name、phone字段
         if (filters.containsKey("title") && filters.get("title") != null && !filters.get("title").toString().isEmpty()) {
-            wrapper.like("title", filters.get("title"));
+            String searchKey = filters.get("title").toString();
+            wrapper.and(w -> w.like("content", searchKey)
+                    .or().like("rela_name", searchKey)
+                    .or().like("phone", searchKey));
         }
 
         if (filters.containsKey("time") && filters.get("time") != null && !filters.get("time").toString().trim().isEmpty()) {
