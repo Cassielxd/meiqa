@@ -36,11 +36,6 @@ public class ChatServiceFeedbackEntity implements Serializable {
     private String phone;
 
     /**
-     * 标题
-     */
-    private String title;
-
-    /**
      * 内容
      */
     private String content;

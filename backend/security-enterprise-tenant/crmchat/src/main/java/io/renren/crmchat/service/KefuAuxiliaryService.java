@@ -197,15 +197,13 @@ public class KefuAuxiliaryService {
         // 4. 创建反馈记录
         ChatServiceFeedbackEntity feedback = new ChatServiceFeedbackEntity();
         feedback.setUserId(userId);
-        feedback.setTitle(relaName); // PHP中的rela_name对应title字段
+        feedback.setRelaName(relaName); // 联系人姓名
+        feedback.setPhone(phone); // 联系电话
         feedback.setContent(content);
+        feedback.setMake(""); // 备注初始为空
         feedback.setAddTime((int) (System.currentTimeMillis() / 1000));
         feedback.setAppid(currentAppid);
         feedback.setStatus(0); // 未处理
-
-        // 注意：ChatServiceFeedback表可能没有phone和rela_name字段
-        // 如果有make字段，可以将联系方式存入make
-        feedback.setMake("Contact: " + relaName + ", Phone: " + phone);
 
         int result = chatServiceFeedbackMapper.insert(feedback);
         if (result <= 0) {
