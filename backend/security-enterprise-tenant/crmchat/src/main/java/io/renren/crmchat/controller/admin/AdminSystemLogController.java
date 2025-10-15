@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -53,14 +54,18 @@ public class AdminSystemLogController {
             @RequestParam(defaultValue = "20") Integer limit) {
 
         // PHP: $where['data'] - 时间范围参数
-        Long startTime = null;
-        Long endTime = null;
+        // 将前端传来的 Unix 时间戳（秒）转换为 Timestamp 对象
+        Timestamp startTime = null;
+        Timestamp endTime = null;
         if (data != null && !data.isEmpty()) {
             String[] times = data.split(",");
             if (times.length == 2) {
                 try {
-                    startTime = Long.parseLong(times[0].trim());
-                    endTime = Long.parseLong(times[1].trim());
+                    long startUnix = Long.parseLong(times[0].trim());
+                    long endUnix = Long.parseLong(times[1].trim());
+                    // Unix 时间戳是秒，需要转换为毫秒
+                    startTime = new Timestamp(startUnix * 1000);
+                    endTime = new Timestamp(endUnix * 1000);
                 } catch (NumberFormatException e) {
                     log.warn("Invalid time format: {}", data);
                 }

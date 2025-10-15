@@ -75,9 +75,20 @@ export default {
   filters: {
     formatDate(time) {
       if(time !== 0) {
+        // 如果是字符串格式的日期
+        if (typeof time === 'string') {
+          // 检查是否包含"1969"(Jackson错误格式化的标志),直接忽略显示
+          if (time.includes('1969')) {
+            return '-'
+          }
+          // 正常的日期字符串,直接返回
+          return time
+        }
+        // 数字类型,按Unix时间戳处理
         let date = new Date(time * 1000)
         return formatDate(date, 'yyyy-MM-dd hh:mm')
       }
+      return '-'
     }
   },
   data() {

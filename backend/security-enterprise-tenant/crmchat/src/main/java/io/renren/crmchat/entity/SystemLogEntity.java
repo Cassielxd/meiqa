@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * 系统日志实体
@@ -81,9 +82,10 @@ public class SystemLogEntity implements Serializable {
     private String type;
 
     /**
-     * 添加时间 (Unix timestamp秒数)
+     * 操作时间
      * JSON: add_time
+     * 参考 TenantsEntity.createdAt 的实现方式
      */
     @JsonProperty("add_time")
-    private Long addTime;
+    private Timestamp addTime;
 }

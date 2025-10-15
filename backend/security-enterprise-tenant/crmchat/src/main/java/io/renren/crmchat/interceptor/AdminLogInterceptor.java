@@ -100,7 +100,7 @@ public class AdminLogInterceptor implements HandlerInterceptor {
             logEntity.setPage(page);
             logEntity.setIp(ip);
             logEntity.setType(type);
-            logEntity.setAddTime(System.currentTimeMillis() / 1000); // Unix timestamp
+            logEntity.setAddTime(new java.sql.Timestamp(System.currentTimeMillis())); // 当前时间戳
 
             // PHP: $this->dao->save($data)
             int result = systemLogMapper.insert(logEntity);

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +35,14 @@ public class SystemLogService {
      * @param path 路径搜索
      * @param ip IP地址搜索
      * @param adminId 管理员ID筛选
-     * @param startTime 开始时间 (Unix timestamp)
-     * @param endTime 结束时间 (Unix timestamp)
+     * @param startTime 开始时间 (Timestamp)
+     * @param endTime 结束时间 (Timestamp)
      * @param page 页码
      * @param limit 每页数量
      * @return {list: [], count: N}
      */
     public Map<String, Object> getLogList(String pages, String path, String ip,
-                                          Integer adminId, Long startTime, Long endTime,
+                                          Integer adminId, Timestamp startTime, Timestamp endTime,
                                           Integer page, Integer limit) {
         QueryWrapper<SystemLogEntity> query = new QueryWrapper<>();
 

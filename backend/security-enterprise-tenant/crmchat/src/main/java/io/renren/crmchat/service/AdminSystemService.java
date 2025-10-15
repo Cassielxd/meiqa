@@ -156,9 +156,10 @@ public class AdminSystemService {
         map.put("type", entity.getType());
 
         // PHP返回的add_time格式化为日期字符串 "2025-01-01 10:00:00"
+        // Timestamp 可以直接传给 SimpleDateFormat.format()
         if (entity.getAddTime() != null) {
             map.put("add_time", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                    .format(new Date(entity.getAddTime() * 1000)));
+                    .format(entity.getAddTime()));
         }
 
         return map;
