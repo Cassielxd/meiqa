@@ -226,10 +226,12 @@ public class AdminUserService {
         }
 
         // 使用UserFormBuilder构建表单配置
+        // Admin端使用 /admin/widget.images/index.html 作为图片选择器路径
         return io.renren.crmchat.utils.UserFormBuilder.buildEditForm(
                 user,
                 groupOptions,
-                "user/" + id
+                "user/" + id,
+                "admin"
         );
     }
 

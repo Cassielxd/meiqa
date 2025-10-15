@@ -29,12 +29,14 @@ public class UserFormBuilder {
      * @param user          用户实体
      * @param groupOptions  用户分组下拉选项列表，格式: [{value: 1, label: "VIP"}]
      * @param actionUrl     表单提交URL，如: "user/123"
+     * @param pathPrefix    路径前缀：admin 或 tenant
      * @return 表单配置Map
      */
     public static Map<String, Object> buildEditForm(
             ChatUserEntity user,
             List<Map<String, Object>> groupOptions,
-            String actionUrl) {
+            String actionUrl,
+            String pathPrefix) {
 
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
@@ -42,11 +44,20 @@ public class UserFormBuilder {
         if (actionUrl == null || actionUrl.trim().isEmpty()) {
             throw new IllegalArgumentException("Action URL cannot be empty");
         }
+        if (pathPrefix == null || pathPrefix.trim().isEmpty()) {
+            pathPrefix = "admin"; // 默认使用admin路径
+        }
 
         // 构建form-create兼容的表单规则（参考PHP: Form::frameImage, Form::input等）
         List<Map<String, Object>> rules = new ArrayList<>();
 
         // 1. 头像字段 - frame类型（图片选择器）
+        // PHP Reference:
+        //   Admin: Form::frameImage('avatar', '用户头像', $this->url('admin/widget.images/index.html', ['fodder' => 'avatar', 'big' => 1]))
+        //   Tenant: $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true)
+        // Frontend Routes:
+        //   Admin: /admin/widget.images/index.html -> @/components/uploadPictures/widgetImg
+        //   Tenant: /tenant/widget.images/index.html -> @/components/uploadPictures/widgetImg
         Map<String, Object> avatarRule = new HashMap<>();
         avatarRule.put("type", "frame");
         avatarRule.put("field", "avatar");
@@ -55,7 +66,9 @@ public class UserFormBuilder {
 
         Map<String, Object> avatarProps = new HashMap<>();
         avatarProps.put("type", "image");
-        avatarProps.put("src", "/admin/widget.images/index");
+        // 根据pathPrefix使用不同的图片选择器路径
+        // Vue Router使用hash模式,需要在URL中包含 # 符号
+        avatarProps.put("src", "/" + pathPrefix + "/#/" + pathPrefix + "/widget.images/index.html?fodder=avatar&big=1");
         avatarProps.put("icon", "ios-image");
         avatarProps.put("width", "950px");
         avatarProps.put("height", "420px");
