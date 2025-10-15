@@ -80,7 +80,7 @@ public class ChatWebSocketServer {
             // 对应PHP Manager::onOpen()第109行: 发送success消息触发前端user消息发送
             Map<String, Object> successData = new HashMap<>();
             successData.put("appid", identity.appid);
-            if (identity.onlineFlag > 0) {
+            if (identity.userId > 0) {
                 successData.put("uid", identity.userId);
             }
             sendEnvelope(session, "success", successData);
@@ -253,7 +253,7 @@ public class ChatWebSocketServer {
         data.put("appid", identity.appid);
         // 对应PHP: 只有当token中有用户信息时才返回uid字段
         // 前端通过检查uid字段是否存在来判断是否需要发送user消息
-        if (identity.onlineFlag > 0) {
+        if (identity.userId > 0) {
             data.put("uid", identity.userId);
         }
         data.put("type", identity.userType);
@@ -297,7 +297,7 @@ public class ChatWebSocketServer {
 
             // 2. 广播用户上线消息给所有客服 (对应PHP第60-63行)
             // 只有当用户已存在时才广播（onlineFlag > 0表示是已存在用户）
-            if (identity.onlineFlag > 0 && userMapper != null) {
+            if (identity.userId > 0 && userMapper != null) {
                 ChatUserEntity chatUser = userMapper.selectById(identity.userId);
                 if (chatUser != null) {
                     // 获取所有客服的session
