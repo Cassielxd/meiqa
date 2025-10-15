@@ -211,18 +211,6 @@ public class AdminUserService {
             throw new CrmChatException("User does not exist");
         }
 
-        QueryWrapper<ChatUserLabelAssistEntity> assistWrapper = new QueryWrapper<>();
-        tenantAppid.ifPresent(a -> assistWrapper.eq("appid", a));
-        assistWrapper.eq("user_id", id);
-
-        List<ChatUserLabelAssistEntity> labelAssists = chatUserLabelAssistMapper.selectList(assistWrapper);
-
-        // 获取用户的标签ID列表
-        List<Integer> labelIds = new ArrayList<>();
-        for (ChatUserLabelAssistEntity assist : labelAssists) {
-            labelIds.add(assist.getLabelId());
-        }
-
         // 获取用户分组列表作为下拉选项
         QueryWrapper<ChatUserGroupEntity> groupWrapper = new QueryWrapper<>();
         tenantAppid.ifPresent(a -> groupWrapper.eq("appid", a));
@@ -231,81 +219,18 @@ public class AdminUserService {
 
         List<Map<String, Object>> groupOptions = new ArrayList<>();
         for (ChatUserGroupEntity group : groups) {
-            Map<String, Object> option = new HashMap<>();
-            option.put("value", group.getId());
-            option.put("label", group.getGroupName());
-            groupOptions.add(option);
+            groupOptions.add(io.renren.crmchat.utils.UserFormBuilder.buildGroupOption(
+                    group.getId(),
+                    group.getGroupName()
+            ));
         }
 
-        // 构建form-create兼容的表单规则（参考PHP: Form::frameImage, Form::input等）
-        List<Map<String, Object>> rules = new ArrayList<>();
-
-        // 头像字段
-        Map<String, Object> avatarRule = new HashMap<>();
-        avatarRule.put("type", "frame");
-        avatarRule.put("field", "avatar");
-        avatarRule.put("title", "用户头像");
-        avatarRule.put("value", user.getAvatar() != null ? user.getAvatar() : "");
-        Map<String, Object> avatarProps = new HashMap<>();
-        avatarProps.put("type", "image");
-        avatarProps.put("src", "/admin/widget.images/index");
-        avatarProps.put("icon", "ios-image");
-        avatarProps.put("width", "950px");
-        avatarProps.put("height", "420px");
-        avatarRule.put("props", avatarProps);
-        rules.add(avatarRule);
-
-        // 昵称字段
-        Map<String, Object> nicknameRule = new HashMap<>();
-        nicknameRule.put("type", "input");
-        nicknameRule.put("field", "nickname");
-        nicknameRule.put("title", "用户昵称");
-        nicknameRule.put("value", user.getNickname() != null ? user.getNickname() : "");
-        rules.add(nicknameRule);
-
-        // 备注昵称字段
-        Map<String, Object> remarkNicknameRule = new HashMap<>();
-        remarkNicknameRule.put("type", "input");
-        remarkNicknameRule.put("field", "remark_nickname");
-        remarkNicknameRule.put("title", "备注昵称");
-        remarkNicknameRule.put("value", user.getRemarkNickname() != null ? user.getRemarkNickname() : "");
-        rules.add(remarkNicknameRule);
-
-        // 手机号字段
-        Map<String, Object> phoneRule = new HashMap<>();
-        phoneRule.put("type", "input");
-        phoneRule.put("field", "phone");
-        phoneRule.put("title", "手机号");
-        phoneRule.put("value", user.getPhone() != null ? user.getPhone() : "");
-        rules.add(phoneRule);
-
-        // 用户分组下拉框（参考PHP OptionsRule.php: options直接在根级别，不在props内）
-        Map<String, Object> groupRule = new HashMap<>();
-        groupRule.put("type", "select");
-        groupRule.put("field", "group_id");
-        groupRule.put("title", "用户分组");
-        groupRule.put("value", user.getGroupId() != null ? user.getGroupId() : 0);
-        groupRule.put("options", groupOptions);  // ✅ 修复：options直接在根级别，参考PHP form-builder
-        rules.add(groupRule);
-
-        // 用户备注文本域
-        Map<String, Object> remarksRule = new HashMap<>();
-        remarksRule.put("type", "textarea");
-        remarksRule.put("field", "remarks");
-        remarksRule.put("title", "用户备注");
-        remarksRule.put("value", user.getRemarks() != null ? user.getRemarks() : "");
-        rules.add(remarksRule);
-
-        // 返回form-create格式（参考PHP: create_form函数返回值）
-        Map<String, Object> result = new HashMap<>();
-        result.put("rules", rules);
-        result.put("title", "修改用户");
-        result.put("action", "user/" + id);  // ✅ 修复：去掉/api/admin前缀，避免与前端baseURL重复拼接
-        result.put("method", "PUT");
-        result.put("info", "");
-        result.put("status", true);
-
-        return result;
+        // 使用UserFormBuilder构建表单配置
+        return io.renren.crmchat.utils.UserFormBuilder.buildEditForm(
+                user,
+                groupOptions,
+                "user/" + id
+        );
     }
 
     /**

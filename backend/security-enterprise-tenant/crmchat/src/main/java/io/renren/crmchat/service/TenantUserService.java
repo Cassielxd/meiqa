@@ -264,12 +264,14 @@ public class TenantUserService {
      *
      * 业务逻辑:
      * 1. 验证id非空
-     * 2. 返回用户详情
+     * 2. 获取用户信息
+     * 3. 查询用户分组选项
+     * 4. 使用UserFormBuilder构建form-create格式的表单配置
      *
      * @param id           用户ID
-     * @return 用户详情
+     * @return 表单配置Map，包含rules、title、action、method
      */
-    public ChatUserEntity getChatUserForm(Integer id) {
+    public Map<String, Object> getChatUserForm(Integer id) {
         // PHP: if (!$id) return $this->fail('缺少参数');
         // PHP: return $this->success($this->services->getChatUserForm((int)$id));
 
@@ -283,7 +285,26 @@ public class TenantUserService {
         }
         TenantGuard.ensureOwnedByCurrentTenant(user.getAppid(), "User does not exist");
 
-        return user;
+        // 获取用户分组列表作为下拉选项
+        QueryWrapper<ChatUserGroupEntity> groupWrapper = new QueryWrapper<>();
+        groupWrapper.select("id", "group_name");
+        groupWrapper.orderByAsc("id");  // 注意：eb_chat_user_group表没有sort字段，使用id排序
+        List<ChatUserGroupEntity> groups = chatUserGroupMapper.selectList(groupWrapper);
+
+        List<Map<String, Object>> groupOptions = new ArrayList<>();
+        for (ChatUserGroupEntity group : groups) {
+            groupOptions.add(io.renren.crmchat.utils.UserFormBuilder.buildGroupOption(
+                    group.getId(),
+                    group.getGroupName()
+            ));
+        }
+
+        // 使用UserFormBuilder构建表单配置
+        return io.renren.crmchat.utils.UserFormBuilder.buildEditForm(
+                user,
+                groupOptions,
+                "user/" + id
+        );
     }
 
     /**

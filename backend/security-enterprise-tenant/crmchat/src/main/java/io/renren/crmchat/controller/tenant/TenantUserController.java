@@ -110,21 +110,24 @@ public class TenantUserController {
 
     /**
      * 获取用户编辑表单
-     * GET /api/tenant/user/:id/edit
+     * GET /api/tenant/user/:id/edit (RESTful格式)
+     * GET /api/tenant/user/edit/:id (兼容前端旧格式)
      *
      * PHP Reference: User.php::edit()
      *
      * Response:
      * {
-     *   "id": 1,
-     *   "nickname": "张三",
-     *   "avatar": "http://...",
-     *   ...
+     *   "rules": [...],
+     *   "title": "修改用户",
+     *   "action": "user/123",
+     *   "method": "PUT",
+     *   "info": "",
+     *   "status": true
      * }
      */
-    @GetMapping("/{id}/edit")
+    @GetMapping(value = {"/{id}/edit", "/edit/{id}"})
     @Operation(summary = "Get User Edit Form")
-    public ApiResult<ChatUserEntity> edit(@PathVariable Integer id) {
+    public ApiResult<Map<String, Object>> edit(@PathVariable Integer id) {
 
         if (id == null || id <= 0) {
             return ApiResult.fail("Missing parameters");
@@ -133,8 +136,8 @@ public class TenantUserController {
         String appid = requireAppid();
         log.info("[租户API] user/edit - appid={}, userId={}", appid, id);
 
-        ChatUserEntity user = tenantUserService.getChatUserForm(id);
-        return ApiResult.ok(user);
+        Map<String, Object> formConfig = tenantUserService.getChatUserForm(id);
+        return ApiResult.ok(formConfig);
     }
 
     /**
