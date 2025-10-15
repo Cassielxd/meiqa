@@ -191,7 +191,7 @@ export default {
         this.$store.commit('kefu/setInfo', res.data.kefuInfo)
 
         // pc页面
-        return this.$router.replace({ path: this.$route.query.redirect || '/kefu/pc_list' });
+        return this.$router.replace({ path: this.$route.query.redirect || '/admin/#/kefu/pc_list' });
 
       }).catch(rej => {
         msg();

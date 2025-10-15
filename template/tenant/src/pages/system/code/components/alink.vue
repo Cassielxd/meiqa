@@ -20,7 +20,7 @@
 
         <div class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink1" class="code" rows="1">{{siteUrl}}/chat/index?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink1" class="code" rows="1">{{siteUrl}}/admin/#/chat/index?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
                 <div class="other-wrap">
                     <a class="btn btn-blue btn-large mr10" :href="linkUrl3" target="_blank">{{ $t('system.clickToExperience') }}</a>
                     <a @click="getCopy('NormalCodeTextarealink1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
@@ -31,7 +31,7 @@
         <p class="typetitle">{{ $t('system.pcLinkUsage') }}</p>
         <div  class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink2" class="code" rows="1">{{siteUrl}}/chat/pc?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink2" class="code" rows="1">{{siteUrl}}/admin/#/chat/pc?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
                 <div class="other-wrap">
                     <a class="btn btn-blue btn-large mr10" :href="linkUrl1" target="_blank">{{ $t('system.clickToExperience') }}</a>
                     <a @click="getCopy('NormalCodeTextarealink2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
@@ -42,7 +42,7 @@
         <p class="typetitle">{{ $t('system.mobileLinkUsage') }}</p>
         <div  class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink3" class="code" rows="1">{{siteUrl}}/chat/mobile?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink3" class="code" rows="1">{{siteUrl}}/admin/#/chat/mobile?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
             <div class="other-wrap">
                 <a class="btn btn-blue btn-large mr10" :href="linkUrl2" target="_blank">{{ $t('system.clickToExperience') }}</a>
                 <a @click="getCopy('NormalCodeTextarealink3')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
@@ -69,13 +69,13 @@ export default{
     },
     computed: {
         linkUrl1() {
-            return `${location.origin}/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
+            return `${location.origin}/admin/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
         },
         linkUrl2() {
-            return `${location.origin}/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1&deviceType=Mobile`;
+            return `${location.origin}/admin/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1&deviceType=Mobile`;
         },
         linkUrl3() {
-            return `${location.origin}/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
+            return `${location.origin}/admin/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
         }
     },
     mounted() {

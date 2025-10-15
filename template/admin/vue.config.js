@@ -13,7 +13,7 @@ const resolve = dir => {
 // 需要将它改为'/my-app/'
 // iview-admin线上演示打包路径： https://file.iviewui.com/admin-dist/
 const BASE_URL = process.env.NODE_ENV === 'production'
-    ? '/'
+    ? '/admin'
     : '/'
 const env = process.env.NODE_ENV
 module.exports = {
@@ -40,5 +40,5 @@ module.exports = {
     // devServer: {
     //   proxy: 'localhost:3000'
     // }
-    publicPath: env === 'development' ? '/' : '/'
+    publicPath: env === 'development' ? '/admin' : '/admin'
 }

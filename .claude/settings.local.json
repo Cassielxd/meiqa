@@ -7,7 +7,9 @@
       "Bash(mvn:*)",
       "Bash(php -r \"echo strtolower(basename(''FormBuilder\\UI\\Iview\\Components\\Frame''));\")",
       "Bash(xargs ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(./mvnw compile -q)",
+      "Bash(mysql:*)"
     ],
     "deny": []
   }

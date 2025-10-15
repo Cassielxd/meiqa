@@ -101,7 +101,7 @@ canCustomerServer.getCustomeServer();
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa3" class="code" rows="45">
 
-<script src="{{siteUrl}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.token_md5}}"}'></script>
+<script src="{{siteUrl}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.tokenMd5}}"}'></script>
 <script>
     //自动实例化对象
     var canCustomerServer

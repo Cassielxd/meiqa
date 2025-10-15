@@ -68,8 +68,11 @@ public class TenantChatService {
      * @return 对话记录列表和统计数据
      */
     public Map<String, Object> getDialogueRecordList(Map<String, Object> filters) {
-        // PHP: $where['appid']=$appid;
+        // PHP: $where['appid']=$appid; (CRITICAL - 租户隔离)
+        String appid = io.renren.crmchat.security.TenantSecurityUtils.requireAppid();
+
         QueryWrapper<ChatServiceDialogueRecordEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("appid", appid);
 
         // PHP: if ((int)$where['kefu_id'] === 0) { $where['kefu_id'] = ''; }
         // PHP: if ($where['kefu_id']) { $where['kefu_id'] = $make->value($where['kefu_id'], 'user_id'); }
@@ -117,21 +120,77 @@ public class TenantChatService {
         Page<ChatServiceDialogueRecordEntity> pageObj = new Page<>(page, limit);
         Page<ChatServiceDialogueRecordEntity> pageResult = chatServiceDialogueRecordMapper.selectPage(pageObj, wrapper);
 
+        // 转换为下划线命名格式（兼容PHP前端）
+        // PHP: with(['user', 'userThis']) 关联查询
+        List<Map<String, Object>> formattedList = new ArrayList<>();
+        for (ChatServiceDialogueRecordEntity item : pageResult.getRecords()) {
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", item.getId());
+            itemMap.put("user_id", item.getUserId());
+            itemMap.put("to_user_id", item.getToUserId());
+            itemMap.put("msn", item.getMsn());
+            itemMap.put("type", item.getType());
+            itemMap.put("other", item.getOther());
+            itemMap.put("add_time", item.getAddTime());
+            itemMap.put("appid", item.getAppid());
+            itemMap.put("is_tourist", item.getIsTourist());
+            itemMap.put("msn_type", item.getMsnType());
+            itemMap.put("remind", item.getRemind());
+            itemMap.put("guid", item.getGuid());
+            itemMap.put("mer_id", item.getMerId());
+
+            // PHP: with(['user']) - 关联 user_id 的用户信息
+            if (item.getUserId() != null) {
+                ChatUserEntity user = chatUserMapper.selectById(item.getUserId());
+                if (user != null) {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("id", user.getId());
+                    userMap.put("nickname", user.getNickname());
+                    userMap.put("avatar", user.getAvatar());
+                    userMap.put("appid", user.getAppid());
+                    itemMap.put("user", userMap);
+                }
+            }
+
+            // PHP: with(['userThis']) - 关联 to_user_id 的用户信息
+            if (item.getToUserId() != null) {
+                ChatUserEntity userThis = chatUserMapper.selectById(item.getToUserId());
+                if (userThis != null) {
+                    Map<String, Object> userThisMap = new HashMap<>();
+                    userThisMap.put("id", userThis.getId());
+                    userThisMap.put("nickname", userThis.getNickname());
+                    userThisMap.put("avatar", userThis.getAvatar());
+                    userThisMap.put("appid", userThis.getAppid());
+                    itemMap.put("user_this", userThisMap);
+                }
+            }
+
+            formattedList.add(itemMap);
+        }
+
         // PHP: $data = [
         //     'record' => $service->count(),
         //     'tourist' => $userService->count(['is_tourist' => 1]),
         //     'user' => $userService->count(['is_tourist' => 0]),
         //     'count' => $this->dao->getDialogueRecord()->count()
         // ];
-        // 统计数据
+        // 统计数据（按appid过滤）
         Map<String, Object> data = new HashMap<>();
-        data.put("record", chatServiceRecordMapper.selectCount(new QueryWrapper<ChatServiceRecordEntity>()));
-        data.put("tourist", chatUserMapper.selectCount(new QueryWrapper<ChatUserEntity>().eq("is_tourist", 1)));
-        data.put("user", chatUserMapper.selectCount(new QueryWrapper<ChatUserEntity>().eq("is_tourist", 0)));
-        data.put("count", chatServiceDialogueRecordMapper.selectCount(new QueryWrapper<ChatServiceDialogueRecordEntity>()));
+        // record: 按appid过滤的chat_service_record记录数（通过to_user_id关联）
+        QueryWrapper<ChatServiceRecordEntity> recordWrapper = new QueryWrapper<>();
+        recordWrapper.isNull("delete_time");
+        recordWrapper.inSql("to_user_id", "SELECT id FROM eb_chat_user WHERE appid = '" + appid + "'");
+        data.put("record", chatServiceRecordMapper.selectCount(recordWrapper));
+
+        // tourist/user: 按appid过滤的chat_user记录数
+        data.put("tourist", chatUserMapper.selectCount(new QueryWrapper<ChatUserEntity>().eq("appid", appid).eq("is_tourist", 1)));
+        data.put("user", chatUserMapper.selectCount(new QueryWrapper<ChatUserEntity>().eq("appid", appid).eq("is_tourist", 0)));
+
+        // count: 按appid过滤的dialogue_record记录数
+        data.put("count", chatServiceDialogueRecordMapper.selectCount(new QueryWrapper<ChatServiceDialogueRecordEntity>().eq("appid", appid)));
 
         Map<String, Object> result = new HashMap<>();
-        result.put("list", pageResult.getRecords());
+        result.put("list", formattedList);
         result.put("count", (int) pageResult.getTotal());
         result.put("data", data);
 
@@ -432,8 +491,28 @@ public class TenantChatService {
         Page<ChatServiceDialogueRecordEntity> pageObj = new Page<>(page, limit);
         Page<ChatServiceDialogueRecordEntity> pageResult = chatServiceDialogueRecordMapper.selectPage(pageObj, wrapper);
 
+        // 转换为下划线命名格式（兼容PHP前端）
+        List<Map<String, Object>> formattedList = new ArrayList<>();
+        for (ChatServiceDialogueRecordEntity item : pageResult.getRecords()) {
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", item.getId());
+            itemMap.put("user_id", item.getUserId());
+            itemMap.put("to_user_id", item.getToUserId());
+            itemMap.put("msn", item.getMsn());
+            itemMap.put("type", item.getType());
+            itemMap.put("other", item.getOther());
+            itemMap.put("add_time", item.getAddTime());
+            itemMap.put("appid", item.getAppid());
+            itemMap.put("is_tourist", item.getIsTourist());
+            itemMap.put("msn_type", item.getMsnType());
+            itemMap.put("remind", item.getRemind());
+            itemMap.put("guid", item.getGuid());
+            itemMap.put("mer_id", item.getMerId());
+            formattedList.add(itemMap);
+        }
+
         Map<String, Object> result = new HashMap<>();
-        result.put("list", pageResult.getRecords());
+        result.put("list", formattedList);
         result.put("count", (int) pageResult.getTotal());
 
         return result;

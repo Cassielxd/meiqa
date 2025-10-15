@@ -488,9 +488,9 @@ export default {
           setCookies('kefuInfo', res.data.kefuInfo, expires);
 
           if(this.$store.state.media.isMobile) {
-            url = window.location.protocol + "//" + window.location.host + '/kefu/mobile_list';
+            url = window.location.protocol + "//" + window.location.host + '/admin/#/kefu/mobile_list';
           } else {
-            url = window.location.protocol + "//" + window.location.host + '/kefu/pc_list';
+            url = window.location.protocol + "//" + window.location.host + '/admin/#/kefu/pc_list';
           }
 
 

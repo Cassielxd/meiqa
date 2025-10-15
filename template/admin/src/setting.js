@@ -10,7 +10,7 @@ const Setting = {
     //socket连接
     wsSocketUrl: VUE_APP_WS_ADMIN_URL,
     // 路由模式，可选值为 history 或 hash
-    routerMode: 'history',
+    routerMode: 'hash',
     // 页面切换时，是否显示模拟的进度条
     showProgressBar: true
 }
