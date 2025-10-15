@@ -279,6 +279,9 @@
             // 加载历史消息
             await loadHistory();
 
+            // 连接WebSocket (重要：建立实时通信连接)
+            connectWebSocket();
+
             // 设置事件监听
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendMessage();
@@ -557,6 +560,25 @@
             switch (type) {
                 case 'login':
                     console.log('WebSocket登录成功:', data);
+                    break;
+                case 'success':
+                    // 收到success消息后，发送user消息到后端，触发广播给客服
+                    // 对应 PHP Manager::onOpen() 第109行的处理逻辑
+                    console.log('收到success消息，发送user消息到后端');
+                    if (ws && ws.readyState === WebSocket.OPEN && userId) {
+                        ws.send(JSON.stringify({
+                            type: 'user',
+                            data: {
+                                uid: userId
+                            }
+                        }));
+                        console.log('已发送user消息, userId:', userId);
+                    } else {
+                        console.warn('无法发送user消息:', {
+                            wsReady: ws && ws.readyState === WebSocket.OPEN,
+                            userId: userId
+                        });
+                    }
                     break;
                 case 'ping':
                     // 响应心跳

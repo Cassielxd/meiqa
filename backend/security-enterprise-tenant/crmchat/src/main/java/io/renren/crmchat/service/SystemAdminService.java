@@ -129,6 +129,7 @@ public class SystemAdminService {
         info.put("logo_square", ""); // 透明logo
         info.put("logo_rectangle", ""); // 方形logo
         info.put("login_logo", ""); // 登录logo
+        info.put("slide", new java.util.ArrayList<>()); // 轮播图数组（前端需要）
         info.put("site_name", "CRMChat Customer Service System");
         return info;
     }
