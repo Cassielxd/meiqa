@@ -23,6 +23,7 @@ import static io.renren.crmchat.security.TenantSecurityUtils.requireAppid;
 public class TenantApplicationController {
 
     private final TenantApplicationService tenantApplicationService;
+    private final TenantApplicationService  adminApplicationService;
 
     @GetMapping
     @Operation(summary = "Get Application Information")
@@ -68,13 +69,14 @@ public class TenantApplicationController {
 
     @PutMapping("/reset/{id}")
     @Operation(summary = "重置token")
-    public ApiResult<Map<String, Object>> resetToken(@PathVariable Integer id) {
+    public ApiResult<ApplicationEntity> resetToken(@PathVariable Integer id) {
 
         if (id == null || id <= 0) {
             return ApiResult.fail("Invalid parameters");
         }
 
-        Map<String, Object> tokenInfo = tenantApplicationService.resetToken(id);
-        return ApiResult.ok("Reset successfully", tokenInfo);
+        String appid = adminApplicationService.resetToken(id);
+        ApplicationEntity application = tenantApplicationService.getApplication(appid);
+        return ApiResult.ok("Query successful", application);
     }
 }

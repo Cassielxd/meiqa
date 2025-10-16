@@ -98,7 +98,7 @@ export default {
     confirme() {
       appReset(this.token.id).then(res => {
         if(res.status == 200) {
-          this.$set(this.token, 'token', res.data.token);
+          this.token = res.data
         }
       })
     },
