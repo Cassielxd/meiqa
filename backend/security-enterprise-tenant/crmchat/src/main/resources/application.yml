@@ -111,7 +111,7 @@ file:
     # Linux: /var/www/crmchat/uploads 或 ./uploads
     path: ${FILE_UPLOAD_PATH:./uploads}
     # 文件访问域名
-    domain: ${FILE_UPLOAD_DOMAIN:http://47.97.102.216:20108}
+    domain: ${FILE_UPLOAD_DOMAIN:http://lxd.vv-xj.com}
   storage:
     # 存储类型: local, oss, cos, qiniu
     type: ${FILE_STORAGE_TYPE:local}
