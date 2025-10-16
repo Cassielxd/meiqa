@@ -16,10 +16,10 @@ service.interceptors.request.use(
     config => {
         let baseUrl;
         if(config.kefu) {
-            baseUrl = Setting.apiBaseURL.replace(/admin/, "kefu")
+            baseUrl = Setting.apiBaseURL.replace(/admin|tenant/, "kefu")
             config.baseURL = baseUrl
         } else if(config.mobile) {
-            baseUrl = Setting.apiBaseURL.replace(/admin/, "mobile");
+            baseUrl = Setting.apiBaseURL.replace(/admin|tenant/, "mobile");
             config.baseURL = baseUrl
         } else {
             config.baseURL = Setting.apiBaseURL
