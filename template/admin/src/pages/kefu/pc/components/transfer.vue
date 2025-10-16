@@ -51,8 +51,11 @@ export default {
         nickname: this.name,
         user_id: this.userUid
       }).then(res => {
-        this.labelLists = res.data.list
-        console.log('Transfer list:', this.labelLists);
+        const list = Array.isArray(res.data.list) ? res.data.list : []
+        this.labelLists = list.map(item => ({
+          ...item,
+          user_id: item.user_id || item.userId
+        }))
       }).catch(error => {
         console.error('Failed to get transfer list:', error);
         this.$Message.error(error.msg || 'Failed to load customer service list');
@@ -62,7 +65,7 @@ export default {
       // this.$emit('transferPeople',item)
       serviceTransfer({
         user_id: this.userUid,
-        kefuToUserId: item.user_id
+        kefuToUserId: item.user_id || item.userId
       }).then(res => {
         this.$Message.success(res.msg)
         this.$emit('close')

@@ -46,7 +46,8 @@ public class KefuServiceExtensionController {
     @Operation(summary = "Get Online Customer Service List (For Transfer)")
     public ApiResult<Map<String, Object>> getServiceList(
             @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) Integer user_id,
+            @RequestParam(name = "user_id", required = false) Integer userIdParam,
+            @RequestParam(name = "uid", required = false) Integer legacyUserId,
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
 
@@ -65,8 +66,9 @@ public class KefuServiceExtensionController {
         // 排除当前客服和当前聊天的用户（如果有）
         List<Integer> excludeIds = new ArrayList<>();
         excludeIds.add(kefuId);
-        if (user_id != null && user_id > 0) {
-            excludeIds.add(user_id);
+        Integer excludeUserId = userIdParam != null ? userIdParam : legacyUserId;
+        if (excludeUserId != null && excludeUserId > 0) {
+            excludeIds.add(excludeUserId);
         }
 
         Map<String, Object> result = kefuServiceExtensionService.getServiceList(filters, excludeIds, appid);

@@ -49,17 +49,20 @@ export default {
     getList() {
       transferList({
         nickname: this.name,
-        uid: this.userUid
+        user_id: this.userUid
       }).then(res => {
-        this.labelLists = res.data.list
-        console.log(this.labelLists);
+        const list = Array.isArray(res.data.list) ? res.data.list : []
+        this.labelLists = list.map(item => ({
+          ...item,
+          user_id: item.user_id || item.userId
+        }))
       })
     },
     bindActive(item) {
       // this.$emit('transferPeople',item)
       serviceTransfer({
         user_id: this.userUid,
-        kefuToUserId: item.user_id
+        kefuToUserId: item.user_id || item.userId
       }).then(res => {
         this.$Message.success(res.msg)
         this.$emit('close')

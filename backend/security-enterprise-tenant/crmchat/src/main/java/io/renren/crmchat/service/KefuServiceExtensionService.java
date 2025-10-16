@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Kefu Service Extension Service - 客服扩展功能服务
@@ -100,8 +101,12 @@ public class KefuServiceExtensionService {
         Page<ChatServiceEntity> pageObj = new Page<>(page, limit);
         Page<ChatServiceEntity> pageResult = chatServiceMapper.selectPage(pageObj, wrapper);
 
+        List<Map<String, Object>> list = pageResult.getRecords().stream()
+                .map(this::buildKefuListItem)
+                .collect(Collectors.toList());
+
         Map<String, Object> result = new HashMap<>();
-        result.put("list", pageResult.getRecords());
+        result.put("list", list);
         result.put("count", (int) pageResult.getTotal());
 
         return result;
@@ -516,6 +521,25 @@ public class KefuServiceExtensionService {
         info.put("avatar", kefu.getAvatar());
         info.put("account", kefu.getAccount());
         return info;
+    }
+
+    private Map<String, Object> buildKefuListItem(ChatServiceEntity kefu) {
+        if (kefu == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", kefu.getId());
+        item.put("user_id", kefu.getUserId());
+        item.put("userId", kefu.getUserId());
+        item.put("appid", kefu.getAppid());
+        item.put("nickname", kefu.getNickname());
+        item.put("avatar", kefu.getAvatar());
+        item.put("online", kefu.getOnline());
+        item.put("status", kefu.getStatus());
+        item.put("account", kefu.getAccount());
+        item.put("group_id", kefu.getGroupId());
+        item.put("update_time", kefu.getUpdateTime());
+        return item;
     }
 
     private String formatTimestamp(Integer epochSeconds) {
