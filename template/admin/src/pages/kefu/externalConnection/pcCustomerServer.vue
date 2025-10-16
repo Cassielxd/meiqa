@@ -247,28 +247,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            background: linear-gradient(135deg, #F5F6F8 0%, #EBEDEF 100%);
             padding: 14px 14px;
             box-sizing: border-box;
             height: 56px;
             font-size: 16px;
-            color: #fff;
+            color: #1F2937;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 
             &_title {
                 display: flex;
                 align-items: center;
 
                 img {
-                    width: 40px;
-                    height: 40px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: 50%;
-                    margin-right: 10px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.6);
+                    margin-right: 12px;
+                    box-shadow: 0 0 0 3px white, 0 4px 12px rgba(0, 0, 0, 0.15);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
 
                     &:hover {
                         transform: scale(1.08);
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.8);
+                        box-shadow: 0 0 0 4px white, 0 6px 16px rgba(0, 0, 0, 0.2), 0 0 0 6px rgba(79, 70, 229, 0.1);
                     }
                 }
             }
