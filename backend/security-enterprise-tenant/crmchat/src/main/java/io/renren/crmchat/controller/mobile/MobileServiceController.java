@@ -165,7 +165,7 @@ public class MobileServiceController {
     @PostMapping("/service/upload")
     @Operation(summary = "Upload image")
     public ApiResult<Map<String, Object>> upload(
-            @RequestParam("filename") MultipartFile file,
+            @RequestParam("file") MultipartFile file,
             @RequestParam(value = "appid", required = false, defaultValue = "default") String appid) {
         appid = UserContext.getAppid();
         Map<String, Object> result = mobileServiceService.upload(file, appid);
