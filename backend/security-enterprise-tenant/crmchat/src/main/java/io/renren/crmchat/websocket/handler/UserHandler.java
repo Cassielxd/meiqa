@@ -197,6 +197,7 @@ public class UserHandler implements BaseHandler {
             }
             QueryWrapper<ChatUserEntity> wrapper = new QueryWrapper<>();
             wrapper.eq("uid", uid);
+            wrapper.eq("appid", appId);
             // 2. 创建或更新用户信息 (对应PHP第96-102行: createUser)
             ChatUserEntity chatUser = userMapper.selectOne(wrapper);
             boolean isNewUser = false;
