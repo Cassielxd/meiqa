@@ -1260,6 +1260,11 @@ public class MobileServiceService {
             webSocketPushService.sendReply(appid, toUserId, response);
         }
 
+        // 广播用户上线消息给所有客服（用于更新左侧用户列表和在线状态）
+        webSocketPushService.broadcastUserStatus(appid, userId, 1,
+            Optional.ofNullable(chatUser.getNickname()).orElse(""),
+            Optional.ofNullable(chatUser.getAvatar()).orElse(""));
+
         log.info("Message sent successfully: userId={}, toUserId={}, guid={}", userId, toUserId, guid);
         return response;
     }

@@ -50,6 +50,64 @@ public class WebSocketPushService {
         broadcast(appid, userId, "online", payload);
     }
 
+    /**
+     * 广播用户上线消息给所有客服（用于更新左侧用户列表和在线状态）
+     * Broadcast user online status to all customer service sessions
+     *
+     * @param appid 租户ID
+     * @param userId 用户ID（游客的chat_user.id）
+     * @param nickname 用户昵称
+     * @param avatar 用户头像
+     */
+    public void broadcastUserOnline(String appid, int userId, String nickname, String avatar) {
+        broadcastUserStatus(appid, userId, 1, nickname, avatar);
+    }
+
+    public void broadcastUserOffline(String appid, int userId, String nickname, String avatar) {
+        broadcastUserStatus(appid, userId, 0, nickname, avatar);
+    }
+
+    public void broadcastUserStatus(String appid, int userId, int onlineFlag, String nickname, String avatar) {
+        if (appid == null || appid.isEmpty()) {
+            log.warn("broadcastUserStatus: appid is null or empty, skipping");
+            return;
+        }
+
+        log.info("broadcastUserStatus: appid={}, userId={}, online={}, nickname={}, avatar={}",
+                 appid, userId, onlineFlag, nickname, avatar);
+
+        // 获取所有客服的session
+        java.util.Set<WebSocketSessionRegistry.SessionHolder> kefuSessions =
+                WebSocketSessionRegistry.getSessionsByType(appid, "kefu");
+
+        if (kefuSessions.isEmpty()) {
+            log.warn("broadcastUserStatus: no kefu sessions found for appid={}", appid);
+            return;
+        }
+
+        // 构建user_online消息payload
+        Map<String, Object> onlineData = new HashMap<>();
+        onlineData.put("user_id", userId);
+        onlineData.put("online", onlineFlag);
+        onlineData.put("nickname", nickname != null ? nickname : "");
+        onlineData.put("avatar", avatar != null ? avatar : "");
+
+        // 向每个客服发送user_online消息
+        int successCount = 0;
+        for (WebSocketSessionRegistry.SessionHolder kefuHolder : kefuSessions) {
+            try {
+                ChatWebSocketServer.sendEnvelope(kefuHolder.getSession(), "user_online", onlineData);
+                successCount++;
+            } catch (Exception e) {
+                log.warn("broadcastUserStatus: failed to send to kefu session userId={}, error: {}",
+                         kefuHolder.getUserId(), e.getMessage());
+            }
+        }
+
+        log.info("broadcastUserStatus: sent to {}/{} kefu sessions for userId={}, online={}",
+                 successCount, kefuSessions.size(), userId, onlineFlag);
+    }
+
     public void sendEvent(String appid, int userId, String type, Object payload) {
         broadcast(appid, userId, type, payload);
     }

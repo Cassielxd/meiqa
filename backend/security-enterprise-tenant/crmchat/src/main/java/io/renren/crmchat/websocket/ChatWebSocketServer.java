@@ -332,6 +332,11 @@ public class ChatWebSocketServer {
         ChatServiceRecordMapper chatServiceRecordMapper = SpringContextUtils.getBean(ChatServiceRecordMapper.class);
         ChatCacheService cacheService = SpringContextUtils.getBean(ChatCacheService.class);
 
+        ChatCacheService.UserProfile cachedProfile = null;
+        if (cacheService != null) {
+            cachedProfile = cacheService.getUserProfile(appid, userId);
+        }
+
         if (chatUserMapper != null) {
             UpdateWrapper<ChatUserEntity> wrapper = new UpdateWrapper<>();
             wrapper.eq("appid", appid).eq("id", userId);
@@ -372,6 +377,26 @@ public class ChatWebSocketServer {
         if (cacheService != null) {
             cacheService.invalidateUserProfile(appid, userId);
             cacheService.invalidateOnlineServices(appid);
+        }
+
+        WebSocketPushService pushService = SpringContextUtils.getBean(WebSocketPushService.class);
+        if (pushService != null && "user".equals(userType)) {
+            String nickname = cachedProfile != null ? cachedProfile.getNickname() : "";
+            String avatar = cachedProfile != null ? cachedProfile.getAvatar() : "";
+            if ((nickname.isEmpty() || avatar.isEmpty()) && chatUserMapper != null) {
+                ChatUserEntity freshUser = chatUserMapper.selectById(userId);
+                if (freshUser != null) {
+                    if (nickname.isEmpty()) {
+                        nickname = freshUser.getRemarkNickname() != null && !freshUser.getRemarkNickname().isBlank()
+                                ? freshUser.getRemarkNickname()
+                                : (freshUser.getNickname() != null ? freshUser.getNickname() : "");
+                    }
+                    if (avatar.isEmpty() && freshUser.getAvatar() != null) {
+                        avatar = freshUser.getAvatar();
+                    }
+                }
+            }
+            pushService.broadcastUserStatus(appid, userId, flag, nickname, avatar);
         }
     }
 

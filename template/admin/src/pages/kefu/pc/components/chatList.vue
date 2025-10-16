@@ -82,19 +82,13 @@ export default {
   watch: {
     userOnline: {
       handler(nVal, oVal) {
-        if(nVal.hasOwnProperty('user_id')) {
-          this.userList.forEach((el, index) => {
-            if(el.to_user_id == nVal.user_id) {
-              el.online = nVal.online
-              if(nVal.online == 1) {
-                this.$Notice.info({
-                  title: this.$t('kefu.online'),
-                  desc: `${el.nickname} ${this.$t('kefu.online')}`
-                });
-              }
-
-            }
-          })
+        if(!nVal || typeof nVal !== 'object' || !Object.prototype.hasOwnProperty.call(nVal, 'user_id')) {
+          return;
+        }
+        const incomingId = Number(nVal.user_id);
+        const matched = this.applyOnlineUpdate(incomingId, nVal);
+        if(!matched && nVal.online == 1) {
+          this.refreshRecordList();
         }
       },
       deep: true
@@ -167,7 +161,8 @@ export default {
     //   groupOn: -1,
       labelList: [],
       userGroupList: [],
-      tabOn: '1'
+      tabOn: '1',
+      refreshingOnline: false
     }
   },
   filters: {
@@ -365,8 +360,8 @@ export default {
       this.getList()
     },
     getList() {
-      if(!this.isScroll) return
-      record({
+      if(!this.isScroll) return Promise.resolve();
+      return record({
         nickname: this.nickname,
         labelId: this.labelId,
         groupId: this.groupId,
@@ -394,6 +389,56 @@ export default {
         }
 
       })
+    },
+    refreshRecordList() {
+      if(this.refreshingOnline) {
+        return;
+      }
+      this.refreshingOnline = true;
+      const params = {
+        nickname: this.nickname,
+        labelId: this.labelId,
+        groupId: this.groupId,
+        page: 1,
+        limit: this.limit,
+        is_tourist: this.hdTabCur === 1 ? '' : 1
+      };
+      record(params)
+        .then(res => {
+          let dataList = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
+          if(dataList.length > 0) {
+            dataList[0].mssage_num = dataList[0].mssage_num || 0;
+            const merged = [...dataList, ...this.userList];
+            const seen = new Set();
+            const makeKey = (item) => {
+              if(!item) return `empty-${Math.random()}`;
+              if(item.id) return `id-${item.id}`;
+              if(item.user_id) return `user-${item.user_id}`;
+              return `hash-${Math.random()}`;
+            };
+            this.userList = merged.filter(item => {
+              const key = makeKey(item);
+              if(seen.has(key)) {
+                const existing = this.userList.find(u => makeKey(u) === key);
+                if(existing && item.online != null) {
+                  existing.online = item.online;
+                }
+                if(existing && item.nickname) {
+                  existing.nickname = item.nickname;
+                }
+                if(existing && item.avatar) {
+                  existing.avatar = item.avatar;
+                }
+                return false;
+              }
+              seen.add(key);
+              return true;
+            });
+          }
+        })
+        .finally(() => {
+          this.refreshingOnline = false;
+        });
     },
     chartReachBottom() {
       this.getList()
@@ -790,4 +835,29 @@ export default {
     }
 }
 </style>
-
+    applyOnlineUpdate(userId, payload) {
+      let matched = false;
+      this.userList.forEach(el => {
+        if(Number(el.user_id) === userId) {
+          matched = true;
+          if(Object.prototype.hasOwnProperty.call(payload, 'online')) {
+            el.online = payload.online;
+            if(payload.online == 1) {
+              this.$Notice.info({
+                title: this.$t('kefu.online'),
+                desc: `${payload.nickname || el.nickname || ''} ${this.$t('kefu.online')}`
+              });
+            } else if(payload.online == 0) {
+              el.online = 0;
+            }
+          }
+          if(payload.nickname) {
+            el.nickname = payload.nickname;
+          }
+          if(payload.avatar) {
+            el.avatar = payload.avatar;
+          }
+        }
+      });
+      return matched;
+    },
