@@ -36,6 +36,8 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 【安全修复】当allowCredentials=true时，不能使用通配符
+        // 允许本地文件系统访问（用于SDK测试HTML文件）
+        config.addAllowedOrigin("null");
         // 允许本地开发环境的所有端口
         config.addAllowedOriginPattern("http://localhost:*");
         config.addAllowedOriginPattern("http://127.0.0.1:*");
