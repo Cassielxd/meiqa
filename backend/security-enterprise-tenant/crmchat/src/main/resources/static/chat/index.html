@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: #F7F7F7;
+            background: #F3F4F6;
             height: 100vh;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
@@ -25,7 +25,7 @@
             flex-direction: column;
             height: 100vh;
             background: #FFFFFF;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         .chat-header {
@@ -85,7 +85,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 24px 20px;
-            background: #FAFAFA;
+            background: #F3F4F6;
         }
 
         .message {
@@ -121,8 +121,13 @@
             font-size: 13px;
             font-weight: 500;
             flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .message-avatar:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 0 5px rgba(79, 70, 229, 0.1);
         }
 
         .message.user .message-avatar {
@@ -136,34 +141,34 @@
         }
 
         .message-bubble {
-            background: #FFFFFF;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border-top-left-radius: 4px;
+            background: #F5F6F8;
+            padding: 12px 14px;
+            border-radius: 18px 18px 18px 4px;
             word-wrap: break-word;
             font-size: 14px;
             line-height: 1.6;
-            color: #262626;
-            border: 1px solid #F0F0F0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: box-shadow 0.2s ease;
+            color: #1F2937;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+            position: relative;
         }
 
         .message-bubble:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
         .message.user .message-bubble {
-            background: linear-gradient(135deg, #E8E3FF 0%, #EFE9FF 100%);
-            color: #262626;
-            border: none;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 4px;
-            box-shadow: 0 2px 10px rgba(122, 97, 255, 0.15);
+            background: linear-gradient(135deg, #E0E7FF 0%, #D4D9F7 100%);
+            color: #312E81;
+            border: 1px solid rgba(79, 70, 229, 0.1);
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, 0.15), 0 1px 3px rgba(79, 70, 229, 0.08);
         }
 
         .message.user .message-bubble:hover {
-            box-shadow: 0 4px 14px rgba(122, 97, 255, 0.20);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2), 0 2px 6px rgba(79, 70, 229, 0.12);
         }
 
         .message-time {
@@ -176,8 +181,8 @@
 
         .chat-input {
             padding: 18px 24px;
-            background: #FFFFFF;
-            border-top: 1px solid #F0F0F0;
+            background: #F9FAFB;
+            border-top: 1px solid #E5E7EB;
             height: auto;
             flex-shrink: 0;
             display: flex;
@@ -188,13 +193,14 @@
         .input-wrapper {
             display: flex;
             align-items: center;
-            background: #FAFAFA;
-            border: 1.5px solid #E8E8E8;
-            border-radius: 8px;
-            padding: 10px 14px;
+            background: #F3F4F6;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 12px 16px;
             flex: 1;
             position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
         .input-wrapper input {
@@ -205,11 +211,11 @@
             outline: none;
             padding: 6px 10px;
             line-height: 1.6;
-            color: #262626;
+            color: #374151;
         }
 
         .input-wrapper input::placeholder {
-            color: #BFBFBF;
+            color: #9CA3AF;
             font-weight: 400;
         }
 
@@ -218,60 +224,65 @@
         }
 
         .input-wrapper:focus-within {
-            background: #FFFFFF;
-            border-color: #BFBFBF;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            background: #FAFBFC;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         .send-btn {
-            background: linear-gradient(135deg, #E8E3FF 0%, #D8D0FF 100%);
-            color: #595959;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: #FFFFFF;
             border: none;
-            padding: 10px 28px;
-            border-radius: 8px;
+            padding: 12px 32px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             margin-left: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 40px;
-            box-shadow: 0 2px 8px rgba(122, 97, 255, 0.15);
+            transition: all 0.2s ease;
+            height: 44px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35), 0 2px 6px rgba(79, 70, 229, 0.2);
             letter-spacing: 0.3px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .send-btn:hover {
-            background: linear-gradient(135deg, #D8D0FF 0%, #C8BFFF 100%);
-            color: #262626;
-            box-shadow: 0 4px 12px rgba(122, 97, 255, 0.25);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.45), 0 4px 10px rgba(79, 70, 229, 0.25);
+            transform: translateY(-2px);
         }
 
         .send-btn:active {
-            background: linear-gradient(135deg, #C8BFFF 0%, #B8AFFF 100%);
             transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(122, 97, 255, 0.20);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
 
         .send-btn:disabled {
-            background: #FAFAFA;
-            color: #D9D9D9;
+            background: #D1D5DB;
+            color: #9CA3AF;
             cursor: not-allowed;
-            box-shadow: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
             transform: none;
         }
 
         .system-message {
             text-align: center;
-            color: #8C8C8C;
+            color: #6B7280;
             font-size: 12px;
-            margin: 20px auto;
-            padding: 6px 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
-            display: block;
+            margin: 16px auto;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 999px;
+            display: inline-block;
             max-width: 80%;
-            font-weight: 400;
+            font-weight: 500;
             letter-spacing: 0.2px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(4px);
             animation: systemMessageFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -340,20 +351,20 @@
 
         /* 产品卡片样式 - 匹配工作台订单卡片设计 */
         .product-card {
-            background: #FFFFFF;
-            border: 1px solid #F0F0F0;
+            background: #F9FAFB;
+            border: 1px solid rgba(0, 0, 0, 0.04);
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 16px;
             max-width: 320px;
-            padding: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
             transition: box-shadow 0.3s ease, transform 0.3s ease;
             animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .product-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
         }
 
@@ -365,9 +376,9 @@
             width: 64px;
             height: 64px;
             object-fit: cover;
-            border-radius: 8px;
-            background: #FAFAFA;
-            border: 1px solid #F0F0F0;
+            border-radius: 10px;
+            background: #F3F4F6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .product-card-body {
@@ -493,7 +504,7 @@
 
         /* 滚动条样式优化 */
         .chat-messages::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .chat-messages::-webkit-scrollbar-track {
@@ -502,18 +513,18 @@
         }
 
         .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.12);
-            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
             transition: background 0.2s ease;
         }
 
         .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.18);
+            background: rgba(0, 0, 0, 0.25);
         }
 
         /* 焦点状态优化 - 提升无障碍访问 */
         .send-btn:focus-visible {
-            outline: 2px solid #3875EA;
+            outline: 2px solid #4F46E5;
             outline-offset: 2px;
         }
 
