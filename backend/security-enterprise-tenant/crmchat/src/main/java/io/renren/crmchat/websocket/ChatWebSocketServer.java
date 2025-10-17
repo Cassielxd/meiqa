@@ -283,14 +283,13 @@ public class ChatWebSocketServer {
 
             // 1. 更新chat_service_record的在线状态 (对应PHP第58行)
             if (recordMapper != null) {
-                int now = (int) (System.currentTimeMillis() / 1000);
                 UpdateWrapper<ChatServiceRecordEntity> wrapper = new UpdateWrapper<>();
                 wrapper.eq("appid", identity.appid)
                         .eq("to_user_id", identity.userId);
                 ChatServiceRecordEntity update = new ChatServiceRecordEntity();
                 update.setOnline(1);
                 update.setType(identity.formType);
-                update.setUpdateTime(now);
+                // 移除：update.setUpdateTime(now);  // ❌ 游客登录时不应该修改所有会话的最后消息时间
                 recordMapper.update(update, wrapper);
                 log.info("Updated service record online status for user login: userId={}", identity.userId);
             }
@@ -361,12 +360,13 @@ public class ChatWebSocketServer {
         }
 
         if (chatServiceRecordMapper != null) {
-            int now = (int) (System.currentTimeMillis() / 1000);
+            // 修复：更新在线状态时不应该修改 update_time
+            // update_time 应该只在实际收发消息时更新，不是在更新在线状态时更新
             UpdateWrapper<ChatServiceRecordEntity> userRecordWrapper = new UpdateWrapper<>();
             userRecordWrapper.eq("appid", appid).eq("user_id", userId);
             ChatServiceRecordEntity recordUpdate = new ChatServiceRecordEntity();
             recordUpdate.setOnline(flag);
-            recordUpdate.setUpdateTime(now);
+            // 移除：recordUpdate.setUpdateTime(now);  // ❌ 这是导致刷新页面时间变化的根本原因
             chatServiceRecordMapper.update(recordUpdate, userRecordWrapper);
 
             UpdateWrapper<ChatServiceRecordEntity> toUserWrapper = new UpdateWrapper<>();

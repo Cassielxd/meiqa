@@ -1224,6 +1224,8 @@ public class MobileServiceService {
         }
 
         int unreadCount = getUnreadCount(appid, userId, toUserId);
+        // 游客发送消息时,游客肯定在线,所以online=1
+        // 注意：saveConversationRecord保存的是游客的会话记录(user_id=游客),所以online应该是游客的在线状态
         Map<String, Object> recored = saveConversationRecord(
                 appid,
                 userId,
@@ -1234,7 +1236,7 @@ public class MobileServiceService {
                 isTourist,
                 Optional.ofNullable(chatUser.getNickname()).orElse(""),
                 Optional.ofNullable(chatUser.getAvatar()).orElse(""),
-                service.getOnline() != null ? service.getOnline() : 0,
+                1,  // 修复：游客发送消息时肯定在线，所以传1而不是service.getOnline()
                 chatUser.getType() != null ? chatUser.getType() : 0
         );
 
@@ -1253,17 +1255,33 @@ public class MobileServiceService {
         // 不推送给游客自己，避免前端重复显示（前端HTTP API成功后已主动添加）
         // webSocketPushService.sendChat(appid, userId, response);
 
-        // 发送消息给客服
-        if (webSocketPushService.isOnline(appid, toUserId)) {
-            // 客服在线时，总是发送实际消息内容(reply类型)，而不是仅发送通知
-            // 这样客服端可以实时看到游客的消息，无需刷新
-            webSocketPushService.sendReply(appid, toUserId, response);
-        }
-
-        // 广播用户上线消息给所有客服（用于更新左侧用户列表和在线状态）
+        // ⭐ FIX: 先广播用户上线消息,确保客服端左侧列表有该用户,再发送消息内容
+        // 这样避免首次游客发消息时,客服端收到reply但左侧列表还没有该用户的竞态问题
+        log.info("📡 [FIRST_VISITOR_FIX] Broadcasting user_online before reply: appid={}, userId={}, nickname={}",
+                 appid, userId, chatUser.getNickname());
         webSocketPushService.broadcastUserStatus(appid, userId, 1,
             Optional.ofNullable(chatUser.getNickname()).orElse(""),
             Optional.ofNullable(chatUser.getAvatar()).orElse(""));
+
+        // 短暂延迟(100ms),确保客服端先处理user_online消息,再处理reply消息
+        // 这样客服端左侧用户列表会先更新,然后消息才到达,避免找不到对应会话
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Message ordering delay interrupted: {}", e.getMessage());
+        }
+
+        // 发送消息给客服
+        if (webSocketPushService.isOnline(appid, toUserId)) {
+            log.info("📨 [FIRST_VISITOR_FIX] Sending reply to kefu after user_online: appid={}, visitorId={}, kefuId={}",
+                     appid, userId, toUserId);
+            // 客服在线时，总是发送实际消息内容(reply类型)，而不是仅发送通知
+            // 这样客服端可以实时看到游客的消息，无需刷新
+            webSocketPushService.sendReply(appid, toUserId, response);
+        } else {
+            log.warn("⚠️ [FIRST_VISITOR_FIX] Kefu is offline, reply not sent: appid={}, kefuId={}", appid, toUserId);
+        }
 
         log.info("Message sent successfully: userId={}, toUserId={}, guid={}", userId, toUserId, guid);
         return response;

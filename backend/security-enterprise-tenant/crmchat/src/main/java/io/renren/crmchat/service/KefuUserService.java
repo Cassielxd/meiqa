@@ -114,7 +114,7 @@ public class KefuUserService {
             // TODO: 分组筛选
         }
 
-        wrapper.orderByDesc("id");
+        wrapper.orderByDesc("update_time");  // 修复：按更新时间降序排列，最新消息在前
         System.out.println("Executing SQL query with to_user_id=" + kefuUserId + " AND appid=" + appid);
         List<ChatServiceRecordEntity> records = chatServiceRecordMapper.selectList(wrapper);
         System.out.println("Query returned " + (records != null ? records.size() : 0) + " records from database");

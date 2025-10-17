@@ -291,22 +291,18 @@ public class UserHandler implements BaseHandler {
 
             // 3. 更新在线状态 (对应PHP第106-111行)
             if (recordMapper != null) {
-                int now = (int) (System.currentTimeMillis() / 1000);
-
                 // 更新chat_service_record表中的在线状态
                 UpdateWrapper<ChatServiceRecordEntity> wrapper1 = new UpdateWrapper<>();
                 wrapper1.eq("appid", appId)
                         .eq("user_id", currentUserId);
                 ChatServiceRecordEntity update = new ChatServiceRecordEntity();
                 update.setOnline(1);
-                update.setUpdateTime(now);
+                // 移除：update.setUpdateTime(now);  // ❌ 更新在线状态不应该修改最后消息时间
                 recordMapper.update(update, wrapper1);
             }
 
             // 4. 建立聊天关系并清空未读消息 (对应PHP第113-127行)
             if (toUserId != null && toUserId > 0 && recordMapper != null) {
-                int now = (int) (System.currentTimeMillis() / 1000);
-
                 // 查找或创建与客服的聊天记录
                 QueryWrapper<ChatServiceRecordEntity> query = new QueryWrapper<>();
                 query.eq("appid", appId)
@@ -317,7 +313,7 @@ public class UserHandler implements BaseHandler {
                 if (record != null) {
                     // 清空未读消息计数
                     record.setNum(0);
-                    record.setUpdateTime(now);
+                    // 移除：record.setUpdateTime(now);  // ❌ 清空未读数不应该修改最后消息时间
                     recordMapper.updateById(record);
                     log.info("Cleared unread messages for user-kefu pair: userId={}, toUserId={}", currentUserId, toUserId);
                 }
