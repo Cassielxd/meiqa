@@ -16,10 +16,7 @@
           </div>
           <div class="user-info">
             <div class="hd">
-              <span class="name line1">{{ item.nickname }}</span>
-              <template >
-                <span class="label pc">default</span>
-              </template>
+              <span class="name">{{ item.nickname }}</span>
             </div>
             <div class="bd line1">
               <template v-if="item.message_type <=2">{{item.message}}</template>
@@ -82,13 +79,19 @@ export default {
   watch: {
     userOnline: {
       handler(nVal, oVal) {
-        if(!nVal || typeof nVal !== 'object' || !Object.prototype.hasOwnProperty.call(nVal, 'user_id')) {
-          return;
-        }
-        const incomingId = Number(nVal.user_id);
-        const matched = this.applyOnlineUpdate(incomingId, nVal);
-        if(!matched && nVal.online == 1) {
-          this.refreshRecordList();
+        if(nVal.hasOwnProperty('user_id')) {
+          this.userList.forEach((el, index) => {
+            if(el.to_user_id == nVal.user_id) {
+              el.online = nVal.online
+              if(nVal.online == 1) {
+                this.$Notice.info({
+                  title: this.$t('kefu.online'),
+                  desc: `${el.nickname} ${this.$t('kefu.online')}`
+                });
+              }
+
+            }
+          })
         }
       },
       deep: true
@@ -161,8 +164,7 @@ export default {
     //   groupOn: -1,
       labelList: [],
       userGroupList: [],
-      tabOn: '1',
-      refreshingOnline: false
+      tabOn: '1'
     }
   },
   filters: {
@@ -268,16 +270,42 @@ export default {
       }
     },
     updateUserList(data,op){
-      let ids = [];
-      this.userList.map(item=>{
-        ids.push(item.id)
-        if (item.id === data.id) {
-          item.message = data.message
-          item._update_time = data._update_time
-        }
-      })
-      if(ids.indexOf(data.id) === -1 && op) {
+      console.log('[updateUserList] 收到更新:', { data, op });
+
+      // 查找用户在列表中的索引
+      const userIndex = this.userList.findIndex(item => item.id === data.id);
+
+      if (userIndex !== -1) {
+        // 用户已在列表中：移除旧位置，更新后插入顶部
+        const existingUser = this.userList[userIndex];
+
+        // 合并所有字段，新数据优先，但使用fallback保留旧值
+        const updatedUser = {
+          ...existingUser,  // 保留所有现有字段
+          ...data,          // 用新数据覆盖
+          // 特殊处理：确保关键字段存在
+          message: data.message !== undefined ? data.message : existingUser.message,
+          update_time: data.update_time || data._update_time || existingUser.update_time,
+          message_type: data.message_type !== undefined ? data.message_type : existingUser.message_type,
+          nickname: data.nickname || existingUser.nickname,
+          avatar: data.avatar || existingUser.avatar,
+          mssage_num: data.mssage_num !== undefined ? data.mssage_num : existingUser.mssage_num,
+          online: data.online !== undefined ? data.online : existingUser.online,
+          is_tourist: data.is_tourist !== undefined ? data.is_tourist : existingUser.is_tourist
+        };
+
+        // 使用 Vue.set 或 splice 确保响应式更新
+        this.userList.splice(userIndex, 1);  // 移除旧位置
+        this.userList.unshift(updatedUser);  // 插入顶部
+
+        console.log('[updateUserList] 已更新并移至顶部:', updatedUser);
+      } else if (op) {
+        // 用户不在列表中且 op=true：添加到顶部
+        console.log('[updateUserList] 新用户添加到列表，data内容:', data);
         this.userList.unshift(data);
+        console.log('[updateUserList] 新用户添加到列表:', data);
+      } else {
+        console.log('[updateUserList] 用户不在列表且 op=false，跳过添加');
       }
     },
     wsStart() {
@@ -360,8 +388,8 @@ export default {
       this.getList()
     },
     getList() {
-      if(!this.isScroll) return Promise.resolve();
-      return record({
+      if(!this.isScroll) return
+      record({
         nickname: this.nickname,
         labelId: this.labelId,
         groupId: this.groupId,
@@ -389,56 +417,6 @@ export default {
         }
 
       })
-    },
-    refreshRecordList() {
-      if(this.refreshingOnline) {
-        return;
-      }
-      this.refreshingOnline = true;
-      const params = {
-        nickname: this.nickname,
-        labelId: this.labelId,
-        groupId: this.groupId,
-        page: 1,
-        limit: this.limit,
-        is_tourist: this.hdTabCur === 1 ? '' : 1
-      };
-      record(params)
-        .then(res => {
-          let dataList = Array.isArray(res.data) ? res.data : (res.data && res.data.list ? res.data.list : []);
-          if(dataList.length > 0) {
-            dataList[0].mssage_num = dataList[0].mssage_num || 0;
-            const merged = [...dataList, ...this.userList];
-            const seen = new Set();
-            const makeKey = (item) => {
-              if(!item) return `empty-${Math.random()}`;
-              if(item.id) return `id-${item.id}`;
-              if(item.user_id) return `user-${item.user_id}`;
-              return `hash-${Math.random()}`;
-            };
-            this.userList = merged.filter(item => {
-              const key = makeKey(item);
-              if(seen.has(key)) {
-                const existing = this.userList.find(u => makeKey(u) === key);
-                if(existing && item.online != null) {
-                  existing.online = item.online;
-                }
-                if(existing && item.nickname) {
-                  existing.nickname = item.nickname;
-                }
-                if(existing && item.avatar) {
-                  existing.avatar = item.avatar;
-                }
-                return false;
-              }
-              seen.add(key);
-              return true;
-            });
-          }
-        })
-        .finally(() => {
-          this.refreshingOnline = false;
-        });
     },
     chartReachBottom() {
       this.getList()
@@ -478,7 +456,7 @@ export default {
     padding: 0 52px;
     font-size: 14px;
     color: #374151;
-    background: #F5F6F8;
+    background: #FFFFFF;
     border-bottom: 1px solid #E5E7EB;
 
     .item {
@@ -534,33 +512,20 @@ export default {
     border-left: 3px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: #F5F6F8;
+    background: #FFFFFF;
     margin: 2px 8px;
-    border-radius: 8px;
+    border-radius: 4px;
+    border: 1px solid #E5E7EB;
 
     &:hover {
-      background: linear-gradient(90deg, #FAFBFC 0%, #F9FAFB 100%);
-      transform: translateX(3px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+      background: #F9FAFB;
+      border-color: #D1D5DB;
     }
 
     &.active {
-      background: linear-gradient(90deg, #EEF2FF 0%, #F9FAFB 100%);
+      background: #F3F4F6;
       border-left-color: #4F46E5;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15), 0 2px 6px rgba(79, 70, 229, 0.1);
-      transform: translateX(5px);
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(180deg, #4F46E5 0%, #8B5CF6 100%);
-        border-radius: 0 4px 4px 0;
-        box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
-      }
+      border-left-width: 3px;
     }
 
     .avatar {
@@ -575,13 +540,7 @@ export default {
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.8);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      &:hover img {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(79, 70, 229, 0.1);
-        transform: scale(1.05);
+        border: 2px solid #E5E7EB;
       }
 
       .status {
@@ -593,22 +552,9 @@ export default {
         background: #10B981;
         border: 2px solid #fff;
         border-radius: 50%;
-        box-shadow: 0 0 0 2px white, 0 0 8px rgba(16, 185, 129, 0.4);
-        animation: status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
         &.off {
           background: #9CA3AF;
-          box-shadow: 0 0 0 2px white;
-          animation: none;
-        }
-      }
-
-      @keyframes status-pulse {
-        0%, 100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.7;
         }
       }
     }
@@ -625,33 +571,10 @@ export default {
         color: rgba(0, 0, 0, 0.65);
 
         .name {
-          max-width: 67%;
-        }
-
-        .label {
-          margin-left: 5px;
-          color: #3875EA;
-          font-size: 12px;
-          background: #D8E5FF;
-          border-radius: 10px;
-          padding: 2px 8px;
-          font-weight: 500;
-          letter-spacing: 0.3px;
-
-          &.H5 {
-            background: #FAF1D0;
-            color: #DC9A04;
-          }
-
-          &.wechat {
-            background: rgba(64, 194, 73, 0.16);
-            color: #40C249;
-          }
-
-          &.pc {
-            background: rgba(100, 64, 194, 0.16);
-            color: #6440C2;
-          }
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
 
@@ -679,24 +602,13 @@ export default {
         margin-top: 4px;
 
         /deep/ .ivu-badge-count {
-          background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-          box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-          animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          font-weight: 600;
+          background: #EF4444;
+          font-weight: 500;
           font-size: 11px;
           min-width: 18px;
           height: 18px;
           line-height: 18px;
           padding: 0 5px;
-        }
-
-        @keyframes badge-pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
         }
       }
     }
@@ -712,17 +624,15 @@ export default {
 
   /deep/ .ivu-input-wrapper {
     .ivu-input {
-      border-radius: 10px;
-      background: #F3F4F6;
-      border: 2px solid transparent;
+      border-radius: 4px;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
       transition: all 0.2s ease;
       padding: 8px 12px;
       font-size: 14px;
 
       &:focus {
-        background: #FAFBFC;
         border-color: #4F46E5;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
       }
 
       &::placeholder {
@@ -835,29 +745,4 @@ export default {
     }
 }
 </style>
-    applyOnlineUpdate(userId, payload) {
-      let matched = false;
-      this.userList.forEach(el => {
-        if(Number(el.user_id) === userId) {
-          matched = true;
-          if(Object.prototype.hasOwnProperty.call(payload, 'online')) {
-            el.online = payload.online;
-            if(payload.online == 1) {
-              this.$Notice.info({
-                title: this.$t('kefu.online'),
-                desc: `${payload.nickname || el.nickname || ''} ${this.$t('kefu.online')}`
-              });
-            } else if(payload.online == 0) {
-              el.online = 0;
-            }
-          }
-          if(payload.nickname) {
-            el.nickname = payload.nickname;
-          }
-          if(payload.avatar) {
-            el.avatar = payload.avatar;
-          }
-        }
-      });
-      return matched;
-    },
+

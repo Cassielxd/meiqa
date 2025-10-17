@@ -380,6 +380,9 @@ export default {
         });
 
         ws.$on(["reply", "chat"], (data) => {
+          console.log('[WebSocket] 收到 reply/chat 消息:', data);
+          console.log('[WebSocket] data.recored:', data.recored);
+
           if(data.msn_type == 1) {
             data.msn = this.replace_em(data.msn);
           }
@@ -388,13 +391,43 @@ export default {
               data.msn = this.replace_em(`[${data.msn}]`);
             }
           }
-          this.chatList.push(data);
-          this.$refs.chatList.updateUserList(data.recored,false);
-          this.$nextTick(()=>{
-            this.scrollTop = document.querySelector(
-              "#chat_scroll"
-            ).offsetHeight;
-          });
+
+          // ⭐ FIX: 只有消息属于当前选中用户时，才添加到聊天窗口
+          // 判断逻辑：消息的发送者或接收者是当前选中的用户
+          const currentUserId = this.userActive ? this.userActive.user_id : null;
+          const belongsToCurrentChat = currentUserId && (
+            data.user_id === currentUserId ||
+            data.to_user_id === currentUserId
+          );
+
+          if (belongsToCurrentChat) {
+            this.chatList.push(data);
+            this.$nextTick(()=>{
+              this.scrollTop = document.querySelector(
+                "#chat_scroll"
+              ).offsetHeight;
+            });
+            console.log('[消息归属] 消息属于当前用户，已添加到聊天窗口:', {
+              currentUserId,
+              messageFrom: data.user_id,
+              messageTo: data.to_user_id
+            });
+          } else {
+            console.log('[消息归属] 消息不属于当前用户，仅更新列表:', {
+              currentUserId,
+              messageFrom: data.user_id,
+              messageTo: data.to_user_id
+            });
+          }
+
+          // 无论消息是否属于当前用户，都要更新左侧用户列表
+          // ⭐ FIX: op=true 确保新用户会被添加到列表
+          if (data.recored) {
+            console.log('[WebSocket] 调用 updateUserList, recored:', data.recored);
+            this.$refs.chatList.updateUserList(data.recored, true);
+          } else {
+            console.warn('[WebSocket] data.recored 为空，无法更新用户列表');
+          }
         });
 
         ws.$on('recored',(data)=>{

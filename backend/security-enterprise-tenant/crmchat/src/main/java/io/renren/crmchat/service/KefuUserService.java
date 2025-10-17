@@ -119,7 +119,7 @@ public class KefuUserService {
         List<ChatServiceRecordEntity> records = chatServiceRecordMapper.selectList(wrapper);
         System.out.println("Query returned " + (records != null ? records.size() : 0) + " records from database");
 
-        // 转换为Map
+        // 转换为Map（修复：确保字段名匹配前端期待）
         return records.stream().map(record -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", record.getId());
@@ -129,9 +129,20 @@ public class KefuUserService {
             map.put("avatar", record.getAvatar());
             map.put("is_tourist", record.getIsTourist());
             map.put("add_time", record.getAddTime());
-            map.put("msn", record.getMsn());
+
+            // 前端期待 message 字段（数据库是message，Java属性是msn）
+            map.put("message", record.getMsn());  // 修复：getMsn()对应数据库的message字段
             map.put("message_type", record.getMessageType());
-            map.put("num", record.getNum());
+
+            // 前端期待 mssage_num (三个s) 而不是 num
+            map.put("mssage_num", record.getNum());  // 修复：字段名拼写
+
+            // 前端需要 update_time 来显示时间
+            map.put("update_time", record.getUpdateTime());  // 修复：添加 update_time
+
+            // 前端需要 online 字段来显示在线状态
+            map.put("online", record.getOnline() != null ? record.getOnline() : 0);  // 修复：添加 online
+
             return map;
         }).collect(Collectors.toList());
     }
