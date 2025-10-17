@@ -195,12 +195,30 @@ public class UserHandler implements BaseHandler {
                 log.error("ChatUserMapper not available");
                 return;
             }
-            QueryWrapper<ChatUserEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("uid", uid);
-            wrapper.eq("appid", appId);
             // 2. 创建或更新用户信息 (对应PHP第96-102行: createUser)
-            ChatUserEntity chatUser = userMapper.selectOne(wrapper);
+            // 修复: 优先使用id查询，兼容前端传递的uid实际是id的情况
+            ChatUserEntity chatUser = null;
             boolean isNewUser = false;
+
+            // 尝试1: 如果uid是数字且大于0，先尝试作为id查询（兼容前端传递id作为uid的情况）
+            if (uid != null && uid > 0) {
+                chatUser = userMapper.selectOne(new QueryWrapper<ChatUserEntity>()
+                        .eq("id", uid)
+                        .eq("appid", appId));
+                if (chatUser != null) {
+                    log.info("Found existing user by id: userId={}, uid={}", chatUser.getId(), chatUser.getUid());
+                }
+            }
+
+            // 尝试2: 如果未找到，再尝试用uid字段查询
+            if (chatUser == null && uid != null) {
+                chatUser = userMapper.selectOne(new QueryWrapper<ChatUserEntity>()
+                        .eq("uid", uid)
+                        .eq("appid", appId));
+                if (chatUser != null) {
+                    log.info("Found existing user by uid field: userId={}, uid={}", chatUser.getId(), chatUser.getUid());
+                }
+            }
 
             if (chatUser == null) {
                 // 用户不存在，创建新用户
