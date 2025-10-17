@@ -83,7 +83,7 @@
                 <div class="icon-item" @click.stop.stop="authMsg = true"><Icon style="font-weight: bold" size="22" color="#515a6e" type="ios-chatboxes-outline" /></div>
               </div>
               <div class="right-wrapper">
-                <div class="icon-item" @click.stop="isTransfer = !isTransfer">
+                <div class="icon-item" @click.stop="handleTransferClick">
                   <span class="iconfont iconzhuanjie"></span>
                   <span>Transfer</span>
                 </div>
@@ -309,12 +309,25 @@ export default {
 
   },
   methods: {
+      // 校验是否选中了会话
+      checkSessionSelected() {
+        if (!this.userActive || !this.userActive.to_user_id) {
+          this.$Message.warning('Please select a conversation first');
+          return false;
+        }
+        return true;
+      },
       handleInput() {
           let chatCon = this.$refs.editable.innerText.replace(/[\r\n]/g, '');
           console.log(chatCon)
           this.chatCon = chatCon.trim();
       },
       handlePaste(event) {
+        // 校验会话选中
+        if (!this.checkSessionSelected()) {
+          return;
+        }
+
         let clipboardDataItem = event.clipboardData.items[0];
         if (clipboardDataItem.type.indexOf('image/') != -1) {
             let file = clipboardDataItem.getAsFile();
@@ -435,6 +448,11 @@ export default {
 
     // 上传成功
     handleSuccess(res, file, fileList) {
+      // 校验会话选中
+      if (!this.checkSessionSelected()) {
+        return;
+      }
+
       if(res.status === 200) {
         this.$Message.success(res.msg);
         this.sendMsg(res.data.url, 3)
@@ -506,6 +524,14 @@ export default {
 
 
     },
+    // 处理转接按钮点击
+    handleTransferClick() {
+      // 校验会话选中
+      if (!this.checkSessionSelected()) {
+        return;
+      }
+      this.isTransfer = !this.isTransfer;
+    },
     msgClose(e) {
       this.isTransfer = false
     },
@@ -526,6 +552,11 @@ export default {
     },
     // 文本发送
     sendText() {
+    // 校验会话选中
+    if (!this.checkSessionSelected()) {
+      return;
+    }
+
     let chatCon = this.$refs.editable.innerText.replace(/[\r\n]/g, '');
     if (!chatCon) {
         return this.$Message.error('Please enter content');
@@ -645,6 +676,11 @@ export default {
     },
     // 商品推送
     bindPush(data) {
+      // 校验会话选中
+      if (!this.checkSessionSelected()) {
+        return;
+      }
+
       this.sendMsg(data, 5)
     },
     // 商品详情
