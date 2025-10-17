@@ -19,6 +19,7 @@ class wsSocket {
         this.networkStatus = true;
         this.reconneMax = 100;
         this.connectLing = false;
+        this.manualClose = false; // 标记是否为手动关闭（退出登录）
         reconneTimer[this.opt.key] = null;
         reconneCount[this.opt.key] = 0;
         this.init(opt);
@@ -203,7 +204,13 @@ class wsSocket {
         this.timer = null;
         this.opt.close && this.opt.close();
         this.socketStatus = false;
-        this.reconne();
+
+        // 如果是手动关闭（退出登录），则不自动重连
+        if (!this.manualClose) {
+            this.reconne();
+        } else {
+            console.log('[WebSocket] 手动关闭，不进行重连');
+        }
     }
 
     onError(e) {
@@ -221,6 +228,19 @@ class wsSocket {
 
     $off(...args) {
         this.vm.$off(...args);
+    }
+
+    // 手动关闭WebSocket连接（退出登录时使用，不自动重连）
+    manuallyClose() {
+        this.manualClose = true;
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.close();
+        }
+        console.log('[WebSocket] 手动关闭连接，已禁用自动重连');
     }
 }
 

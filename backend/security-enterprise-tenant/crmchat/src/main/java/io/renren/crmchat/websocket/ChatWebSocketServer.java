@@ -135,6 +135,49 @@ public class ChatWebSocketServer {
                         log.error("UserHandler bean not available");
                     }
                 }
+                case "logout" -> {
+                    // 处理客服退出登录
+                    WebSocketSessionRegistry.SessionHolder holder = WebSocketSessionRegistry.get(session);
+                    if (holder != null) {
+                        log.info("Processing logout request: appid={}, userId={}, type={}",
+                                holder.getAppid(), holder.getUserId(), holder.getUserType());
+
+                        // 标记用户离线
+                        runWithUserContext(holder.getAppid(), holder.getUserId(), holder.getUserType(),
+                                () -> markUserOnline(holder, false));
+
+                        // 移除session注册
+                        WebSocketSessionRegistry.remove(session);
+
+                        // 发送logout确认并关闭连接
+                        sendEnvelope(session, "logout", Map.of("status", "success"));
+                        closeSilently(session);
+                    }
+                }
+                case "online" -> {
+                    // 处理客服在线状态变更
+                    Integer onlineStatus = parseIntNullable(dataNode.path("online").asText(null));
+                    if (onlineStatus != null) {
+                        WebSocketSessionRegistry.SessionHolder holder = WebSocketSessionRegistry.get(session);
+                        if (holder != null && "kefu".equals(holder.getUserType())) {
+                            ChatServiceMapper serviceMapper = SpringContextUtils.getBean(ChatServiceMapper.class);
+                            if (serviceMapper != null) {
+                                UpdateWrapper<ChatServiceEntity> wrapper = new UpdateWrapper<>();
+                                if (holder.getServiceId() != null && holder.getServiceId() > 0) {
+                                    wrapper.eq("id", holder.getServiceId()).eq("appid", holder.getAppid());
+                                } else {
+                                    wrapper.eq("appid", holder.getAppid()).eq("user_id", holder.getUserId());
+                                }
+                                ChatServiceEntity update = new ChatServiceEntity();
+                                update.setOnline(onlineStatus);
+                                update.setIsBackstage(onlineStatus);
+                                update.setUpdateTime((int) (System.currentTimeMillis() / 1000));
+                                serviceMapper.update(update, wrapper);
+                                log.info("Updated kefu online status: userId={}, status={}", holder.getUserId(), onlineStatus);
+                            }
+                        }
+                    }
+                }
                 case "to_chat" -> {
                     Integer target = parseIntNullable(dataNode.path("id").asText(null));
                     WebSocketSessionRegistry.updateCurrentTarget(session, target);

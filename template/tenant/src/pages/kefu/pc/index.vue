@@ -221,6 +221,7 @@ export default {
       tourist: 0,
       isShow:false,
       toChat:false,
+      tokenCheckTimer: null, // Token过期检查定时器
     }
   },
   computed: {
@@ -292,6 +293,9 @@ export default {
 
     console.log(this.$route);
 
+    // 启动Token过期检查
+    this.startTokenExpirationCheck();
+
     window.onbeforeunload = (e) => {
       if(this.$route.name == "kefu_pc_list") {
         e = e || window.event;
@@ -308,7 +312,111 @@ export default {
 
 
   },
+  beforeDestroy() {
+    // 清理Token检查定时器
+    if (this.tokenCheckTimer) {
+      clearInterval(this.tokenCheckTimer);
+      this.tokenCheckTimer = null;
+    }
+  },
   methods: {
+      // 启动Token过期检查
+      startTokenExpirationCheck() {
+        // 立即检查一次
+        this.checkTokenExpiration();
+
+        // 每分钟检查一次Token是否过期
+        this.tokenCheckTimer = setInterval(() => {
+          this.checkTokenExpiration();
+        }, 60000); // 60秒 = 1分钟
+      },
+
+      // 检查Token是否过期
+      checkTokenExpiration() {
+        const token = getCookies('kefu_token');
+
+        if (!token) {
+          console.warn('[Token检查] Token不存在，跳转登录页');
+          this.redirectToLogin();
+          return;
+        }
+
+        try {
+          // 解析JWT Token (格式: header.payload.signature)
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            console.error('[Token检查] Token格式无效');
+            this.redirectToLogin();
+            return;
+          }
+
+          // 解码payload (Base64URL解码)
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+          if (!payload.exp) {
+            console.error('[Token检查] Token缺少过期时间');
+            return;
+          }
+
+          const expireTime = payload.exp * 1000; // 转为毫秒
+          const now = Date.now();
+          const remainingTime = expireTime - now;
+          const remainingMinutes = Math.floor(remainingTime / 60000);
+
+          console.log(`[Token检查] Token剩余有效期: ${remainingMinutes} 分钟`);
+
+          // Token已过期
+          if (remainingTime <= 0) {
+            console.warn('[Token已过期] 跳转登录页');
+            this.$Notice.error({
+              title: 'Session Expired',
+              desc: 'Your session has expired. Please login again.',
+              duration: 3
+            });
+            this.redirectToLogin();
+            return;
+          }
+
+          // Token剩余时间少于30分钟时提示
+          if (remainingTime < 30 * 60 * 1000) {
+            this.$Notice.warning({
+              title: 'Session Expiring Soon',
+              desc: `Your session will expire in ${remainingMinutes} minutes. Please save your work.`,
+              duration: 10
+            });
+          }
+
+        } catch (e) {
+          console.error('[Token检查] Token解析失败:', e);
+          // Token解析失败可能是格式错误，跳转登录
+          this.redirectToLogin();
+        }
+      },
+
+      // 跳转到登录页
+      redirectToLogin() {
+        // 清理定时器
+        this.cleanupTokenTimer();
+
+        // 清除所有认证信息
+        localStorage.clear();
+        document.cookie.split(";").forEach(c => {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // 跳转到登录页
+        this.$router.replace({ path: '/kefu' });
+      },
+
+      // 清理Token检查定时器（供Vuex logout action调用）
+      cleanupTokenTimer() {
+        if (this.tokenCheckTimer) {
+          clearInterval(this.tokenCheckTimer);
+          this.tokenCheckTimer = null;
+          console.log('[Token管理] 定时器已清理');
+        }
+      },
+
       // 校验是否选中了会话
       checkSessionSelected() {
         if (!this.userActive || !this.userActive.to_user_id) {
