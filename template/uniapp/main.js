@@ -2,12 +2,14 @@ import Vue from 'vue'
 import App from './App'
 import layOut from 'pages/components/layout.vue';
 import store from './store'
+import i18n from './i18n';
 import Socket from 'pages/api/socket.js';
 import {
 	cache
 } from './pages/utils/uniApi.js'
 Vue.prototype.$store = store
 Vue.prototype.$cache = cache
+Vue.prototype.$i18n = i18n
 
 // 挂载 socket
 Vue.prototype.scoket = new Socket();
@@ -27,6 +29,7 @@ App.mpType = 'app'
 
 const app = new Vue({
 	...App,
-	store
+	store,
+    i18n
 })
 app.$mount()
