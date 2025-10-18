@@ -19,17 +19,19 @@
 
     <!-- Right Sign-in Form -->
     <div class="signin-form">
-      <!-- QR Code Switch Icon (top-right) -->
-      <div v-if="loginType === 0" class="switch-mode-btn" @click="toggleLoginType">
-        <Icon type="ios-qr-scanner" class="switch-icon" />
-      </div>
-      <div v-else class="switch-mode-btn" @click="toggleLoginType">
-        <Icon type="ios-contact" class="switch-icon" />
+      <!-- Title and Switch Icon Row -->
+      <div class="signin-header">
+        <span class="signin-label">{{ $t('kefu.loginTitle') }}</span>
+        <div v-if="loginType === 0" class="switch-mode-btn" @click="toggleLoginType">
+          <Icon type="ios-qr-scanner" class="switch-icon" />
+        </div>
+        <div v-else class="switch-mode-btn" @click="toggleLoginType">
+          <Icon type="ios-contact" class="switch-icon" />
+        </div>
       </div>
 
       <!-- Account Login Form -->
       <template v-if="loginType === 0">
-        <span class="signin-label">{{ $t('kefu.loginTitle') }}</span>
         <Form ref="formInline" :model="formInline" :rules="ruleInline" @keyup.enter="handleSubmit('formInline')">
           <FormItem prop="username">
             <Input
@@ -408,10 +410,25 @@ export default {
   position: relative;
 }
 
+.signin-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.signin-label {
+  color: #1A1A1A;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+  grid-column: 2;
+}
+
 .switch-mode-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -421,6 +438,7 @@ export default {
   border-radius: 8px;
   background-color: #2D6FF7;
   transition: all 0.3s ease;
+  grid-column: 3;
 }
 
 .switch-mode-btn:hover {
@@ -432,15 +450,6 @@ export default {
 .switch-icon {
   font-size: 22px;
   color: #FFFFFF;
-}
-
-.signin-label {
-  color: #1A1A1A;
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 32px;
-  margin-top: 0;
 }
 
 .email-input,
