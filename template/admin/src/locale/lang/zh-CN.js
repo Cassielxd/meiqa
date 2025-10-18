@@ -1,6 +1,13 @@
 export default {
   home: '首页问问',
-  login: '登录',
+  login: {
+    title: '平台管理登录',
+    username: '请输入管理员账号',
+    password: '请输入密码',
+    usernamePlaceholder: '请输入管理员账号',
+    passwordPlaceholder: '请输入密码',
+    loginBtn: '登录',
+  },
   components: '组件',
   count_to_page: '数字渐变',
   tables_page: '多功能表格',
@@ -64,6 +71,11 @@ export default {
     pcList: '客服列表',
     appChat: '客服聊天',
     mobileUserChat: '移动用户聊天',
+    // Brand information
+    brandName: '美洽',
+    tagline1: '让客户',
+    tagline2: '服务更简单',
+    description: '美洽提供专业的客服软件，帮助企业提升客户服务体验。',
     // Login related
     loginTitle: '客服登录',
     appScanLogin: 'APP扫码登录',
@@ -76,6 +88,8 @@ export default {
     loginLoading: '登录中...',
     loginSuccess: '登录成功',
     loginFailed: '登录失败',
+    loginFailedNoToken: '登录失败：未获取到token',
+    loginFailedNoUserInfo: '登录失败：未获取到用户信息',
     qrcodeExpired: '已过期',
     refreshQrcode: '点击刷新',
     systemTitle: '客服系统',

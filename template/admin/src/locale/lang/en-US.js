@@ -1,6 +1,13 @@
 export default {
   home: 'Home',
-  login: 'Login',
+  login: {
+    title: 'Platform Management Login',
+    username: 'Please enter the administrator account',
+    password: 'Please enter the password',
+    usernamePlaceholder: 'Please enter the administrator account',
+    passwordPlaceholder: 'Please enter the password',
+    loginBtn: 'Login',
+  },
   components: 'Components',
   count_to_page: 'Count-to',
   tables_page: 'Table',
@@ -64,6 +71,11 @@ export default {
     pcList: 'Customer Service List',
     appChat: 'Customer Service Chat',
     mobileUserChat: 'Mobile User Chat',
+    // Brand information
+    brandName: 'MeiQia',
+    tagline1: 'Making Customer',
+    tagline2: 'Service Simple',
+    description: 'MeiQia provides professional customer service software to help enterprises improve customer service experience.',
     // Login related
     loginTitle: 'Customer Service Login',
     appScanLogin: 'APP Scan Login',
@@ -76,6 +88,8 @@ export default {
     loginLoading: 'Logging in...',
     loginSuccess: 'Login successful',
     loginFailed: 'Login failed',
+    loginFailedNoToken: 'Login failed: No token received',
+    loginFailedNoUserInfo: 'Login failed: No user information',
     qrcodeExpired: 'Expired',
     refreshQrcode: 'Click to refresh',
     systemTitle: 'Customer Service System',

@@ -5,15 +5,15 @@
       <div class="brand-section">
         <div class="logo-container">
           <img src="https://mdn.alipayobjects.com/fecodex_image/afts/img/xOLTT5BfbTAAAAAAQLAAAAgAejH3AQBr/original" class="brand-logo" />
-          <span class="brand-name">MeiQia</span>
+          <span class="brand-name">{{ $t('kefu.brandName') }}</span>
         </div>
       </div>
       <div class="tagline-container">
-        <span class="tagline-line-1">Making Customer</span>
-        <span class="tagline-line-2">Service Simple</span>
+        <span class="tagline-line-1">{{ $t('kefu.tagline1') }}</span>
+        <span class="tagline-line-2">{{ $t('kefu.tagline2') }}</span>
       </div>
       <div class="description-container">
-        <p class="description-text">MeiQia provides professional customer service software to help enterprises improve customer service experience.</p>
+        <p class="description-text">{{ $t('kefu.description') }}</p>
       </div>
     </div>
 
@@ -197,7 +197,7 @@ export default {
         msg();
 
         if (!res.data.token) {
-          this.$Message.error('Login failed: No token received');
+          this.$Message.error(this.$t('kefu.loginFailedNoToken'));
           return;
         }
 
@@ -208,7 +208,7 @@ export default {
         let kefuUid = kefuInfo ? kefuInfo.uid : null;
 
         if (!kefuUid) {
-          this.$Message.error('Login failed: No user information');
+          this.$Message.error(this.$t('kefu.loginFailedNoUserInfo'));
           return;
         }
 
