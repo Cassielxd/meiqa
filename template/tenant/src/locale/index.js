@@ -44,11 +44,11 @@ const getUrlLang = () => {
   return null;
 };
 
-// 语言优先级：URL参数 > 本地存储 > 浏览器语言 > 默认中文
+// 语言优先级：URL参数 > 本地存储 > 浏览器语言 > 默认英文
 const urlLang = getUrlLang();
 const navLang = navigator.language;
 const localLang = (navLang === 'zh-CN' || navLang === 'en-US' || navLang === 'zh-TW') ? navLang : false;
-let lang = urlLang || localRead('local') || localLang || 'zh-CN';
+let lang = urlLang || localRead('local') || localLang || 'en-US';
 
 // 如果从URL获取了语言，保存到本地存储
 if (urlLang) {
