@@ -10,24 +10,49 @@ import zhTwLocale from 'iview/src/locale/lang/zh-TW'
 
 Vue.use(VueI18n);
 
-// 从URL参数获取语言设置，优先级：URL参数 > 本地存储 > 浏览器语言
-const getUrlParam = (name) => {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(name);
+// 从URL参数获取语言设置（支持hash路由）
+const getUrlLang = () => {
+  // 先尝试从hash后面获取参数（hash路由模式）
+  let urlParams = null;
+  if (window.location.hash && window.location.hash.includes('?')) {
+    const hashParts = window.location.hash.split('?');
+    if (hashParts.length > 1) {
+      urlParams = new URLSearchParams(hashParts[1]);
+    }
+  }
+  // 如果hash中没有，再从window.location.search获取（传统模式）
+  if (!urlParams) {
+    urlParams = new URLSearchParams(window.location.search);
+  }
+
+  const urlLang = urlParams.get('lang') || urlParams.get('language');
+  if (urlLang) {
+    // 支持的语言列表
+    const supportedLangs = ['zh-CN', 'en-US', 'zh-TW'];
+    // 语言映射，支持简写
+    const langMap = {
+      'zh': 'zh-CN',
+      'cn': 'zh-CN',
+      'en': 'en-US',
+      'tw': 'zh-TW',
+      'hk': 'zh-TW'
+    };
+
+    const normalizedLang = langMap[urlLang.toLowerCase()] || urlLang;
+    return supportedLangs.includes(normalizedLang) ? normalizedLang : null;
+  }
+  return null;
 };
 
-const urlLang = getUrlParam('lang');
-const navLang = navigator.language;
-const localLang = (navLang === 'zh-CN' || navLang === 'en-US') ? navLang : false;
-
 // 语言优先级：URL参数 > 本地存储 > 浏览器语言 > 默认中文
-let lang = 'zh-CN';
-if (urlLang && ['zh-CN', 'en-US'].includes(urlLang)) {
-  lang = urlLang;
-  // 将URL参数的语言保存到本地存储
+const urlLang = getUrlLang();
+const navLang = navigator.language;
+const localLang = (navLang === 'zh-CN' || navLang === 'en-US' || navLang === 'zh-TW') ? navLang : false;
+let lang = urlLang || localRead('local') || localLang || 'zh-CN';
+
+// 如果从URL获取了语言，保存到本地存储
+if (urlLang) {
   localStorage.setItem('local', urlLang);
-} else {
-  lang = localRead('local') || localLang || 'zh-CN';
 }
 
 Vue.config.lang = lang;
@@ -36,6 +61,7 @@ Vue.config.lang = lang;
 Vue.locale = () => {};
 const messages = {
   'zh-CN': Object.assign(zhCnLocale, customZhCn),
+  'zh-TW': Object.assign(zhTwLocale, customZhTw),
   'en-US': Object.assign(enUsLocale, customEnUs)
 };
 const i18n = new VueI18n({
