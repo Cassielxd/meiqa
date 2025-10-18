@@ -1,10 +1,6 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <div class="login-logo">
-        <img :src="login_logo" alt="logo" />
-      </div>
-
       <!-- Login Form -->
       <template v-if="!isRegister">
         <div class="login-title">{{ $t('login.loginBtn') }}</div>
@@ -432,19 +428,12 @@ export default {
   overflow-y: auto;
 }
 
-.login-logo {
-  margin-bottom: 15px;
-  img {
-    max-width: 140px;
-    height: auto;
-  }
-}
-
 .login-title {
   font-size: 24px;
   font-weight: 600;
   color: #333;
   margin-bottom: 25px;
+  margin-top: 0;
 }
 
 .login-button {
