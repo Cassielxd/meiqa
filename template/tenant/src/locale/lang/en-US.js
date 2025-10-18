@@ -96,7 +96,7 @@ export default {
 
   // Login page
   login: {
-    title: 'Login',
+    title: 'Login/Register',
     username: 'Please enter username',
     password: 'Please enter password',
     captcha: 'Please enter captcha',
@@ -109,7 +109,26 @@ export default {
     email: 'Please enter email (as login account)',
     phone: 'Please enter contact information',
     confirmPassword: 'Please confirm password',
-    securityVerify: 'Please complete security verification'
+    securityVerify: 'Please complete security verification',
+    // Registration related
+    emailCaptcha: 'Please enter email verification code',
+    emailCaptchaLength: 'Verification code must be 6 digits',
+    sending: 'Sending...',
+    seconds: 's',
+    sendCaptcha: 'Send Code',
+    emailFormatError: 'Please enter a valid email address',
+    passwordMinLength: 'Password length cannot be less than 6 characters',
+    confirmPasswordRequired: 'Please confirm password',
+    passwordMismatch: 'The passwords entered do not match',
+    enterEmailFirst: 'Please enter email first',
+    sendingCaptcha: 'Sending verification code...',
+    captchaSent: 'Verification code sent, please check your email!',
+    sendCaptchaFailed: 'Failed to send verification code',
+    loggingIn: 'Logging in...',
+    loginFailed: 'Login failed',
+    registering: 'Registering...',
+    registerSuccess: 'Registration successful! Please login',
+    registerFailed: 'Registration failed'
   },
 
   // Dashboard/Home page

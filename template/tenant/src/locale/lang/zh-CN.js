@@ -96,7 +96,7 @@
 
   // 登录页面
   login: {
-    title: '登录',
+    title: '登录/注册',
     username: '请输入用户名',
     password: '请输入密码',
     captcha: '请输入验证码',
@@ -109,7 +109,26 @@
     email: '请输入邮箱（作为登录账号）',
     phone: '请输入联系方式',
     confirmPassword: '请确认密码',
-    securityVerify: '请完成安全校验'
+    securityVerify: '请完成安全校验',
+    // 注册相关
+    emailCaptcha: '请输入邮件验证码',
+    emailCaptchaLength: '验证码必须是6位',
+    sending: '发送中...',
+    seconds: '秒',
+    sendCaptcha: '发送验证码',
+    emailFormatError: '请输入正确的邮箱格式',
+    passwordMinLength: '密码长度不能少于6位',
+    confirmPasswordRequired: '请确认密码',
+    passwordMismatch: '两次输入的密码不一致',
+    enterEmailFirst: '请先输入邮箱',
+    sendingCaptcha: '正在发送验证码...',
+    captchaSent: '验证码已发送，请查收邮件！',
+    sendCaptchaFailed: '发送验证码失败',
+    loggingIn: '登录中...',
+    loginFailed: '登录失败',
+    registering: '注册中...',
+    registerSuccess: '注册成功！请登录',
+    registerFailed: '注册失败'
   },
 
   // 首页/仪表板

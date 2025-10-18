@@ -1,203 +1,108 @@
 <template>
-  <div class="page-account">
-    <div class="container" :class="[fullWidth > 768 ? 'containerSamll' : 'containerBig']">
-      <swiper :options="swiperOption" class="swiperPross" v-if="fullWidth > 768">
-        <swiper-slide class="swiperPic" v-for="(item, index) in swiperList" :key="index">
-          <img :src="item.slide" />
-        </swiper-slide>
-        <div class="swiper-pagination" slot="pagination"></div>
-      </swiper>
-      <div class="index_from page-account-container from-wh">
-        <div class="page-account-top">
-          <div class="page-account-top-logo">
-            <img :src="login_logo" alt="logo" style="width: 100%; height: 74px" />
-          </div>
-        </div>
-        <!-- 登录表单 -->
-        <Form ref="formInline" :model="formInline" :rules="ruleInline" @keyup.enter="handleSubmit('formInline')" v-if="!isRegister">
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <img :src="login_logo" alt="logo" />
+      </div>
+
+      <!-- Login Form -->
+      <template v-if="!isRegister">
+        <div class="login-title">{{ $t('login.loginBtn') }}</div>
+        <Form ref="formInline" :model="formInline" :rules="ruleInline" @keyup.enter="handleSubmit('formInline')">
           <FormItem prop="username">
-            <Input
-              type="text"
-              v-model="formInline.username"
-              prefix="ios-contact-outline"
-              :placeholder="$t('login.username')"
-              size="large"
-            />
+            <Input type="text" v-model="formInline.username" :placeholder="$t('login.username')" size="large">
+              <Icon type="ios-contact-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
           <FormItem prop="password">
-            <Input
-              type="password"
-              v-model="formInline.password"
-              prefix="ios-lock-outline"
-              :placeholder="$t('login.password')"
-              size="large"
-            />
-          </FormItem>
-          <!-- 数字验证码已注释 -->
-          <!-- <FormItem prop="code">
-            <div class="code">
-              <Input
-                type="text"
-                v-model="formInline.code"
-                prefix="ios-keypad-outline"
-                :placeholder="$t('login.captcha')"
-                size="large"
-              />
-              <img :src="imgcode" class="pictrue" @click="captchas" />
-            </div>
-          </FormItem> -->
-          <FormItem>
-            <Button type="primary" long :loading="loading" size="large" @click="handleSubmit('formInline')" class="btn"
-              >{{ $t('login.loginBtn') }}</Button
-            >
+            <Input type="password" v-model="formInline.password" :placeholder="$t('login.password')" size="large">
+               <Icon type="ios-lock-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
           <FormItem>
-            <div class="switch-mode">
-              <span>{{ $t('login.noAccount') }}</span>
-              <a @click="switchToRegister">{{ $t('login.goRegister') }}</a>
-            </div>
+            <Button type="primary" long :loading="loading" size="large" @click="handleSubmit('formInline')" class="login-button">
+              {{ $t('login.loginBtn') }}
+            </Button>
           </FormItem>
+          <div class="switch-mode">
+            <span>{{ $t('login.noAccount') }}</span>
+            <a @click="switchToRegister">{{ $t('login.goRegister') }}</a>
+          </div>
         </Form>
+      </template>
 
-        <!-- 注册表单 -->
-        <Form ref="registerForm" :model="registerForm" :rules="registerRules" @keyup.enter="handleRegister('registerForm')" v-if="isRegister">
+      <!-- Register Form -->
+      <template v-if="isRegister">
+        <div class="login-title">{{ $t('login.registerBtn') }}</div>
+        <Form ref="registerForm" :model="registerForm" :rules="registerRules" @keyup.enter="handleRegister('registerForm')">
           <FormItem prop="email">
-            <Input
-              type="text"
-              v-model="registerForm.email"
-              prefix="ios-mail-outline"
-              :placeholder="$t('login.email')"
-              size="large"
-            />
+            <Input type="text" v-model="registerForm.email" :placeholder="$t('login.email')" size="large">
+              <Icon type="ios-mail-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
           <FormItem prop="contact_phone">
-            <Input
-                type="text"
-                v-model="registerForm.contact_phone"
-                prefix="ios-contact-outline"
-                :placeholder="$t('login.phone')"
-                size="large"
-            />
+            <Input type="text" v-model="registerForm.contact_phone" :placeholder="$t('login.phone')" size="large">
+              <Icon type="ios-call-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
           <FormItem prop="password">
-            <Input
-              type="password"
-              v-model="registerForm.password"
-              prefix="ios-lock-outline"
-              :placeholder="$t('login.password')"
-              size="large"
-            />
+            <Input type="password" v-model="registerForm.password" :placeholder="$t('login.password')" size="large">
+              <Icon type="ios-lock-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
-          <FormItem prop="confirmPassword">
-            <Input
-              type="password"
-              v-model="registerForm.confirm_pwd"
-              prefix="ios-lock-outline"
-              :placeholder="$t('login.confirmPassword')"
-              size="large"
-            />
+           <FormItem prop="confirm_pwd">
+            <Input type="password" v-model="registerForm.confirm_pwd" :placeholder="$t('login.confirmPassword')" size="large">
+               <Icon type="ios-lock-outline" slot="prefix"></Icon>
+            </Input>
           </FormItem>
-          <!-- 邮件验证码 -->
           <FormItem prop="captcha">
-            <div class="code">
-              <Input
-                type="text"
-                v-model="registerForm.captcha"
-                prefix="ios-keypad-outline"
-                placeholder="请输入邮件验证码"
-                size="large"
-                style="flex: 1; margin-right: 10px;"
-              />
-              <Button
-                type="primary"
-                size="large"
-                :disabled="sendingCode || countdown > 0"
-                :loading="sendingCode"
-                @click="handleSendEmailCode"
-                style="min-width: 120px;"
-              >
-                {{ sendingCode ? '发送中...' : countdown > 0 ? `${countdown}秒` : '发送验证码' }}
+            <div class="captcha-line">
+              <Input type="text" v-model="registerForm.captcha" :placeholder="$t('login.emailCaptcha')" size="large" class="captcha-input"/>
+              <Button type="primary" size="large" :disabled="sendingCode || countdown > 0" :loading="sendingCode" @click="handleSendEmailCode" class="captcha-btn">
+                {{ sendingCode ? $t('login.sending') : countdown > 0 ? `${countdown}${$t('login.seconds')}` : $t('login.sendCaptcha') }}
               </Button>
             </div>
           </FormItem>
-          <FormItem prop="code">
-            <div class="code">
-              <Input
-                type="text"
-                v-model="registerForm.code"
-                prefix="ios-keypad-outline"
-                :placeholder="$t('login.captcha')"
-                size="large"
-              />
-              <img :src="imgcode" class="pictrue" @click="captchas" />
-            </div>
+           <FormItem prop="code">
+             <div class="captcha-line">
+              <Input type="text" v-model="registerForm.code" :placeholder="$t('login.captcha')" size="large" class="captcha-input"/>
+              <img :src="imgcode" class="captcha-img" @click="captchas" />
+             </div>
           </FormItem>
           <FormItem>
-            <Button type="primary" long :loading="registerLoading" size="large" @click="handleRegister('registerForm')" class="btn"
-              >{{ $t('login.registerBtn') }}</Button
-            >
+            <Button type="primary" long :loading="registerLoading" size="large" @click="handleRegister('registerForm')" class="login-button">
+              {{ $t('login.registerBtn') }}
+            </Button>
           </FormItem>
-          <FormItem>
-            <div class="switch-mode">
-              <span>{{ $t('login.hasAccount') }}</span>
-              <a @click="switchToLogin">{{ $t('login.goLogin') }}</a>
-            </div>
-          </FormItem>
+          <div class="switch-mode">
+            <span>{{ $t('login.hasAccount') }}</span>
+            <a @click="switchToLogin">{{ $t('login.goLogin') }}</a>
+          </div>
         </Form>
-      </div>
+      </template>
     </div>
-
-    <!-- <Modal
-      v-model="modals"
-      scrollable
-      footer-hide
-      closable
-      :title="$t('login.securityVerify')"
-      :mask-closable="false"
-      :z-index="2"
-      width="342"
-    >
-      <div class="captchaBox">
-        <div id="captcha" style="position: relative" ref="captcha"></div>
-        <div id="msg"></div>
-      </div>
-    </Modal> -->
-    <!-- 滑动验证码已注释 -->
-    <!-- <Verify
-        @success="success"
-        captchaType="blockPuzzle"
-        :imgSize="{ width: '330px', height: '155px' }"
-      ref="verify"
-    ></Verify> -->
   </div>
 </template>
+
 <script>
 import { AccountLogin, AccountRegister, loginInfoApi, captcha_pro, sendRegisterCaptcha } from '@/api/account';
 import { getWorkermanUrl } from '@/api/kefu';
 import { getStaticMenusAPI, getTransformedMenus } from '@/data/static-menus';
-// import mixins from '../mixins'
 import Setting from '@/setting';
 import { setCookies } from '@/libs/util';
 import '../../../assets/js/canvas-nest.min';
-// import '../../../assets/js/jigsaw.js';
 import Verify from "@/components/verifition/Verify";
+
 export default {
-  // mixins: [mixins],
   components: {
     Verify,
   },
   data() {
     return {
       fullWidth: document.documentElement.clientWidth,
-      swiperOption: {
-        pagination: '.swiper-pagination',
-        autoplay: true,
-      },
       loading: false,
       registerLoading: false,
-      isShow: false,
       isRegister: false, // 控制登录/注册页面切换
-      autoLogin: true,
       imgcode: '',
       sendingCode: false, // 发送邮件验证码状态
       countdown: 0, // 倒计时秒数
@@ -207,11 +112,6 @@ export default {
         password: '',
         code: '',
         key: '',
-      },
-      ruleInline: {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        // code: [{ required: true, message: '请输入验证码', trigger: 'blur' }], // 已注释验证码验证
       },
       // 注册表单数据
       registerForm: {
@@ -223,36 +123,42 @@ export default {
         code: '',
         key: '',
       },
-      // 注册表单验证规则
-      registerRules: {
+      errorNum: 0,
+      login_logo: '',
+      key: '',
+    };
+  },
+  computed: {
+    ruleInline() {
+      return {
+        username: [{ required: true, message: this.$t('login.username'), trigger: 'blur' }],
+        password: [{ required: true, message: this.$t('login.password'), trigger: 'blur' }],
+      }
+    },
+    registerRules() {
+      return {
         email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+          { required: true, message: this.$t('login.email'), trigger: 'blur' },
+          { type: 'email', message: this.$t('login.emailFormatError'), trigger: 'blur' }
         ],
         contact_phone: [
-          { required: true, message: '请输入联系方式', trigger: 'blur' },
+          { required: true, message: this.$t('login.phone'), trigger: 'blur' },
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+          { required: true, message: this.$t('login.password'), trigger: 'blur' },
+          { min: 6, message: this.$t('login.passwordMinLength'), trigger: 'blur' }
         ],
         confirm_pwd: [
-          { required: true, message: '请确认密码', trigger: 'blur' },
+          { required: true, message: this.$t('login.confirmPassword'), trigger: 'blur' },
           { validator: this.validateConfirmPassword, trigger: 'blur' }
         ],
         captcha: [
-          { required: true, message: '请输入邮件验证码', trigger: 'blur' },
-          { len: 6, message: '验证码必须是6位', trigger: 'blur' }
+          { required: true, message: this.$t('login.emailCaptcha'), trigger: 'blur' },
+          { len: 6, message: this.$t('login.emailCaptchaLength'), trigger: 'blur' }
         ],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-      },
-      errorNum: 0,
-      // jigsaw: null,
-      login_logo: '',
-      swiperList: [],
-      defaultSwiperList: require('@/assets/images/sw.jpg'),
-      key: '',
-    };
+        code: [{ required: true, message: this.$t('login.captcha'), trigger: 'blur' }],
+      }
+    }
   },
   created() {
     var _this = this;
@@ -261,82 +167,46 @@ export default {
       if (_this.$route.name === 'login') {
         let key = window.event.keyCode;
         if (key === 13) {
-          _this.handleSubmit('formInline');
+          if (!_this.isRegister) {
+            _this.handleSubmit('formInline');
+          } else {
+            _this.handleRegister('registerForm');
+          }
         }
       }
     };
     window.addEventListener('resize', this.handleResize);
   },
-  watch: {
-    fullWidth(val) {
-      // 为了避免频繁触发resize函数导致页面卡顿，使用定时器
-      if (!this.timer) {
-        // 一旦监听到的screenWidth值改变，就将其重新赋给data里的screenWidth
-        this.screenWidth = val;
-        this.timer = true;
-        let that = this;
-        setTimeout(function () {
-          // 打印screenWidth变化的值
-          that.timer = false;
-        }, 400);
-      }
-    },
-    $route(n) {
-      this.captchas();
-    },
-  },
   mounted: function () {
     this.$nextTick(() => {
-      // /* eslint-disable */
-      let that = this;
-      // this.jigsaw = jigsaw.init({
-      //   el: this.$refs.captcha,
-      //   onSuccess() {
-      //     that.modals = false;
-      //     that.closeModel();
-      //   },
-      //   onFail: this.closefail,
-      //   onRefresh() {},
-      // });
-      if (this.screenWidth < 768) {
-        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
-      } else {
-        document.getElementsByTagName('canvas')[0].className = 'index_bg';
-      }
-      this.swiperData();
+      this.loginInfo();
     });
     this.captchas();
   },
   methods: {
-    swiperData() {
+    loginInfo() {
       loginInfoApi()
         .then((res) => {
           localStorage.setItem('ADMIN_TITLE', res.data.site_name);
           let data = res.data || {};
           this.login_logo = data.login_logo ? data.login_logo : require('@/assets/images/logo.png');
-          this.swiperList = data.slide.length ? data.slide : [{ slide: this.defaultSwiperList }];
           this.key = data.key;
         })
         .catch((err) => {
           this.$Message.error(err);
           this.login_logo = require('@/assets/images/logo.png');
-          this.swiperList = [{ slide: this.defaultSwiperList }];
         });
     },
     success(params){
-      console.log('Success callback called with params:', params);
       if (this.isRegister) {
         this.closeRegisterModel(params);
       } else {
         this.closeModel(params);
       }
     },
-    // 关闭模态框
     closeModel(params) {
-      console.log('closeModel called with params:', params);
-      this.isShow = false;
       let msg = this.$Message.loading({
-        content: '登录中...',
+        content: this.$t('login.loggingIn'),
         duration: 0,
       });
       this.loading = true;
@@ -350,28 +220,20 @@ export default {
         captchaVerification: params.captchaVerification,
       };
 
-      console.log('Calling AccountLogin with data:', loginData);
       AccountLogin(loginData)
         .then(async (res) => {
           msg();
           let data = res.data;
           let expires = this.getExpiresTime(data.expires_time);
-          // 记录用户登陆信息
           setCookies('uuid', data.tenant_info.id, expires);
           setCookies('tenant_token', data.token, expires);
           setCookies('expires_time', data.expires_time, expires);
-
           this.$store.commit('userInfo/uniqueAuth', data.unique_auth||"");
           this.$store.commit('userInfo/userInfo', data.tenant_info);
-          // 保存菜单信息 - 使用树形菜单数据
-          this.$store.commit('menus/setopenMenus', []);
-          // 直接使用已构建的树形菜单数据（支持i18n国际化）
           const menuData = getTransformedMenus();
+          this.$store.commit('menus/setopenMenus', []);
           this.$store.commit('menus/getmenusNav', menuData);
-          // 更新localStorage缓存
           localStorage.setItem('menuList', JSON.stringify(menuData));
-
-          // 记录用户信息
           this.$store.commit('userInfo/name', data.tenant_info.account);
           this.$store.commit('userInfo/avatar', data.tenant_info.head_pic);
           this.$store.commit('userInfo/access', data.unique_auth||"");
@@ -379,9 +241,6 @@ export default {
           this.$store.commit('userInfo/logoSmall', data.logo_square||"");
           this.$store.commit('userInfo/version', data.version||"1.0.0");
           this.$store.commit('userInfo/newOrderAudioLink', data.newOrderAudioLink||"");
-
-          // if (this.jigsaw) this.jigsaw.reset();
-
           return this.$router.replace({ path: '/tenant/home/' || '/tenant/' });
         })
         .catch((res) => {
@@ -390,10 +249,9 @@ export default {
           let data = res === undefined ? {} : res;
           this.errorNum++;
           this.captchas();
-          this.$Message.error(data.msg || '登录失败');
-          // if (this.jigsaw) this.jigsaw.reset();
+          this.$Message.error(data.msg || this.$t('login.loginFailed'));
         });
-      setTimeout((e) => {
+      setTimeout(() => {
         this.loading = false;
       }, 1000);
     },
@@ -402,17 +260,8 @@ export default {
       let expiresTimeNum = expiresTime - nowTimeNum;
       return parseFloat(parseFloat(parseFloat(expiresTimeNum / 60) / 60) / 24);
     },
-    closefail() {
-      // if (this.jigsaw) this.jigsaw.reset();
-      this.$Message.error('校验错误');
-    },
     handleResize(event) {
       this.fullWidth = document.documentElement.clientWidth;
-      if (this.fullWidth < 768) {
-        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
-      } else {
-        document.getElementsByTagName('canvas')[0].className = 'index_bg';
-      }
     },
     captchas: function () {
       captcha_pro().then(res => {
@@ -422,44 +271,24 @@ export default {
           this.registerForm.key = res.data.key;
         }
       })
-      // this.imgcode = Setting.apiBaseURL + '/captcha_pro?' + Date.parse(new Date());
     },
     handleSubmit(name) {
-      console.log('handleSubmit called with name:', name);
       this.$refs[name].validate((valid) => {
-        console.log('Form validation result:', valid);
         if (valid) {
-          console.log('Form is valid, calling login directly without captcha');
-          // 直接登录,不使用滑动验证码
           this.closeModel({ captchaVerification: '' });
-
-          // 原滑动验证码逻辑已注释
-          // this.$refs.verify.show()
-
-          // if (this.errorNum >= 2) {
-          //   this.isShow = true;
-          // } else {
-          //   this.closeModel();
-          // }
-        } else {
-          console.log('Form validation failed');
         }
       });
     },
-    // 注册处理方法
     handleRegister(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
-          // 直接注册，不使用滑动验证码（与登录保持一致）
           this.closeRegisterModel({ captchaVerification: '' });
         }
       });
     },
-    // 关闭注册模态框并执行注册
     closeRegisterModel(params) {
-      this.isShow = false;
       let msg = this.$Message.loading({
-        content: '注册中...',
+        content: this.$t('login.registering'),
         duration: 0,
       });
       this.registerLoading = true;
@@ -469,7 +298,7 @@ export default {
         pwd: this.registerForm.password,
         confirm_pwd: this.registerForm.confirm_pwd,
         contact_phone: this.registerForm.contact_phone,
-        captcha: this.registerForm.captcha, // 邮件验证码
+        captcha: this.registerForm.captcha,
         imgcode: this.registerForm.code,
         key: this.registerForm.key,
         captchaType: 'blockPuzzle',
@@ -477,10 +306,8 @@ export default {
       })
         .then(async (res) => {
           msg();
-          this.$Message.success('注册成功！请登录');
-          // 注册成功后切换到登录页面
+          this.$Message.success(this.$t('login.registerSuccess'));
           this.switchToLogin();
-          // 清空注册表单
           this.resetRegisterForm();
         })
         .catch((res) => {
@@ -488,25 +315,22 @@ export default {
           this.registerForm.code = '';
           let data = res === undefined ? {} : res;
           this.captchas();
-          this.$Message.error(data.msg || '注册失败');
+          this.$Message.error(data.msg || this.$t('login.registerFailed'));
         });
-      setTimeout((e) => {
+      setTimeout(() => {
         this.registerLoading = false;
       }, 1000);
     },
-    // 切换到注册页面
     switchToRegister() {
       this.isRegister = true;
       this.resetRegisterForm();
       this.captchas();
     },
-    // 切换到登录页面
     switchToLogin() {
       this.isRegister = false;
       this.formInline.code = '';
       this.captchas();
     },
-    // 重置注册表单
     resetRegisterForm() {
       this.registerForm = {
         email: '',
@@ -517,257 +341,166 @@ export default {
         code: '',
         key: '',
       };
-      // 清除验证状态
       if (this.$refs.registerForm) {
         this.$refs.registerForm.resetFields();
       }
-      // 清理倒计时
       if (this.countdownTimer) {
         clearInterval(this.countdownTimer);
-        this.countdownTimer = null;
       }
       this.countdown = 0;
     },
-    // 验证确认密码
     validateConfirmPassword(rule, value, callback) {
       if (value === '') {
-        callback(new Error('请确认密码'));
+        callback(new Error(this.$t('login.confirmPasswordRequired')));
       } else if (value !== this.registerForm.password) {
-        callback(new Error('两次输入的密码不一致'));
+        callback(new Error(this.$t('login.passwordMismatch')));
       } else {
         callback();
       }
     },
-    // 发送邮件验证码
     async handleSendEmailCode() {
-      if (this.sendingCode) {
-        return;
-      }
+      if (this.sendingCode || this.countdown > 0) return;
 
-      // 验证邮箱
       if (!this.registerForm.email) {
-        this.$Message.error('请先输入邮箱');
+        this.$Message.error(this.$t('login.enterEmailFirst'));
         return;
       }
-
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.registerForm.email)) {
-        this.$Message.error('请输入正确的邮箱格式');
+        this.$Message.error(this.$t('login.emailFormatError'));
         return;
       }
 
       this.sendingCode = true;
       let closeLoading = this.$Message.loading({
-        content: '正在发送验证码...',
+        content: this.$t('login.sendingCaptcha'),
         duration: 0
       });
 
       try {
         await sendRegisterCaptcha(this.registerForm.email);
-        if (typeof closeLoading === 'function') {
-          closeLoading();
-          closeLoading = null;
-        }
-
-        this.$Message.success('验证码已发送，请查收邮件！');
-
-        // 开始倒计时
-        if (this.countdownTimer) {
-          clearInterval(this.countdownTimer);
-          this.countdownTimer = null;
-        }
+        if (typeof closeLoading === 'function') closeLoading();
+        this.$Message.success(this.$t('login.captchaSent'));
         this.countdown = 60;
         this.countdownTimer = setInterval(() => {
           this.countdown--;
           if (this.countdown <= 0) {
             clearInterval(this.countdownTimer);
-            this.countdownTimer = null;
           }
         }, 1000);
       } catch (err) {
-        if (typeof closeLoading === 'function') {
-          closeLoading();
-          closeLoading = null;
-        }
-
-        this.$Message.error(err.msg || '发送验证码失败');
+        if (typeof closeLoading === 'function') closeLoading();
+        this.$Message.error(err.msg || this.$t('login.sendCaptchaFailed'));
       } finally {
-        if (typeof closeLoading === 'function') {
-          closeLoading();
-          closeLoading = null;
-        }
+        if (typeof closeLoading === 'function') closeLoading();
         this.sendingCode = false;
       }
     },
   },
-  beforeCreate() {
-    if (this.fullWidth < 768) {
-      document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
-    } else {
-      document.getElementsByTagName('canvas')[0].className = 'index_bg';
-    }
-  },
   beforeDestroy: function () {
     window.removeEventListener('resize', this.handleResize);
-    document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
-    // 清理倒计时定时器
     if (this.countdownTimer) {
       clearInterval(this.countdownTimer);
-      this.countdownTimer = null;
     }
   },
 };
 </script>
 <style scoped lang="stylus">
-.page-account {
+.login-page {
   display: flex;
-  width: 100%;
-  background-image: url('../../../assets/images/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  overflow: auto;
+  width: 100vw;
+  background-image: url('../../../assets/images/bg.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
-.page-account .code {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.page-account .code .pictrue {
-  height: 40px;
-}
-
-.swiperPross {
-  border-radius: 12px 0px 0px 12px;
-}
-
-.swiperPross, .swiperPic, .swiperPic img {
-  width: 510px;
-  height: 100%;
-}
-
-.swiperPic img {
-  width: 100%;
-  height: 100%;
-}
-
-.container {
-  height: 500px !important;
-  padding: 0 !important;
-  border-radius: 12px;
-  z-index: 1;
-  display: flex;
-}
-
-.containerSamll {
-  /* width: 56% !important; */
-  background: #fff !important;
-}
-
-.containerBig {
-  width: auto !important;
-  background: #f7f7f7 !important;
-}
-
-.index_from {
-  padding: 0 40px 32px 40px;
-  height: 500px;
-  box-sizing: border-box;
-}
-
-.page-account-top {
-  padding: 20px 0 !important;
-  box-sizing: border-box !important;
-  display: flex;
-  justify-content: center;
-}
-
-.page-account-container {
-  border-radius: 0px 6px 6px 0px;
-}
-
-.btn {
-  background: linear-gradient(90deg, rgba(25, 180, 241, 1) 0%, rgba(14, 115, 232, 1) 100%) !important;
-}
-
-.captchaBox {
-  width: 310px;
-}
-
-input {
-  display: block;
-  width: 290px;
-  line-height: 40px;
-  margin: 10px 0;
-  padding: 0 10px;
-  outline: none;
-  border: 1px solid #c8cccf;
-  border-radius: 4px;
-  color: #6a6f77;
-}
-
-#msg {
-  width: 100%;
-  line-height: 40px;
-  font-size: 14px;
+.login-card {
+  width: 90%;
+  max-width: 420px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   text-align: center;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-a:link, a:visited, a:hover, a:active {
-  margin-left: 100px;
-  color: #0366D6;
+.login-logo {
+  margin-bottom: 15px;
+  img {
+    max-width: 140px;
+    height: auto;
+  }
 }
 
-.index_from >>> .ivu-input-large {
-  font-size: 14px !important;
+.login-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 25px;
 }
 
-.from-wh {
-  width: 400px;
-}
-
-.pull-right {
-    float: right!important;
-}
-.footer{
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  left: 0;
-  margin: 0;
-  background: rgba(255,255,255,.8);
-  border-top: 1px solid #e7eaec;
-  overflow: hidden;
-  padding: 10px 20px;
-  height: 36px;
+.login-button {
+  background: linear-gradient(90deg, #1890ff, #40a9ff) !important;
+  border: none;
+  font-size: 16px;
+  height: 45px !important;
+  &:hover {
+    background: linear-gradient(90deg, #40a9ff, #1890ff) !important;
+  }
 }
 
 .switch-mode {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.switch-mode span {
+  margin-top: 15px;
+  font-size: 14px;
   color: #666;
-  font-size: 14px;
+  a {
+    color: #1890ff;
+    margin-left: 5px;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
-.switch-mode a {
-  color: #19b4f1;
-  text-decoration: none;
-  margin-left: 5px;
-  cursor: pointer;
-  font-size: 14px;
+.captcha-line {
+  display: flex;
+  align-items: center;
+  .captcha-input {
+    flex: 1;
+    margin-right: 10px;
+  }
+  .captcha-img {
+    height: 45px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .captcha-btn {
+    min-width: 120px;
+    font-size: 14px;
+  }
 }
 
-.switch-mode a:hover {
-  color: #0e73e8;
-  text-decoration: underline;
+// iview overrides
+.login-card >>> .ivu-input-large {
+  font-size: 14px !important;
+  height: 45px !important;
 }
 
+.login-card >>> .ivu-form-item {
+  margin-bottom: 20px;
+}
+
+.login-card >>> .ivu-input-prefix i {
+    font-size: 18px !important;
+    line-height: 45px !important;
+}
 </style>
