@@ -59,12 +59,24 @@ export default {
       return this.isMobile ? 'top' : 'left'
     },
     linkUrl() {
-      return `${location.origin}/chat/index?token=${this.token.token_md5}&noCanClose=1`;
+      return `${location.origin}/chat/index?token=${this.token.tokenMd5}&noCanClose=1`;
     }
   },
   data() {
     return {
-      token: '',
+      token: {
+        "id": 3,
+        "appid": "202116257358989495",
+        "icon": "https://qiniu.crmeb.net/attach/2021/07/069e7202107011810578311.png",
+        "name": "客服",
+        "introduce": "",
+        "rand": 9718,
+        "timestamp": 1757126462,
+        "appSecret": "28242c7066e9166b46f9b41c10e18d72",
+        "token": "eyJyYW5kIjo5NzE4LCJhcHBpZCI6IjIwMjExNjI1NzM1ODk4OTQ5NSIsImFwcF9zZWNyZXQiOiIyODI0MmM3MDY2ZTkxNjZiNDZmOWI0MWMxMGUxOGQ3MiIsInRpbWVzdGFtcCI6MTc1NzEyNjQ2Mn0=",
+        "tokenMd5": "c8f092fd44ca2afd3305f07bb652fb3e",
+        "isDelete": 0
+      },
       canfrime: false,
       srcUrl: `${location.origin}/customerServer.js`,
       siteUrl: `${location.origin}`,
@@ -79,13 +91,13 @@ export default {
   methods: {
     // 获取token
     getAdminAppCustomer() {
-      adminAppCustomer().then(res => {
+      /*adminAppCustomer().then(res => {
         if(res.status == 200) {
           if(res.data.list.length) {
             this.token = res.data.list[0];
           }
         }
-      })
+      })*/
     },
 
     // 重置token
@@ -95,9 +107,9 @@ export default {
     // 确定重置token
     confirme() {
       appReset(this.token.id).then(res => {
-        if(res.status == 200) {
+       /* if(res.status == 200) {
           this.$set(this.token, 'token', res.data.token);
-        }
+        }*/
       })
     },
     cancel() { },

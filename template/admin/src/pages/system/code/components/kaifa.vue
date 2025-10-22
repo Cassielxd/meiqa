@@ -1,6 +1,8 @@
 <template>
     <div class="content">
         <p class="font-w">使用简介</p>
+      <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
+      <p class="text-i">体验客服：http://lxd.vv-xj.com/admin/#/kefu    kefu1 xjlidong123</p>
         <p class="text-i">程序内定制接入客服，深度定制开发说明，省去VUE说明。</p>
         <Divider />
         <p class="typetitle">第一步，引入js</p>
@@ -43,7 +45,7 @@
                 <textarea id="NormalCodeTextareakaifa2" class="code" rows="45">
 var option = {
     openUrl: "{{siteUrl}}", // 打开客服聊天框的地址，即：部署后台管理系统的地址，若未填写，则自动获取当前服务器的地址
-    token: {{tokeninfo.token_md5}}, // token,与后台交互的凭证
+    token: {{tokeninfo.tokenMd5}}, // token,与后台交互的凭证
     kefuid:'',//默认为空自动对接客服，可填写指定客服ID
     isShowTip: true, // 初始化成功后，界面右下角会自动创建 “联系客服按钮”， 如无需默认展示，则填写false即可,默认为true
     mobileIcon: '', //  手机端悬浮客服图片
@@ -101,7 +103,7 @@ canCustomerServer.getCustomeServer();
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa3" class="code" rows="45">
 
-<script src="{{siteUrl}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.token_md5}}"}'></script>
+<script src="{{siteUrl}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.tokenMd5}}"}'></script>
 <script>
     //自动实例化对象
     var canCustomerServer
@@ -177,7 +179,7 @@ import initCustomerServer from '@/libs/customerServer';
                     deviceType: '', //pc, Mobile
                     // domId: 'customerServerTip',
                     insertDomNode: '.getCode_container',
-                    token: this.tokeninfo.token_md5,
+                    token: this.tokeninfo.tokenMd5,
                     isShowTip: true, // true 展示 false 不展示
                     windowStyle: 'center', // center 仅仅pc端有效，在页面中间弹出
                     // sendUserData: {

@@ -2,6 +2,8 @@
   <div class="content">
     <p class="font-w">使用简介</p>
     <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
+    <p class="text-i">体验客服：http://lxd.vv-xj.com/admin/#/kefu    kefu1 xjlidong123</p>
+
     <Divider />
     <p class="typetitle">获取代码</p>
 
@@ -16,7 +18,7 @@
   var option = {
         "authInit":true,
         openUrl: '{{siteUrl}}',
-        token: '4109fbb2d7bc3d5559348278816a20bc',
+        token: '{{tokeninfo.tokenMd5}}',
         kefuid:'',//默认为空自动对接客服，可填写指定客服ID
         isShowTip: true, // 初始化成功后，界面右下角会自动创建 “联系客服按钮”， 如无需默认展示，则填写false即可,默认为true
         mobileIcon: '', //  手机端悬浮客服图片
@@ -61,7 +63,7 @@ export default {
   },
   methods: {
       jiazai(){
-          window.open(`${location.origin}/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`)
+          window.open(`${location.origin}/admin/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1`)
       },
     getCopy(id) {
       this.$emit('cgetCopy', id);

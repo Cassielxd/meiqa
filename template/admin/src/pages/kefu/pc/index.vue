@@ -293,6 +293,7 @@ export default {
 
     console.log(this.$route);
 
+
     window.onbeforeunload = (e) => {
       if(this.$route.name == "kefu_pc_list") {
         e = e || window.event;
@@ -301,6 +302,7 @@ export default {
           e.returnValue = 'Are you sure you want to leave?';
         }
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+
         return 'Are you sure you want to leave?';
       } else {
         window.onbeforeunload = null

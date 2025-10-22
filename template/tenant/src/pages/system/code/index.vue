@@ -59,7 +59,7 @@ export default {
       return this.isMobile ? 'top' : 'left'
     },
     linkUrl() {
-      return `${location.origin}/chat/index?token=${this.token.token_md5}&noCanClose=1`;
+      return `${location.origin}/admin/#/chat/index?token=${this.token.tokenMd5}&noCanClose=1`;
     }
   },
   data() {

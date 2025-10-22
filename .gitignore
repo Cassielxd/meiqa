@@ -20,3 +20,4 @@ bin-release/
 CLAUDE.md
 CLAUDE.local.md
 crmchat/runtime/swoole.pid
+/his
