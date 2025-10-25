@@ -2,6 +2,7 @@ package io.renren.crmchat.controller.mobile;
 
 import io.renren.crmchat.common.result.ApiResult;
 import io.renren.crmchat.security.UserContext;
+import io.renren.crmchat.service.KefuAuxiliaryService;
 import io.renren.crmchat.service.MobileServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import java.util.Map;
 public class MobileServiceController {
 
     private final MobileServiceService mobileServiceService;
+    private final KefuAuxiliaryService kefuAuxiliaryService;
 
     /**
      * 获取聊天记录
@@ -168,7 +170,8 @@ public class MobileServiceController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "appid", required = false, defaultValue = "default") String appid) {
         appid = UserContext.getAppid();
-        Map<String, Object> result = mobileServiceService.upload(file, appid);
+        Long userId = UserContext.getUserId();
+        Map<String, Object> result = mobileServiceService.upload(file, appid,userId);
         return ApiResult.ok("Image uploaded successfully", result);
     }
 

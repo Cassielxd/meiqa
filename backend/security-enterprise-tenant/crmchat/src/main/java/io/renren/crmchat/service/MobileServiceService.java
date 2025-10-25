@@ -7,6 +7,7 @@ import io.renren.crmchat.dao.*;
 import io.renren.crmchat.entity.*;
 import io.renren.crmchat.exception.CrmChatException;
 import io.renren.crmchat.mapper.QrcodeMapper;
+import io.renren.crmchat.service.common.FileService;
 import io.renren.crmchat.websocket.WebSocketPushService;
 import io.renren.crmchat.service.ChatCacheService.UserProfile;
 import io.renren.crmchat.service.common.TokenService;
@@ -59,6 +60,8 @@ public class MobileServiceService {
     private final WebSocketPushService webSocketPushService;
     private final ChatCacheService chatCacheService;
     private final TokenService tokenService;
+    private final FileService fileService;
+    private final SystemAttachmentMapper systemAttachmentMapper;
 
     private static final int PARALLEL_THRESHOLD = 12;
 
@@ -1022,11 +1025,38 @@ public class MobileServiceService {
      * @return 上传结果
      */
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> upload(MultipartFile file, String appid) {
+    public Map<String, Object> upload(MultipartFile file, String appid,Long userid) {
         if (file == null || file.isEmpty()) {
             throw new CrmChatException("Invalid parameter");
         }
-
+        String fileUrl = fileService.uploadFile(file, appid, "kefu");
+        int now = (int) (System.currentTimeMillis() / 1000);
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            originalFilename = "upload_" + now;
+        }
+        long fileSize = file.getSize();
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            contentType = "application/octet-stream";
+        }
+        String completeUrl = fileUrl;
+        if (!fileUrl.startsWith("http://") && !fileUrl.startsWith("https://")) {
+            // 如果fileUrl不包含http协议，使用getFileUrl确保返回完整URL
+            completeUrl = fileService.getFileUrl(fileUrl);
+        }
+        SystemAttachmentEntity attachment = new SystemAttachmentEntity();
+        attachment.setName(originalFilename);
+        attachment.setRealName(originalFilename);
+        attachment.setAttDir(completeUrl);
+        attachment.setSattDir(completeUrl);
+        attachment.setAttSize(String.valueOf(fileSize));
+        attachment.setAttType(contentType);
+        attachment.setImageType(1);
+        attachment.setModuleType(1);
+        attachment.setPid(0);
+        attachment.setTime(now);
+        systemAttachmentMapper.insert(attachment);
         // TODO: 实现上传逻辑
         // 1. 检查上传频率限制
         // 2. 使用UploadService上传到store/comment
@@ -1034,8 +1064,11 @@ public class MobileServiceService {
         // 4. 返回文件信息
 
         Map<String, Object> result = new HashMap<>();
-        result.put("name", file.getOriginalFilename());
-        result.put("url", "");  // TODO: 实际上传后的URL
+        result.put("name", originalFilename);
+        result.put("url", completeUrl);
+        result.put("att_id", attachment.getAttId());
+        result.put("att_size", attachment.getAttSize());
+        result.put("att_type", attachment.getAttType());
 
         log.info("Uploading image: appid={}, filename={}", appid, file.getOriginalFilename());
         return result;
