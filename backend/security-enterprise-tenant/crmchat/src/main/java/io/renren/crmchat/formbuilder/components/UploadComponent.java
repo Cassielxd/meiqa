@@ -5,12 +5,13 @@ package io.renren.crmchat.formbuilder.components;
  */
 public class UploadComponent extends BaseComponent {
 
-    public UploadComponent(String field, String title, String action) {
+    public UploadComponent(String field, String title, String action,String value,String accept) {
         this.type = "upload";
         this.field = field;
         this.title = title;
-        this.value = "";
+        this.value = value;
         this.props.put("action", action);
+        this.props.put("accept", accept);
         this.props.put("maxLength", 1);
     }
 

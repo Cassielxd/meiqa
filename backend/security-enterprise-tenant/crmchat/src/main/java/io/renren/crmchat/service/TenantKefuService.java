@@ -605,7 +605,7 @@ public class TenantKefuService {
             .options(groupOptions));
 
         // PHP: $field[] = $this->builder->frameImage('avatar', '客服头像', $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true), $formData['avatar'] ?? '')->icon('ios-add')->width('950px')->height('420px');
-        field.add(formBuilder.frameImage("avatar", "客服头像", "/tenant/#/tenant/widget.images/index.html?fodder=avatar", "")
+        field.add(formBuilder.frameImage("avatar", "客服头像", "/#/tenant/widget.images/index.html?fodder=avatar", "")
             .icon("ios-add")
             .width("950px")
             .height("420px"));
@@ -696,7 +696,7 @@ public class TenantKefuService {
             .options(groupOptions));
 
         // PHP: $field[] = $this->builder->frameImage('avatar', '客服头像', $this->url('tenant/widget.images/index', ['fodder' => 'avatar'], true), $formData['avatar'] ?? '')->icon('ios-add')->width('950px')->height('420px');
-        field.add(formBuilder.frameImage("avatar", "客服头像", "/tenant/#/tenant/widget.images/index.html?fodder=avatar", kefu.getAvatar() != null ? kefu.getAvatar() : "")
+        field.add(formBuilder.frameImage("avatar", "客服头像", "/#/tenant/widget.images/index.html?fodder=avatar", kefu.getAvatar() != null ? kefu.getAvatar() : "")
             .icon("ios-add")
             .width("950px")
             .height("420px"));

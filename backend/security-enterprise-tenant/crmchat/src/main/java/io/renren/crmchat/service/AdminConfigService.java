@@ -740,7 +740,7 @@ public class AdminConfigService {
             if ("1".equals(uploadType)) {
                 // 单图上传
                 rules.add(formBuilder.frameImage(menuName, info,
-                    "/admin/#/admin/widget.images/index.html?fodder=" + menuName, valueStr)
+                    "/#/admin/widget.images/index.html?fodder=" + menuName, valueStr)
                     .icon("ios-image")
                     .width("950px")
                     .height("420px")
@@ -748,7 +748,7 @@ public class AdminConfigService {
             } else if ("2".equals(uploadType)) {
                 // 多图上传
                 rules.add(formBuilder.frameImage(menuName, info,
-                    "/admin/#/admin/widget.images/index.html?fodder=" + menuName, valueStr)
+                    "/#/admin/widget.images/index.html?fodder=" + menuName, valueStr)
                     .icon("ios-images")
                     .width("950px")
                     .height("420px")
@@ -756,7 +756,7 @@ public class AdminConfigService {
             } else if ("3".equals(uploadType)) {
                 // 文件上传
                 rules.add(formBuilder.frameImage(menuName, info,
-                    "/admin/#/admin/widget.files/index.html?fodder=" + menuName, valueStr)
+                    "/#/admin/widget.files/index.html?fodder=" + menuName, valueStr)
                     .icon("ios-folder")
                     .width("950px")
                     .height("420px")
@@ -1124,21 +1124,21 @@ public class AdminConfigService {
             if ("1".equals(uploadType)) {
                 // 单图上传
                 rules.add(formBuilder.frameImage("value", "Default Value",
-                    "/admin/#/admin/widget.images/index.html?fodder=value", valueStr)
+                    "/#/admin/widget.images/index.html?fodder=value", valueStr)
                     .icon("ios-image")
                     .width("960px")
                     .height("505px"));
             } else if ("2".equals(uploadType)) {
                 // 多图上传（暂用frameImage代替frameImages）
                 rules.add(formBuilder.frameImage("value", "Default Value",
-                    "/admin/#/admin/widget.images/index.html?fodder=value", valueStr)
+                    "/#/admin/widget.images/index.html?fodder=value", valueStr)
                     .icon("ios-images")
                     .width("960px")
                     .height("505px"));
             } else if ("3".equals(uploadType)) {
                 // 文件上传（暂用frameImage代替frameFile）
                 rules.add(formBuilder.frameImage("value", "Default Value",
-                    "/admin/#/admin/widget.files/index.html?fodder=value", valueStr)
+                    "/#/admin/widget.files/index.html?fodder=value", valueStr)
                     .icon("ios-folder")
                     .width("960px")
                     .height("505px"));
@@ -1146,7 +1146,7 @@ public class AdminConfigService {
         } else {
             // 默认单图上传
             rules.add(formBuilder.frameImage("value", "Default Value",
-                "/admin/#/admin/widget.images/index.html?fodder=value", valueStr)
+                "/#/admin/widget.images/index.html?fodder=value", valueStr)
                 .icon("ios-image")
                 .width("960px")
                 .height("505px"));

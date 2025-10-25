@@ -117,3 +117,5 @@ file:
   storage:
     # 存储类型: local, oss, cos, qiniu
     type: ${FILE_STORAGE_TYPE:local}
+
+kefu_path: ${KEFU_DOMAIN:http://lxd.vv-xj.com}

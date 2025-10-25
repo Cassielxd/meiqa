@@ -295,7 +295,7 @@
                 return this.isMobile ? 'top' : 'left'
             },
             linkUrl() {
-                return `${location.origin}/admin/#/chat/index?token=${this.token.token}&noCanClose=1`;
+                return `${location.origin}/#/chat/index?token=${this.token.token}&noCanClose=1`;
             }
         },
         data() {

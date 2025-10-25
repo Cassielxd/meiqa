@@ -44,8 +44,8 @@ public class IviewFactory {
         return new InputNumberComponent(field, title, value);
     }
 
-    public UploadComponent upload(String field, String title, String action) {
-        return new UploadComponent(field, title, action);
+    public UploadComponent upload(String field, String title, String action,String value,String accept) {
+        return new UploadComponent(field, title, action,value,accept);
     }
 
     public HiddenComponent hidden(String field, Object value) {

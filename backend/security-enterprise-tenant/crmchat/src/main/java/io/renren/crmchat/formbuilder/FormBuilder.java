@@ -118,8 +118,8 @@ public class FormBuilder {
     /**
      * 创建Upload上传组件
      */
-    public UploadComponent upload(String field, String title, String action) {
-        return factory.upload(field, title, action);
+    public UploadComponent upload(String field, String title, String action,String value,String accept) {
+        return factory.upload(field, title, action,value,accept);
     }
 
     /**
