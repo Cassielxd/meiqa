@@ -47,7 +47,7 @@ public class ExampleService {
 
         // 2. Agent avatar (FrameImage component)
         field.add(builder.frameImage("avatar", "Agent Avatar",
-                "/admin/widget/images/index?fodder=avatar",
+                "/admin/#/admin/widget.images/index.html?fodder=avatar",
                 (String) formData.getOrDefault("avatar", ""))
                 .icon("ios-add")
                 .width("950px")

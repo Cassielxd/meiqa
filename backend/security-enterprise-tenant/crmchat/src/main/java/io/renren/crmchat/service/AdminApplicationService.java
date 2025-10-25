@@ -79,7 +79,7 @@ public class AdminApplicationService {
 
         // 1. Application icon (FrameImage component)
         rules.add(formBuilder.frameImage("icon", "Application Icon",
-                "/admin/widget/images/index?fodder=icon",
+                "/admin/#/admin/widget.images/index.html?fodder=icon",
                 (String) data.getOrDefault("icon", ""))
             .icon("ios-image")
             .width("950px")
