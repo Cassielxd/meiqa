@@ -418,10 +418,12 @@ public class KefuServiceExtensionService {
         QueryWrapper<ChatServiceDialogueRecordEntity> wrapper = new QueryWrapper<>();
         TenantQueryHelper.applyAppid(wrapper, currentAppid);
 
-        // 查询客服与用户之间的对话（双向）
+        // ✅ 修改：查询所有与该游客相关的消息（支持客服协同）
+        // 包括：游客发送的消息 + 所有客服发送给游客的消息
         wrapper.and(w -> w
-            .and(w1 -> w1.eq("user_id", kefuUserId).eq("to_user_id", toUserId))
-            .or(w2 -> w2.eq("user_id", toUserId).eq("to_user_id", kefuUserId))
+            .eq("user_id", toUserId)  // 游客发送的消息
+            .or()
+            .eq("to_user_id", toUserId)  // 发送给游客的消息（任何客服）
         );
 
         // 4. 支持上拉加载（upperId - 比这个ID更早的记录）
@@ -444,7 +446,7 @@ public class KefuServiceExtensionService {
 
         autoBadgeService.dispatch(kefuUserId, toUserId, currentAppid);
 
-        // 7. 转换为前端期望的下划线命名格式
+        // 7. 转换为前端期望的下划线命名格式，并添加发送者信息
         List<Map<String, Object>> result = new ArrayList<>();
         for (ChatServiceDialogueRecordEntity entity : list) {
             Map<String, Object> map = new HashMap<>();
@@ -461,6 +463,19 @@ public class KefuServiceExtensionService {
             map.put("remind", entity.getRemind());
             map.put("guid", entity.getGuid());
             map.put("mer_id", entity.getMerId());
+
+            // ✅ 添加发送者信息（用于前端区分不同客服）
+            ChatUserEntity sender = chatUserMapper.selectById(entity.getUserId());
+            if (sender != null) {
+                map.put("is_kefu", sender.getIsKefu() != null ? sender.getIsKefu() : 0);
+                map.put("nickname", sender.getNickname());
+                map.put("avatar", sender.getAvatar());
+            } else {
+                map.put("is_kefu", 0);
+                map.put("nickname", "");
+                map.put("avatar", "");
+            }
+
             result.add(map);
         }
 

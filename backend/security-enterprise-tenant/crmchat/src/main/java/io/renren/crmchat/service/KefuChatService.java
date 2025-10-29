@@ -182,9 +182,10 @@ public class KefuChatService {
      *
      * PHP Reference: Service.php::chat_list()
      *
-     * 业务逻辑:
-     * 1. 获取当前客服与指定用户之间的聊天记录
-     * 2. 分页查询
+     * 业务逻辑（客服协同模式）:
+     * 1. 验证当前客服身份（确保是同一个appid）
+     * 2. 查询所有与指定用户相关的聊天记录（不限制客服）
+     * 3. 所有客服都能看到与同一用户的所有消息
      *
      * @param filters      过滤条件
      * @param kefuId       当前客服ID
@@ -192,15 +193,10 @@ public class KefuChatService {
      * @return 对话消息列表
      */
     public Map<String, Object> getChatMessageList(Map<String, Object> filters, Integer kefuId, String currentAppid) {
-        // 1. 获取客服的user_id
+        // 1. 验证客服身份（确保是同一个appid）
         ChatServiceEntity kefu = chatServiceMapper.selectById(kefuId);
         if (kefu == null || !kefu.getAppid().equals(currentAppid)) {
             throw new CrmChatException("Customer service agent does not exist");
-        }
-
-        Integer myUserId = kefu.getUserId();
-        if (myUserId == null) {
-            throw new CrmChatException("Customer service user ID does not exist");
         }
 
         // 2. 获取对方用户ID
@@ -211,27 +207,68 @@ public class KefuChatService {
         wrapper.eq("appid", currentAppid);
 
         if (toUserId > 0) {
-            // 3. 查询当前客服与指定用户之间的对话
+            // ✅ 修改：查询所有与该用户相关的消息（不限制客服）
+            // 允许所有客服查看与同一用户的所有聊天记录，实现客服协同
             wrapper.and(w -> w
-                .and(w1 -> w1.eq("user_id", myUserId).eq("to_user_id", toUserId))
-                .or(w2 -> w2.eq("user_id", toUserId).eq("to_user_id", myUserId))
+                .eq("user_id", toUserId)
+                .or()
+                .eq("to_user_id", toUserId)
             );
         } else {
-            // 如果没有指定对方用户ID，返回所有聊天记录
-            wrapper.and(w -> w.eq("user_id", myUserId).or().eq("to_user_id", myUserId));
+            // 如果没有指定用户ID，返回空结果
+            // 避免返回所有消息导致性能问题
+            return new HashMap<String, Object>() {{
+                put("list", new ArrayList<>());
+                put("count", 0);
+            }};
         }
 
         wrapper.orderByDesc("add_time");
 
-        // 4. 分页
+        // 3. 分页
         Integer page = filters.containsKey("page") ? Integer.parseInt(filters.get("page").toString()) : 1;
         Integer limit = filters.containsKey("limit") ? Integer.parseInt(filters.get("limit").toString()) : 20;
 
         Page<ChatServiceDialogueRecordEntity> pageObj = new Page<>(page, limit);
         Page<ChatServiceDialogueRecordEntity> pageResult = chatServiceDialogueRecordMapper.selectPage(pageObj, wrapper);
 
+        // ✅ 为每条记录添加 is_kefu 和 nickname 字段（用于前端区分不同客服）
+        List<Map<String, Object>> enrichedList = new ArrayList<>();
+        for (ChatServiceDialogueRecordEntity record : pageResult.getRecords()) {
+            Map<String, Object> map = new HashMap<>();
+
+            // 复制所有原始字段
+            map.put("id", record.getId());
+            map.put("user_id", record.getUserId());
+            map.put("to_user_id", record.getToUserId());
+            map.put("msn", record.getMsn());
+            map.put("msn_type", record.getMsnType());
+            map.put("type", record.getType());
+            map.put("other", record.getOther());
+            map.put("add_time", record.getAddTime());
+            map.put("appid", record.getAppid());
+            map.put("is_tourist", record.getIsTourist());
+            map.put("remind", record.getRemind());
+            map.put("guid", record.getGuid());
+            map.put("mer_id", record.getMerId());
+
+            // 查询发送者的 is_kefu 和 nickname 字段
+            ChatUserEntity sender = chatUserMapper.selectById(record.getUserId());
+            if (sender != null) {
+                map.put("is_kefu", sender.getIsKefu() != null ? sender.getIsKefu() : 0);
+                map.put("nickname", sender.getNickname());
+                map.put("avatar", sender.getAvatar());
+            } else {
+                map.put("is_kefu", 0);
+                map.put("nickname", "");
+                map.put("avatar", "");
+            }
+
+            enrichedList.add(map);
+        }
+
         Map<String, Object> result = new HashMap<>();
-        result.put("list", pageResult.getRecords());
+        result.put("list", enrichedList);
         result.put("count", (int) pageResult.getTotal());
 
         return result;

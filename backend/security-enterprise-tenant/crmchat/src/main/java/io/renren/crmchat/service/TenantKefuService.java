@@ -181,7 +181,8 @@ public class TenantKefuService {
      * 业务逻辑:
      * 1. 验证客服存在
      * 2. 验证appid匹配（安全：防止跨租户操作）
-     * 3. 删除客服（硬删除）
+     * 3. 同步软删除关联的 chat_user 记录（支持客服互聊）
+     * 4. 删除客服（硬删除）
      *
      * @param id 客服ID
      */
@@ -193,6 +194,17 @@ public class TenantKefuService {
             throw new io.renren.crmchat.exception.CrmChatException("Data does not exist");
         }
         TenantGuard.ensureOwnedByCurrentTenant(serviceInfo.getAppid(), "Customer service agent does not exist");
+
+        // 2. 同步软删除关联的 chat_user 记录（用于客服互聊功能）
+        if (serviceInfo.getUserId() != null) {
+            ChatUserEntity chatUser = chatUserMapper.selectById(serviceInfo.getUserId());
+            if (chatUser != null && chatUser.getIsKefu() != null && chatUser.getIsKefu() == 1) {
+                // 软删除：设置 is_delete=1，保留历史聊天记录
+                chatUser.setIsDelete(1);
+                chatUser.setUpdateTime(LocalDateTime.now());
+                chatUserMapper.updateById(chatUser);
+            }
+        }
 
         // 3. PHP: $this->services->delete($id);
         int result = chatServiceMapper.deleteById(id);

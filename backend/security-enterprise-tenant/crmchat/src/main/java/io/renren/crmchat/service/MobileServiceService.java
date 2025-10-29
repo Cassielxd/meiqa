@@ -1256,28 +1256,17 @@ public class MobileServiceService {
             throw new CrmChatException("Failed to send");
         }
 
-        int unreadCount = getUnreadCount(appid, userId, toUserId);
-        // 游客发送消息时,游客肯定在线,所以online=1
-        // 注意：saveConversationRecord保存的是游客的会话记录(user_id=游客),所以online应该是游客的在线状态
-        Map<String, Object> recored = saveConversationRecord(
-                appid,
-                userId,
-                toUserId,
-                msn,
-                msnType,
-                unreadCount,
-                isTourist,
-                Optional.ofNullable(chatUser.getNickname()).orElse(""),
-                Optional.ofNullable(chatUser.getAvatar()).orElse(""),
-                1,  // 修复：游客发送消息时肯定在线，所以传1而不是service.getOnline()
-                chatUser.getType() != null ? chatUser.getType() : 0
-        );
+        // ✅ 修改：为所有客服创建会话记录（实现客服协同）
+        // 不再只为被分配的客服创建记录，而是为所有启用的客服创建记录
+        saveConversationRecordForAllKefu(appid, userId, msn, msnType, isTourist, chatUser);
 
         List<Map<String, Object>> tidyMessages = tidyChatRecords(appid, Collections.singletonList(record));
         Map<String, Object> response = tidyMessages.isEmpty()
                 ? new HashMap<>()
                 : new LinkedHashMap<>(tidyMessages.get(0));
-        response.put("recored", recored);
+
+        // ⚠️ 注意：不再返回 recored 字段，因为每个客服的 recored 不同
+        // 前端会通过 WebSocket 的 user_online 消息更新左侧列表
         response.put("guid", guid);
         response.put("nickname", Optional.ofNullable(chatUser.getNickname()).orElse(""));
         response.put("avatar", Optional.ofNullable(chatUser.getAvatar()).orElse(""));
@@ -1305,18 +1294,144 @@ public class MobileServiceService {
             log.warn("Message ordering delay interrupted: {}", e.getMessage());
         }
 
-        // 发送消息给客服
-        if (webSocketPushService.isOnline(appid, toUserId)) {
-            log.info("📨 [FIRST_VISITOR_FIX] Sending reply to kefu after user_online: appid={}, visitorId={}, kefuId={}",
-                     appid, userId, toUserId);
-            // 客服在线时，总是发送实际消息内容(reply类型)，而不是仅发送通知
-            // 这样客服端可以实时看到游客的消息，无需刷新
-            webSocketPushService.sendReply(appid, toUserId, response);
-        } else {
-            log.warn("⚠️ [FIRST_VISITOR_FIX] Kefu is offline, reply not sent: appid={}, kefuId={}", appid, toUserId);
-        }
+        // ✅ 修改：发送消息给所有在线客服（实现客服协同）
+        broadcastVisitorMessageToAllKefu(appid, userId, response);
 
         log.info("Message sent successfully: userId={}, toUserId={}, guid={}", userId, toUserId, guid);
         return response;
+    }
+
+    /**
+     * 为所有客服创建会话记录（实现客服协同）
+     *
+     * @param appid 租户ID
+     * @param visitorUserId 游客user_id
+     * @param msn 消息内容
+     * @param msnType 消息类型
+     * @param isTourist 是否游客
+     * @param chatUser 游客用户实体
+     */
+    private void saveConversationRecordForAllKefu(String appid, Integer visitorUserId, String msn,
+                                                   int msnType, int isTourist, ChatUserEntity chatUser) {
+        try {
+            // 1. 查询同一个appid下的所有启用状态的客服
+            QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("appid", appid);
+            wrapper.eq("status", 1);  // 只查询启用状态的客服
+            wrapper.isNotNull("user_id");  // 必须有user_id
+
+            List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
+
+            log.info("📝 Creating conversation records for {} customer service agents (appid={}, visitor={})",
+                kefuList.size(), appid, visitorUserId);
+
+            // 2. 为每个客服创建会话记录
+            int recordCount = 0;
+            for (ChatServiceEntity kefu : kefuList) {
+                Integer kefuUserId = kefu.getUserId();
+                if (kefuUserId != null) {
+                    // 计算该客服与游客之间的未读数
+                    int unreadCount = getUnreadCount(appid, visitorUserId, kefuUserId);
+
+                    // 保存会话记录
+                    saveConversationRecord(
+                        appid,
+                        visitorUserId,  // 发送者：游客
+                        kefuUserId,     // 接收者：客服
+                        msn,
+                        msnType,
+                        unreadCount,
+                        isTourist,
+                        Optional.ofNullable(chatUser.getNickname()).orElse(""),
+                        Optional.ofNullable(chatUser.getAvatar()).orElse(""),
+                        chatUser.getOnline() != null ? chatUser.getOnline() : 1,  // ✅ 使用实际在线状态
+                        chatUser.getType() != null ? chatUser.getType() : 0
+                    );
+                    recordCount++;
+                    log.debug("📝 Created conversation record for kefu: {} (user_id={})", kefu.getNickname(), kefuUserId);
+                }
+            }
+
+            log.info("✅ Successfully created {} conversation records", recordCount);
+
+        } catch (Exception e) {
+            // 创建记录失败不影响主流程，只记录日志
+            log.error("❌ Failed to create conversation records: appid={}, visitor={}, error={}",
+                appid, visitorUserId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 广播游客消息给所有在线客服（实现客服协同）
+     *
+     * @param appid 租户ID
+     * @param visitorUserId 游客user_id
+     * @param payload 消息内容
+     */
+    private void broadcastVisitorMessageToAllKefu(String appid, Integer visitorUserId, Map<String, Object> payload) {
+        try {
+            // 1. 查询同一个appid下的所有启用状态的客服
+            QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("appid", appid);
+            wrapper.eq("status", 1);  // 只查询启用状态的客服
+            wrapper.isNotNull("user_id");  // 必须有user_id
+
+            List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
+
+            log.info("📡 Broadcasting visitor message to {} customer service agents (appid={}, visitor={})",
+                kefuList.size(), appid, visitorUserId);
+
+            // 2. 推送给每个在线客服（为每个客服查询对应的 recored）
+            int broadcastCount = 0;
+            for (ChatServiceEntity kefu : kefuList) {
+                Integer kefuUserId = kefu.getUserId();
+                if (kefuUserId != null) {
+                    boolean isOnline = webSocketPushService.isOnline(appid, kefuUserId);
+                    if (isOnline) {
+                        // ✅ 为每个客服查询对应的会话记录
+                        QueryWrapper<ChatServiceRecordEntity> recordWrapper = new QueryWrapper<>();
+                        recordWrapper.eq("appid", appid);
+                        recordWrapper.eq("user_id", visitorUserId);  // 游客
+                        recordWrapper.eq("to_user_id", kefuUserId);  // 当前客服
+                        ChatServiceRecordEntity record = chatServiceRecordMapper.selectOne(recordWrapper);
+
+                        // 构建该客服专属的 payload
+                        Map<String, Object> kefuPayload = new LinkedHashMap<>(payload);
+                        if (record != null) {
+                            Map<String, Object> recored = new HashMap<>();
+                            recored.put("id", record.getId());  // ✅ 添加 id 字段（前端用于判断是否同一用户）
+                            recored.put("user_id", record.getUserId());
+                            recored.put("to_user_id", record.getToUserId());
+                            recored.put("nickname", record.getNickname());
+                            recored.put("avatar", record.getAvatar());
+                            recored.put("is_tourist", record.getIsTourist());
+                            recored.put("online", record.getOnline());
+                            recored.put("type", record.getType());
+                            recored.put("num", record.getNum());
+                            recored.put("message", record.getMsn());
+                            recored.put("message_type", record.getMessageType());
+                            recored.put("add_time", record.getAddTime());
+                            recored.put("update_time", record.getUpdateTime());
+                            kefuPayload.put("recored", recored);
+                        }
+
+                        // 推送消息给客服
+                        webSocketPushService.sendReply(appid, kefuUserId, kefuPayload);
+                        broadcastCount++;
+                        log.debug("📨 Broadcasted visitor message to kefu: {} (user_id={})", kefu.getNickname(), kefuUserId);
+                    } else {
+                        log.debug("⚠️ Kefu is offline, skipping: {} (user_id={})", kefu.getNickname(), kefuUserId);
+                    }
+                }
+            }
+
+            log.info("✅ Successfully broadcasted visitor message to {}/{} online customer service agents",
+                broadcastCount, kefuList.size());
+
+        } catch (Exception e) {
+            // 广播失败不影响主流程，只记录日志
+            log.error("❌ Failed to broadcast visitor message to customer service agents: appid={}, visitor={}, error={}",
+                appid, visitorUserId, e.getMessage(), e);
+        }
     }
 }

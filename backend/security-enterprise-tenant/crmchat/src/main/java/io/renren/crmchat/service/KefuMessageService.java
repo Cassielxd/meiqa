@@ -212,6 +212,7 @@ public class KefuMessageService {
         payload.put("avatar", kefu.getAvatar());
         payload.put("recored", recoredMap);
 
+        // 推送给用户
         if (recipientOnline) {
             webSocketPushService.sendReply(appid, toUserId, payload);
         } else {
@@ -219,11 +220,63 @@ public class KefuMessageService {
             webSocketPushService.sendMessageNum(appid, toUserId, kefuRealUserId, pairUnread, totalUnread, recoredMap);
         }
 
+        // ✅ 新增：推送给所有在线的客服（实现客服协同）
+        broadcastToAllKefu(appid, kefuRealUserId, toUserId, payload);
+
         Map<String, Object> response = new HashMap<>(payload);
         autoBadgeService.dispatch(kefuRealUserId, toUserId, appid);
 
         log.info("Message sent: kefuRealUserId={}, toUserId={}, guid={}", kefuRealUserId, toUserId, guid);
         return response;
+    }
+
+    /**
+     * 广播消息给所有在线的客服（客服协同功能）
+     *
+     * 当客服A回复用户时，通知所有其他在线的客服更新会话列表
+     * 这样所有客服都能看到最新的聊天记录
+     *
+     * @param appid 租户ID
+     * @param senderKefuUserId 发送消息的客服user_id
+     * @param chatUserId 聊天用户ID
+     * @param payload 消息内容
+     */
+    private void broadcastToAllKefu(String appid, Integer senderKefuUserId, Integer chatUserId, Map<String, Object> payload) {
+        try {
+            // 1. 查询同一个appid下的所有启用状态的客服
+            QueryWrapper<ChatServiceEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("appid", appid);
+            wrapper.eq("status", 1);  // 只查询启用状态的客服
+            wrapper.isNotNull("user_id");  // 必须有user_id
+            wrapper.ne("user_id", senderKefuUserId);  // 排除发送者自己
+
+            java.util.List<ChatServiceEntity> kefuList = chatServiceMapper.selectList(wrapper);
+
+            log.info("Broadcasting message to {} customer service agents (appid={}, sender={}, user={})",
+                kefuList.size(), appid, senderKefuUserId, chatUserId);
+
+            // 2. 推送给每个在线客服
+            int broadcastCount = 0;
+            for (ChatServiceEntity kefu : kefuList) {
+                Integer kefuUserId = kefu.getUserId();
+                if (kefuUserId != null) {
+                    boolean isOnline = webSocketPushService.isOnline(appid, kefuUserId);
+                    if (isOnline) {
+                        // 推送消息更新通知
+                        webSocketPushService.sendReply(appid, kefuUserId, payload);
+                        broadcastCount++;
+                        log.debug("Broadcasted to kefu: {} (user_id={})", kefu.getNickname(), kefuUserId);
+                    }
+                }
+            }
+
+            log.info("Successfully broadcasted message to {} online customer service agents", broadcastCount);
+
+        } catch (Exception e) {
+            // 广播失败不影响主流程，只记录日志
+            log.error("Failed to broadcast message to customer service agents: appid={}, error={}",
+                appid, e.getMessage(), e);
+        }
     }
 
     private ChatServiceRecordEntity upsertRecord(String appid,

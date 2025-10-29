@@ -9,7 +9,7 @@
     <div class="scroll-box">
 
       <vue-scroll :ops="ops" @handle-scroll="handleScroll" v-if="userList.length>0">
-        <div class="chat-item" v-for="(item,index) in userList" :key="index" :class="{active:curId == item.id}" @click="selectUser(item,index)">
+        <div class="chat-item" v-for="(item,index) in userList" :key="index" :class="{active:curId == item.user_id}" @click="selectUser(item,index)">
           <div class="avatar">
             <img v-lazy="item.avatar" alt="">
             <div class="status" :class="{off:item.online == 0}"></div>
@@ -81,8 +81,14 @@ export default {
       handler(nVal, oVal) {
         if(nVal.hasOwnProperty('user_id')) {
           this.userList.forEach((el, index) => {
-            if(el.to_user_id == nVal.user_id) {
+            // ✅ 修改：用 user_id 判断（游客ID），而不是 to_user_id（客服ID）
+            if(el.user_id == nVal.user_id) {
               el.online = nVal.online
+              console.log('[在线状态更新]', {
+                user_id: el.user_id,
+                nickname: el.nickname,
+                online: nVal.online
+              });
               if(nVal.online == 1) {
                 this.$Notice.info({
                   title: this.$t('kefu.online'),
@@ -261,7 +267,8 @@ export default {
     },
     deleteUserList(item){
       this.userList.forEach((el, index, arr) => {
-        if(el.id == item.id){
+        // ✅ 修改：用 user_id 判断是否同一用户
+        if(el.user_id == item.user_id){
           this.userList.splice(index,1)
         }
       })
@@ -269,14 +276,69 @@ export default {
         this.selectUser(this.userList[0],0)
       }
     },
-    updateUserList(data,op){
-      console.log('[updateUserList] 收到更新:', { data, op });
+    /**
+     * 智能插入用户到列表（按优先级排序）
+     * 排序规则：
+     * 1. 属于当前客服的用户（is_my_customer=1）排在前面
+     * 2. 其他客服的用户（is_my_customer=0）排在后面
+     * 3. 同一组内按最新消息时间排序
+     */
+    insertUserSorted(user) {
+      const isMyCustomer = user.is_my_customer || 0;
+      const updateTime = user.update_time || 0;
 
-      // 查找用户在列表中的索引
-      const userIndex = this.userList.findIndex(item => item.id === data.id);
+      // 查找插入位置
+      let insertIndex = this.userList.length;
+
+      for (let i = 0; i < this.userList.length; i++) {
+        const currentUser = this.userList[i];
+        const currentIsMyCustomer = currentUser.is_my_customer || 0;
+        const currentUpdateTime = currentUser.update_time || 0;
+
+        // 如果新用户是"我的客户"，而当前用户不是，插入到这里
+        if (isMyCustomer === 1 && currentIsMyCustomer === 0) {
+          insertIndex = i;
+          break;
+        }
+
+        // 如果两者都是"我的客户"或都不是，按时间排序
+        if (isMyCustomer === currentIsMyCustomer) {
+          if (updateTime > currentUpdateTime) {
+            insertIndex = i;
+            break;
+          }
+        }
+      }
+
+      // 插入到指定位置
+      this.userList.splice(insertIndex, 0, user);
+
+      console.log('[insertUserSorted] 用户已插入到位置:', {
+        insertIndex,
+        user_id: user.user_id,
+        nickname: user.nickname,
+        is_my_customer: isMyCustomer,
+        update_time: updateTime
+      });
+    },
+    updateUserList(data,op){
+      console.log('[updateUserList] 收到更新:', {
+        data,
+        op,
+        data_user_id: data.user_id,
+        data_to_user_id: data.to_user_id,
+        data_id: data.id,
+        current_list_length: this.userList.length,
+        current_list_user_ids: this.userList.map(u => u.user_id)
+      });
+
+      // ✅ 修改：用 user_id 判断是否同一用户（而不是用 id）
+      // 因为客服协同模式下，每个客服的 chat_service_record.id 不同，但 user_id（游客ID）相同
+      const userIndex = this.userList.findIndex(item => item.user_id === data.user_id);
+      console.log('[updateUserList] 查找结果: userIndex =', userIndex);
 
       if (userIndex !== -1) {
-        // 用户已在列表中：移除旧位置，更新后插入顶部
+        // 用户已在列表中：移除旧位置，更新后重新排序插入
         const existingUser = this.userList[userIndex];
 
         // 合并所有字段，新数据优先，但使用fallback保留旧值
@@ -291,19 +353,25 @@ export default {
           avatar: data.avatar || existingUser.avatar,
           mssage_num: data.mssage_num !== undefined ? data.mssage_num : existingUser.mssage_num,
           online: data.online !== undefined ? data.online : existingUser.online,
-          is_tourist: data.is_tourist !== undefined ? data.is_tourist : existingUser.is_tourist
+          is_tourist: data.is_tourist !== undefined ? data.is_tourist : existingUser.is_tourist,
+          is_my_customer: data.is_my_customer !== undefined ? data.is_my_customer : existingUser.is_my_customer
         };
 
-        // 使用 Vue.set 或 splice 确保响应式更新
-        this.userList.splice(userIndex, 1);  // 移除旧位置
-        this.userList.unshift(updatedUser);  // 插入顶部
+        // 移除旧位置
+        this.userList.splice(userIndex, 1);
 
-        console.log('[updateUserList] 已更新并移至顶部:', updatedUser);
+        // ✅ 智能插入：根据 is_my_customer 和时间排序
+        this.insertUserSorted(updatedUser);
+
+        console.log('[updateUserList] 已更新并重新排序:', updatedUser);
       } else if (op) {
-        // 用户不在列表中且 op=true：添加到顶部
+        // 用户不在列表中且 op=true：智能插入
         console.log('[updateUserList] 新用户添加到列表，data内容:', data);
-        this.userList.unshift(data);
-        console.log('[updateUserList] 新用户添加到列表:', data);
+
+        // ✅ 智能插入：根据 is_my_customer 和时间排序
+        this.insertUserSorted(data);
+
+        console.log('[updateUserList] 新用户已添加并排序:', data);
       } else {
         console.log('[updateUserList] 用户不在列表且 op=false，跳过添加');
       }
@@ -404,10 +472,12 @@ export default {
           dataList[0].mssage_num = 0
           this.isScroll = dataList.length >= this.limit
 
+          // ✅ 后端已经排序好了，直接拼接即可
+          // 后端排序规则：is_my_customer -> mssage_num -> update_time
           this.userList = this.userList.concat(dataList)
 
           if(this.page == 1 && dataList.length > 0 && !this.isSearch) {
-            this.curId = dataList[0].id
+            this.curId = dataList[0].user_id  // ✅ 修改：使用 user_id
             dataList[0].index = 0
             this.$emit('setDataId', dataList[0])
           }
@@ -423,9 +493,10 @@ export default {
     },
     // 选择用户
     selectUser(item,index) {
-      if(this.curId == item.id) return
+      // ✅ 修改：用 user_id 判断是否同一用户
+      if(this.curId == item.user_id) return
       item.mssage_num = 0
-      this.curId = item.id
+      this.curId = item.user_id  // ✅ 修改：保存 user_id 而不是 id
       item.index = index;
       this.$emit('setDataId', item)
     },

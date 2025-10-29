@@ -82,69 +82,144 @@ public class KefuUserService {
     }
 
     /**
-     * 获取聊天记录列表
+     * 获取聊天记录列表（客服协同模式）
      * PHP Reference: User.php::recordList()
+     *
+     * 修改说明：
+     * - 原逻辑：查询发给当前客服的会话（to_user_id = kefuUserId）
+     * - 新逻辑：查询所有有聊天记录的用户，所有客服看到相同的用户列表
+     * - 实现客服协同：任何客服都能查看和回复任何用户
      */
     public List<Map<String, Object>> getRecordList(String appid, Integer kefuUserId, String nickname, String isTourist, String labelId, String groupId) {
-        // 修复: 应该查询eb_chat_service_record表,使用to_user_id字段
-        // 因为客服是消息的接收方,游客是发送方
-        System.out.println("=== SERVICE getRecordList ===");
+        System.out.println("=== SERVICE getRecordList (协同模式) ===");
         System.out.println("Parameters - appid: " + appid + ", kefuUserId: " + kefuUserId + ", nickname: " + nickname + ", isTourist: " + isTourist);
 
-        QueryWrapper<ChatServiceRecordEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("appid", appid);
-        wrapper.eq("to_user_id", kefuUserId);  // 修复: 改为to_user_id
+        // ✅ 修改：查询所有有聊天记录的用户（不限制客服）
+        // 使用 DISTINCT 去重，避免同一个用户出现多次
+        QueryWrapper<ChatServiceDialogueRecordEntity> dialogueWrapper = new QueryWrapper<>();
+        dialogueWrapper.eq("appid", appid);
+        dialogueWrapper.select("DISTINCT user_id, to_user_id");
 
+        List<ChatServiceDialogueRecordEntity> dialogueRecords = chatServiceDialogueRecordMapper.selectList(dialogueWrapper);
+
+        // 收集所有参与聊天的用户ID（排除客服）
+        Set<Integer> userIds = new HashSet<>();
+        for (ChatServiceDialogueRecordEntity record : dialogueRecords) {
+            userIds.add(record.getUserId());
+            userIds.add(record.getToUserId());
+        }
+
+        if (userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 查询用户信息
+        QueryWrapper<ChatUserEntity> userWrapper = new QueryWrapper<>();
+        userWrapper.eq("appid", appid);
+        userWrapper.in("id", userIds);
+        userWrapper.eq("is_delete", 0);
+
+        // 过滤条件
         if (nickname != null && !nickname.trim().isEmpty()) {
-            wrapper.like("nickname", nickname);
+            userWrapper.like("nickname", nickname);
         }
 
         if (isTourist != null && !isTourist.trim().isEmpty()) {
-            wrapper.eq("is_tourist", isTourist);
+            userWrapper.eq("is_tourist", Integer.parseInt(isTourist));
         }
 
-        // 标签和分组筛选
-        if (labelId != null && !labelId.trim().isEmpty()) {
-            String[] labelIds = labelId.split(",");
-            // TODO: 标签关联筛选
-        }
+        // TODO: 标签和分组筛选
 
-        if (groupId != null && !groupId.trim().isEmpty()) {
-            String[] groupIds = groupId.split(",");
-            // TODO: 分组筛选
-        }
+        List<ChatUserEntity> users = chatUserMapper.selectList(userWrapper);
+        System.out.println("Found " + users.size() + " users with chat records");
 
-        wrapper.orderByDesc("update_time");  // 修复：按更新时间降序排列，最新消息在前
-        System.out.println("Executing SQL query with to_user_id=" + kefuUserId + " AND appid=" + appid);
-        List<ChatServiceRecordEntity> records = chatServiceRecordMapper.selectList(wrapper);
-        System.out.println("Query returned " + (records != null ? records.size() : 0) + " records from database");
-
-        // 转换为Map（修复：确保字段名匹配前端期待）
-        return records.stream().map(record -> {
+        // 为每个用户构建会话摘要
+        List<Map<String, Object>> result = users.stream().map(user -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("id", record.getId());
-            map.put("user_id", record.getUserId());
-            map.put("to_user_id", record.getToUserId());
-            map.put("nickname", record.getNickname());
-            map.put("avatar", record.getAvatar());
-            map.put("is_tourist", record.getIsTourist());
-            map.put("add_time", record.getAddTime());
 
-            // 前端期待 message 字段（数据库是message，Java属性是msn）
-            map.put("message", record.getMsn());  // 修复：getMsn()对应数据库的message字段
-            map.put("message_type", record.getMessageType());
+            // ✅ 修改：保持与 chat_service_record 表一致的数据结构
+            // user_id = 游客ID（发送人）
+            // to_user_id = 客服ID（接收人）
+            // 这样前端可以用 user_id 来判断是否同一个游客
+            map.put("user_id", user.getId());  // 游客ID
+            map.put("to_user_id", kefuUserId);  // 当前客服ID
+            map.put("nickname", user.getNickname());
+            map.put("avatar", user.getAvatar());
+            map.put("is_tourist", user.getIsTourist() != null ? user.getIsTourist() : 0);
+            map.put("is_kefu", user.getIsKefu() != null ? user.getIsKefu() : 0);
+            map.put("online", user.getOnline() != null ? user.getOnline() : 0);
 
-            // 前端期待 mssage_num (三个s) 而不是 num
-            map.put("mssage_num", record.getNum());  // 修复：字段名拼写
+            // 查询最新消息
+            QueryWrapper<ChatServiceDialogueRecordEntity> msgWrapper = new QueryWrapper<>();
+            msgWrapper.eq("appid", appid);
+            msgWrapper.and(w -> w.eq("user_id", user.getId()).or().eq("to_user_id", user.getId()));
+            msgWrapper.orderByDesc("add_time");
+            msgWrapper.last("LIMIT 1");
 
-            // 前端需要 update_time 来显示时间
-            map.put("update_time", record.getUpdateTime());  // 修复：添加 update_time
+            ChatServiceDialogueRecordEntity lastMsg = chatServiceDialogueRecordMapper.selectOne(msgWrapper);
+            if (lastMsg != null) {
+                map.put("message", lastMsg.getMsn());
+                map.put("message_type", lastMsg.getMsnType());
+                map.put("add_time", lastMsg.getAddTime());
+                map.put("update_time", lastMsg.getAddTime());  // 使用消息时间作为更新时间
+            } else {
+                map.put("message", "");
+                map.put("message_type", 1);
+                map.put("add_time", 0);
+                map.put("update_time", 0);
+            }
 
-            // 前端需要 online 字段来显示在线状态
-            map.put("online", record.getOnline() != null ? record.getOnline() : 0);  // 修复：添加 online
+            // 查询未读数（针对当前客服）
+            // ✅ 修改：chat_service_record 表结构是 user_id=游客, to_user_id=客服
+            QueryWrapper<ChatServiceRecordEntity> unreadWrapper = new QueryWrapper<>();
+            unreadWrapper.eq("appid", appid);
+            unreadWrapper.eq("user_id", user.getId());  // 游客ID
+            unreadWrapper.eq("to_user_id", kefuUserId);  // 当前客服ID
+
+            ChatServiceRecordEntity recordEntity = chatServiceRecordMapper.selectOne(unreadWrapper);
+            map.put("mssage_num", recordEntity != null && recordEntity.getNum() != null ? recordEntity.getNum() : 0);
+
+            // ✅ 添加 id 字段（如果存在 chat_service_record 记录）
+            // ✅ 添加 is_my_customer 字段（标识是否属于当前客服）
+            if (recordEntity != null) {
+                map.put("id", recordEntity.getId());
+                map.put("is_my_customer", 1);  // 有记录 = 属于当前客服
+            } else {
+                // 如果没有记录，使用游客ID作为临时ID（前端需要一个唯一标识）
+                map.put("id", user.getId());
+                map.put("is_my_customer", 0);  // 没有记录 = 不属于当前客服
+            }
 
             return map;
+        }).sorted((a, b) -> {
+            // ✅ 多级排序：
+            // 1. 优先显示属于当前客服的用户
+            // 2. 其次按未读消息数排序（有未读的排前面）
+            // 3. 最后按最新消息时间排序
+
+            Integer isMyA = (Integer) a.get("is_my_customer");
+            Integer isMyB = (Integer) b.get("is_my_customer");
+
+            // 第一优先级：属于当前客服的排前面
+            if (!isMyA.equals(isMyB)) {
+                return isMyB.compareTo(isMyA);  // 1 排在 0 前面
+            }
+
+            // 第二优先级：未读消息数（有未读的排前面）
+            Integer unreadA = (Integer) a.get("mssage_num");
+            Integer unreadB = (Integer) b.get("mssage_num");
+            if (!unreadA.equals(unreadB)) {
+                return unreadB.compareTo(unreadA);  // 未读数多的排前面
+            }
+
+            // 第三优先级：最新消息时间
+            Integer timeA = (Integer) a.get("update_time");
+            Integer timeB = (Integer) b.get("update_time");
+            return timeB.compareTo(timeA);
         }).collect(Collectors.toList());
+
+        System.out.println("Returning " + result.size() + " conversation records");
+        return result;
     }
 
     /**

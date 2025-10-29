@@ -13,13 +13,17 @@
                   <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
                   <div>{{$t('kefu.loading')}}</div>
                 </Spin>
-                <div class="chat-item" v-for="(item,index) in records" :key="index" :class="[{'right-box':kefuInfo.user_ids.indexOf(item.user_id) !== -1},{'gary':item.msn_type==5}]" :id="`chat_${item.id}`">
+                <div class="chat-item" v-for="(item,index) in records" :key="index" :class="[{'right-box':isKefuMessage(item)},{'gary':item.msn_type==5}]" :id="`chat_${item.id}`">
                   <div class="time" v-show="item.show">{{item.time }}</div>
                   <div class="flex-box">
                     <div class="avatar">
                       <img v-lazy="item.avatar" alt="">
                     </div>
                     <div class="msg-wrapper">
+                      <!-- ⭐ 新增：显示其他客服的昵称 -->
+                      <div class="sender-name" v-if="isOtherKefu(item)">
+                        {{ item.nickname || '客服' }}
+                      </div>
                       <!-- 文档 -->
                       <template v-if="item.msn_type<=2">
                         <div class="txt-wrapper pad16" v-html="item.msn"></div>
@@ -744,6 +748,27 @@ export default {
 
     tolink() {
       window.open('http://github.cassie.net/u/CRMChat');
+    },
+
+    // ⭐ 新增：判断消息是否是客服发送的（包括当前客服和其他客服）
+    isKefuMessage(item) {
+      // 方法1：检查 user_id 是否在 kefuInfo.user_ids 中（当前客服）
+      if (this.kefuInfo.user_ids && this.kefuInfo.user_ids.indexOf(item.user_id) !== -1) {
+        return true;
+      }
+
+      // 方法2：检查 is_kefu 字段（其他客服）
+      if (item.is_kefu === 1) {
+        return true;
+      }
+
+      return false;
+    },
+
+    // ⭐ 新增：判断消息是否是其他客服发送的
+    isOtherKefu(item) {
+      // 不是当前客服，但是客服
+      return item.is_kefu === 1 && (!this.kefuInfo.user_ids || this.kefuInfo.user_ids.indexOf(item.user_id) === -1);
     }
 
 
@@ -869,6 +894,14 @@ textarea.ivu-input {
               box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
             }
 
+            /* ⭐ 新增：发送者昵称样式 */
+            .sender-name {
+              font-size: 12px;
+              color: #6B7280;
+              padding: 6px 14px 0;
+              font-weight: 500;
+            }
+
             .txt-wrapper {
               word-break: break-all;
             }
@@ -974,6 +1007,12 @@ textarea.ivu-input {
                   right: -6px;
                   border-left: none;
                   border-right: 1px solid rgba(79, 70, 229, 0.12);
+                }
+
+                /* ⭐ 新增：右侧消息的发送者昵称样式 */
+                .sender-name {
+                  color: #4C1D95;
+                  text-align: right;
                 }
               }
             }
