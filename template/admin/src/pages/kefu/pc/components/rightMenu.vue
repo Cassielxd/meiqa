@@ -68,6 +68,22 @@
             </div>
           </div>
 
+          <!-- ✅ 地理位置信息 -->
+          <div class="item" v-if="activeUserInfo.last_ip">
+            <span>{{$t('kefu.ipAddress')}}</span>
+            <span class="geo-text">{{activeUserInfo.last_ip}}</span>
+          </div>
+
+          <div class="item" v-if="activeUserInfo.location">
+            <span>{{$t('kefu.location')}}</span>
+            <span class="geo-text" :title="activeUserInfo.location">{{activeUserInfo.location}}</span>
+          </div>
+
+          <div class="item" v-if="activeUserInfo.isp">
+            <span>{{$t('kefu.isp')}}</span>
+            <span class="geo-text">{{activeUserInfo.isp}}</span>
+          </div>
+
         </div>
         <!-- <div class="user-info">
           <div class="item">
@@ -629,6 +645,14 @@ color #6440C2, &.routine {
       width: 70px;
       font-size: 13px;
       color: #666;
+    }
+
+    .geo-text {
+      flex: 1;
+      font-size: 13px;
+      color: #333;
+      word-break: break-all;
+      line-height: 1.4;
     }
   }
 

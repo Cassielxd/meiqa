@@ -6,6 +6,7 @@ import io.renren.crmchat.service.KefuAuxiliaryService;
 import io.renren.crmchat.service.MobileServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -255,11 +256,13 @@ public class MobileServiceController {
      */
     @PostMapping("/service/send_message")
     @Operation(summary = "Send message")
-    public ApiResult<Map<String, Object>> sendMessage(@RequestBody Map<String, Object> data) {
+    public ApiResult<Map<String, Object>> sendMessage(
+            @RequestBody Map<String, Object> data,
+            HttpServletRequest request) {
         // 从请求参数中获取appid（游客访问模式下由前端传入）
         String appid = data.containsKey("appid") ? data.get("appid").toString() : UserContext.getAppid();
 
-        Map<String, Object> result = mobileServiceService.sendMessage(data, appid);
+        Map<String, Object> result = mobileServiceService.sendMessage(data, appid, request);
         return ApiResult.ok("Sent successfully", result);
     }
 }

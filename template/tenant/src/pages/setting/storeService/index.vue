@@ -120,7 +120,7 @@ import {
   kefusetStatusApi, kefuEditApi, kefuRecordApi, kefuChatlistApi,
   kefuLogin,kefuGroupListApi,kefuCreateGroupApi
 } from '@/api/setting'
-import { adminAppCustomer } from '@/api/kefu';
+import { adminAppCustomer,kefuPath } from '@/api/kefu';
 import AutoReply from "./compoents/AutoReply";
 import QRCode from 'qrcodejs2';
 export default {
@@ -339,12 +339,17 @@ export default {
       modal: false,
       modalTitle: '',
       qrcodeTextStart: `${window.location.origin}/chat/index?noCanClose=1`,
+      kefupath:"",
       qrcodeText: '',
       current:0
     }
   },
   async created() {
     let res = await adminAppCustomer();
+    let res1= await kefuPath();
+    if (res1.status == 200) {
+      this.kefupath=res1.data;
+    }
     if (res.status == 200) {
       this.qrcodeTextStart += `&token=${res.data.token_md5}`;
     }
@@ -488,9 +493,9 @@ export default {
           setCookies('kefuInfo', res.data.kefuInfo, expires);
 
           if(this.$store.state.media.isMobile) {
-            url = window.location.protocol + "//" + window.location.host + '/admin/#/kefu/mobile_list';
+            url = this.kefupath + '/#/kefu';
           } else {
-            url = window.location.protocol + "//" + window.location.host + '/admin/#/kefu/pc_list';
+            url = this.kefupath + '/#/kefu';
           }
 
 

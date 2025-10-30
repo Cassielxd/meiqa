@@ -682,6 +682,12 @@ export function adminAppCustomer() {
         method: 'get'
     })
 }
+export function kefuPath() {
+    return request({
+        url: '/app/path/kefu',
+        method: 'get'
+    })
+}
 
 /*
   重置token

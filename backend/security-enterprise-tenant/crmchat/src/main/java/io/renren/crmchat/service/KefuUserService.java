@@ -119,6 +119,10 @@ public class KefuUserService {
         userWrapper.in("id", userIds);
         userWrapper.eq("is_delete", 0);
 
+        // ✅ 重要：只查询非客服用户（排除 is_kefu = 1 的客服）
+        // 客服列表中应该只显示游客和普通用户，不应该显示其他客服
+        userWrapper.and(w -> w.isNull("is_kefu").or().eq("is_kefu", 0));
+
         // 过滤条件
         if (nickname != null && !nickname.trim().isEmpty()) {
             userWrapper.like("nickname", nickname);
@@ -131,7 +135,7 @@ public class KefuUserService {
         // TODO: 标签和分组筛选
 
         List<ChatUserEntity> users = chatUserMapper.selectList(userWrapper);
-        System.out.println("Found " + users.size() + " users with chat records");
+        System.out.println("Found " + users.size() + " users with chat records (excluding kefu)");
 
         // 为每个用户构建会话摘要
         List<Map<String, Object>> result = users.stream().map(user -> {
@@ -245,6 +249,28 @@ public class KefuUserService {
         result.put("group_id", user.getGroupId());
         result.put("is_tourist", user.getIsTourist());
         // result.put("online", user.getOnline());  // TODO: online字段
+
+        // ✅ IP和地理位置信息
+        result.put("last_ip", user.getLastIp() != null ? user.getLastIp() : "");
+        result.put("country", user.getCountry() != null ? user.getCountry() : "");
+        result.put("region", user.getRegion() != null ? user.getRegion() : "");
+        result.put("city", user.getCity() != null ? user.getCity() : "");
+        result.put("isp", user.getIsp() != null ? user.getIsp() : "");
+
+        // 组合地理位置文本
+        StringBuilder locationBuilder = new StringBuilder();
+        if (user.getCountry() != null && !user.getCountry().isEmpty()) {
+            locationBuilder.append(user.getCountry());
+        }
+        if (user.getRegion() != null && !user.getRegion().isEmpty()) {
+            if (locationBuilder.length() > 0) locationBuilder.append("-");
+            locationBuilder.append(user.getRegion());
+        }
+        if (user.getCity() != null && !user.getCity().isEmpty()) {
+            if (locationBuilder.length() > 0) locationBuilder.append("-");
+            locationBuilder.append(user.getCity());
+        }
+        result.put("location", locationBuilder.toString());
 
         // 获取用户标签
         List<ChatUserLabelAssistEntity> labelAssists = chatUserLabelAssistMapper.selectList(

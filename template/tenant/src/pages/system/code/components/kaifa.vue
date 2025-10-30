@@ -9,7 +9,7 @@
                 <p class="font-w">{{ $t('system.generalWebpageImport') }}</p>
                 <div class="code-content-wrap">
                     <textarea id="NormalCodeTextareakaifa1" class="code" rows="1">
-<script src="{{siteUrl}}/customerServer.js"></script>
+<script src="{{tokeninfo.path}}/customerServer.js"></script>
                     </textarea>
                     <div class="other-wrap">
                         <a @click="getCopy('NormalCodeTextareakaifa1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>{{ $t('system.copyCode') }}</span></a>
@@ -24,7 +24,7 @@
 <script>
     (function() {
         var hm = document.createElement("script");
-        hm.src = "{{siteUrl}}/customerServer.js";
+        hm.src = "{{tokeninfo.path}}/customerServer.js";
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(hm, s);
     })()
@@ -42,7 +42,7 @@
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa2" class="code" rows="45">
 var option = {
-    openUrl: "{{siteUrl}}", // 打开客服聊天框的地址，即：部署后台管理系统的地址，若未填写，则自动获取当前服务器的地址
+    openUrl: "{{tokeninfo.path}}", // 打开客服聊天框的地址，即：部署后台管理系统的地址，若未填写，则自动获取当前服务器的地址
     token: {{tokeninfo.tokenMd5}}, // token,与后台交互的凭证
     kefuid:'',//默认为空自动对接客服，可填写指定客服ID
     isShowTip: true, // 初始化成功后，界面右下角会自动创建 “联系客服按钮”， 如无需默认展示，则填写false即可,默认为true
@@ -101,7 +101,7 @@ canCustomerServer.getCustomeServer();
             <div class="code-content-wrap">
                 <textarea id="NormalCodeTextareakaifa3" class="code" rows="45">
 
-<script src="{{siteUrl}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.tokenMd5}}"}'></script>
+<script src="{{tokeninfo.path}}/customerServer.js" id="chat" option='{"authInit":true,"openUrl":"{{siteUrl}}","isShowTip":true,"token":"{{tokeninfo.tokenMd5}}"}'></script>
 <script>
     //自动实例化对象
     var canCustomerServer
@@ -173,7 +173,7 @@ import initCustomerServer from '@/libs/customerServer';
             jiazai() {
                 let option = {
 
-                    openUrl: this.siteUrl,
+                    openUrl: this.tokeninfo.path,
                     deviceType: '', //pc, Mobile
                     // domId: 'customerServerTip',
                     insertDomNode: '.getCode_container',

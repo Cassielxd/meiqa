@@ -116,6 +116,38 @@ public class ChatUserEntity implements Serializable {
     private String version;
 
     /**
+     * 国家
+     */
+    private String country;
+
+    /**
+     * 省份/地区
+     */
+    private String region;
+
+    /**
+     * 城市
+     */
+    private String city;
+
+    /**
+     * 运营商/ISP
+     */
+    private String isp;
+
+    /**
+     * 完整地理信息JSON
+     */
+    @TableField("geo_info")
+    private String geoInfo;
+
+    /**
+     * 地理信息更新时间（Unix时间戳）
+     */
+    @TableField("geo_updated_time")
+    private Integer geoUpdatedTime;
+
+    /**
      * 创建时间
      */
     @TableField("create_time")

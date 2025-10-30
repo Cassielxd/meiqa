@@ -2,7 +2,7 @@
     <div class="content">
         <p class="font-w">使用简介</p>
       <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
-      <p class="text-i">体验客服：http://lxd.vv-xj.com/admin/#/kefu    kefu1 xjlidong123</p>
+      <p class="text-i">体验客服：{{siteUrl}}/#/kefu    kefu1 xjlidong123</p>
         <p class="text-i">A链接可以在网页中或内容中添加A链接使用，可以在自己站点使用，也可以发布的外站使用，或者自己生成链接二维码使用;</p>
         <p class="font-w">超链接参数说明</p>
                 <p class="text-i">
@@ -22,7 +22,7 @@
 
         <div class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink1" class="code" rows="1">{{siteUrl}}/admin/#/chat/index?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink1" class="code" rows="1">{{siteUrl}}/#/chat/index?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
                 <div class="other-wrap">
                     <a class="btn btn-blue btn-large mr10" :href="linkUrl3" target="_blank">点击体验</a>
                     <a @click="getCopy('NormalCodeTextarealink1')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
@@ -33,7 +33,7 @@
         <p class="typetitle">第二种，PC端A链接使用</p>
         <div  class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink2" class="code" rows="1">{{siteUrl}}/admin/#/chat/pc?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink2" class="code" rows="1">{{siteUrl}}/#/chat/pc?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
                 <div class="other-wrap">
                     <a class="btn btn-blue btn-large mr10" :href="linkUrl1" target="_blank">点击体验</a>
                     <a @click="getCopy('NormalCodeTextarealink2')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>
@@ -44,7 +44,7 @@
         <p class="typetitle">第三种，移动端A链接使用</p>
         <div  class="fenlei">
             <div class="code-content-wrap">
-        <textarea id="NormalCodeTextarealink3" class="code" rows="1">{{siteUrl}}/admin/#/chat/mobile?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
+        <textarea id="NormalCodeTextarealink3" class="code" rows="1">{{siteUrl}}/#/chat/mobile?noCanClose=1&token={{tokeninfo.tokenMd5}}</textarea>
             <div class="other-wrap">
                 <a class="btn btn-blue btn-large mr10" :href="linkUrl2" target="_blank">点击体验</a>
                 <a @click="getCopy('NormalCodeTextarealink3')" class="btn btn-blue btn-large" href="javascript:void(0);"><span>复制代码</span></a>

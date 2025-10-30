@@ -30,7 +30,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { adminAppCustomer, appReset } from '@/api/kefu';
+import { adminAppCustomer, appReset,kefuPath } from '@/api/kefu';
 import alink from './components/alink';
 import wangye from './components/wangye';
 import kaifa from './components/kaifa';
@@ -59,12 +59,12 @@ export default {
       return this.isMobile ? 'top' : 'left'
     },
     linkUrl() {
-      return `${location.origin}/admin/#/chat/index?token=${this.token.tokenMd5}&noCanClose=1`;
+      return `${location.origin}/#/chat/index?token=${this.token.tokenMd5}&noCanClose=1`;
     }
   },
   data() {
     return {
-      token: '',
+      token: {},
       canfrime: false,
       srcUrl: `${location.origin}/customerServer.js`,
       siteUrl: `${location.origin}`,
@@ -75,19 +75,20 @@ export default {
 
   mounted() {
     this.getAdminAppCustomer();
+
   },
   methods: {
     // 获取token
-    getAdminAppCustomer() {
-
-      adminAppCustomer().then(res => {
-
-        if(res.status == 200) {
-          if(res.data) {
-            this.token = res.data;
-          }
+    async getAdminAppCustomer() {
+      let res =await adminAppCustomer();
+      if(res.status == 200) {
+        if(res.data) {
+         let data = res.data;
+          let k =await kefuPath();
+          data.path = k.data;
+          this.token = data;
         }
-      })
+      }
     },
 
     // 重置token

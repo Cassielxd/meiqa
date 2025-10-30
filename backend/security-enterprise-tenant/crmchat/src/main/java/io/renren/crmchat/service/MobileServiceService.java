@@ -11,6 +11,8 @@ import io.renren.crmchat.service.common.FileService;
 import io.renren.crmchat.websocket.WebSocketPushService;
 import io.renren.crmchat.service.ChatCacheService.UserProfile;
 import io.renren.crmchat.service.common.TokenService;
+import io.renren.common.utils.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,6 +64,7 @@ public class MobileServiceService {
     private final TokenService tokenService;
     private final FileService fileService;
     private final SystemAttachmentMapper systemAttachmentMapper;
+    private final GeoLocationService geoLocationService;
 
     private static final int PARALLEL_THRESHOLD = 12;
 
@@ -1143,12 +1146,13 @@ public class MobileServiceService {
      * 4. TODO: 通过WebSocket推送消息
      * 5. 返回消息记录（附带guid）
      *
-     * @param data   消息数据
-     * @param appid  租户ID
+     * @param data    消息数据
+     * @param appid   租户ID
+     * @param request HTTP请求对象（用于获取IP地址）
      * @return 发送结果
      */
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> sendMessage(Map<String, Object> data, String appid) {
+    public Map<String, Object> sendMessage(Map<String, Object> data, String appid, HttpServletRequest request) {
         String guid = optionalString(data.get("guid"));
         if (guid.isEmpty()) {
             throw new CrmChatException("Message ID does not exist");
@@ -1166,6 +1170,82 @@ public class MobileServiceService {
         );
         if (chatUser == null) {
             throw new CrmChatException("User does not exist");
+        }
+
+        // ✅ 游客发送消息时，检查IP是否变化，如果变化则重新获取地理位置信息
+        // 获取条件：
+        // 1. 是游客（is_tourist = 1）
+        // 2. IP地址为空 OR IP地址发生变化
+        if (chatUser.getIsTourist() != null && chatUser.getIsTourist() == 1 && request != null) {
+            try {
+                // 获取当前客户端IP（可能包含多个IP，用逗号分隔）
+                String rawIp = IpUtils.getIpAddr(request);
+                // 提取第一个有效的公网IP地址
+                String currentIp = extractFirstValidIp(rawIp);
+                String lastIp = chatUser.getLastIp();
+
+                // 判断是否需要更新地理位置信息
+                boolean needUpdateGeo = false;
+                String updateReason = "";
+
+                if (lastIp == null || lastIp.isEmpty()) {
+                    // 首次发送消息，没有IP记录
+                    needUpdateGeo = true;
+                    updateReason = "首次发送消息";
+                } else if (!currentIp.equals(lastIp)) {
+                    // IP地址发生变化
+                    needUpdateGeo = true;
+                    updateReason = "IP地址变化: " + lastIp + " -> " + currentIp;
+                }
+
+                if (needUpdateGeo) {
+                    log.info("🌍 [GEO] Visitor IP changed, fetching geo location: userId={}, reason={}", userId, updateReason);
+
+                    // 异步调用地理位置API（不阻塞主流程）
+                    final String finalCurrentIp = currentIp;
+                    final Integer finalUserId = userId;
+                    new Thread(() -> {
+                        try {
+                            Map<String, Object> geoData = geoLocationService.getGeoLocation(finalCurrentIp);
+
+                            if (geoData != null && (Boolean) geoData.getOrDefault("success", false)) {
+                                // 重新查询用户（避免并发问题）
+                                ChatUserEntity userToUpdate = chatUserMapper.selectOne(
+                                    new QueryWrapper<ChatUserEntity>().eq("appid", appid).eq("id", finalUserId)
+                                );
+
+                                if (userToUpdate != null) {
+                                    // 更新用户地理位置信息
+                                    userToUpdate.setLastIp(finalCurrentIp);
+                                    userToUpdate.setCountry((String) geoData.get("country"));
+                                    userToUpdate.setRegion((String) geoData.get("region"));
+                                    userToUpdate.setCity((String) geoData.get("city"));
+                                    userToUpdate.setIsp((String) geoData.get("isp"));
+                                    userToUpdate.setGeoInfo((String) geoData.get("raw_json"));
+                                    userToUpdate.setGeoUpdatedTime((int) (System.currentTimeMillis() / 1000));
+
+                                    // 保存到数据库
+                                    chatUserMapper.updateById(userToUpdate);
+
+                                    log.info("✅ [GEO] Successfully updated geo location: userId={}, ip={}, country={}, region={}, city={}, isp={}",
+                                            finalUserId, finalCurrentIp, userToUpdate.getCountry(), userToUpdate.getRegion(),
+                                            userToUpdate.getCity(), userToUpdate.getIsp());
+                                }
+                            } else {
+                                log.warn("⚠️ [GEO] Failed to fetch geo location: userId={}, ip={}", finalUserId, finalCurrentIp);
+                            }
+                        } catch (Exception e) {
+                            log.error("❌ [GEO] Error fetching geo location: userId={}, error={}", finalUserId, e.getMessage(), e);
+                        }
+                    }).start();
+
+                } else {
+                    log.debug("ℹ️ [GEO] Visitor IP unchanged, skipping geo update: userId={}, ip={}", userId, currentIp);
+                }
+            } catch (Exception e) {
+                // 地理位置获取失败不影响主流程
+                log.error("❌ [GEO] Error checking IP change: userId={}, error={}", userId, e.getMessage(), e);
+            }
         }
 
         // 如果toUserId为0，自动分配客服（优先在线客服，如果没有则找历史客服）
@@ -1433,5 +1513,83 @@ public class MobileServiceService {
             log.error("❌ Failed to broadcast visitor message to customer service agents: appid={}, visitor={}, error={}",
                 appid, visitorUserId, e.getMessage(), e);
         }
+    }
+
+    /**
+     * 从IP字符串中提取第一个有效的IP地址
+     * 处理 x-forwarded-for 返回多个IP的情况（例如："103.17.98.150, 172.68.225.67"）
+     *
+     * @param rawIp 原始IP字符串（可能包含多个IP，用逗号或空格分隔）
+     * @return 第一个有效的IP地址
+     */
+    private String extractFirstValidIp(String rawIp) {
+        if (rawIp == null || rawIp.trim().isEmpty()) {
+            return "unknown";
+        }
+
+        // 去除首尾空格
+        rawIp = rawIp.trim();
+
+        // 如果包含逗号，说明有多个IP地址
+        if (rawIp.contains(",")) {
+            String[] ips = rawIp.split(",");
+            for (String ip : ips) {
+                ip = ip.trim();
+                if (isValidIp(ip)) {
+                    log.debug("🔍 [IP] Extracted first valid IP from multiple IPs: {} -> {}", rawIp, ip);
+                    return ip;
+                }
+            }
+        }
+
+        // 如果包含空格，尝试按空格分割
+        if (rawIp.contains(" ")) {
+            String[] ips = rawIp.split("\\s+");
+            for (String ip : ips) {
+                ip = ip.trim();
+                if (isValidIp(ip)) {
+                    log.debug("🔍 [IP] Extracted first valid IP from space-separated IPs: {} -> {}", rawIp, ip);
+                    return ip;
+                }
+            }
+        }
+
+        // 单个IP地址，直接返回
+        if (isValidIp(rawIp)) {
+            return rawIp;
+        }
+
+        log.warn("⚠️ [IP] No valid IP found in: {}", rawIp);
+        return "unknown";
+    }
+
+    /**
+     * 验证IP地址格式是否有效
+     *
+     * @param ip IP地址
+     * @return true=有效, false=无效
+     */
+    private boolean isValidIp(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return false;
+        }
+
+        // 排除 "unknown" 等无效值
+        if ("unknown".equalsIgnoreCase(ip)) {
+            return false;
+        }
+
+        // 简单的IPv4格式验证（xxx.xxx.xxx.xxx）
+        String ipv4Pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        if (ip.matches(ipv4Pattern)) {
+            return true;
+        }
+
+        // 简单的IPv6格式验证（包含冒号）
+        if (ip.contains(":") && !ip.equals("::1")) {
+            return true;
+        }
+
+        return false;
     }
 }

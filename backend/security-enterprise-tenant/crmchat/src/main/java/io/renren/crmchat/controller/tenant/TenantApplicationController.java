@@ -2,6 +2,7 @@ package io.renren.crmchat.controller.tenant;
 
 import io.renren.crmchat.common.result.ApiResult;
 import io.renren.crmchat.entity.ApplicationEntity;
+import io.renren.crmchat.security.JwtUtils;
 import io.renren.crmchat.service.TenantApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import static io.renren.crmchat.security.TenantSecurityUtils.requireAppid;
 @Tag(name = "Tenant - Application Management")
 @AllArgsConstructor
 public class TenantApplicationController {
+    private final JwtUtils jwtUtils;
 
     private final TenantApplicationService tenantApplicationService;
     private final TenantApplicationService  adminApplicationService;
@@ -30,7 +32,14 @@ public class TenantApplicationController {
     public ApiResult<ApplicationEntity> getApplication() {
         String resolvedAppid = requireAppid();
         ApplicationEntity application = tenantApplicationService.getApplication(resolvedAppid);
+
         return ApiResult.ok("Query successful", application);
+    }
+    @GetMapping("path/kefu")
+    @Operation(summary = "Get Application Information")
+    public ApiResult<String> getpath() {
+
+        return ApiResult.ok("Query successful", jwtUtils.getKefuPath());
     }
 
     @PostMapping

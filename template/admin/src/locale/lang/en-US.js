@@ -139,6 +139,13 @@ export default {
     label: 'Label',
     remark: 'Remark',
     noUserInfo: 'No user information',
+    // Geo location
+    ipAddress: 'IP Address',
+    location: 'Location',
+    isp: 'ISP',
+    country: 'Country',
+    region: 'Region',
+    city: 'City',
     // Status terms
     pending: 'Pending',
     refunding: 'Refunding',

@@ -2,7 +2,7 @@
     <div class="content">
         <p class="font-w">使用简介</p>
       <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
-      <p class="text-i">体验客服：http://lxd.vv-xj.com/admin/#/kefu    kefu1 xjlidong123</p>
+      <p class="text-i">体验客服：{{siteUrl}}/#/kefu    kefu1 xjlidong123</p>
         <p class="text-i">程序内定制接入客服，深度定制开发说明，省去VUE说明。</p>
         <Divider />
         <p class="typetitle">第一步，引入js</p>

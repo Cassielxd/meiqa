@@ -4,6 +4,7 @@ import request from '@/libs/request'
 import Modal from './modal'
 import Vue from 'vue';
 import { Message, Spin, Notice } from 'iview'
+import Setting from "@/setting";
 let modalInstance
 
 function getModalInstance(render = undefined) {
@@ -94,6 +95,11 @@ export default function(formRequestPromise, { width = '700' } = { width: '700' }
             // data.config.form.labelWidth = 100
             let fApi
             data = Vue.observable(data);
+            for(let rule of  data.rules){
+                if(rule.type =="upload"){
+                    rule.props.action = Setting.apiBaseURL + rule.props.action
+                }
+            }
             alert({
                 title: data.title,
                 width,

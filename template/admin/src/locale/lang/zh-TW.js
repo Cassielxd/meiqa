@@ -125,6 +125,13 @@ export default {
     label: '標籤',
     remark: '備註',
     noUserInfo: '暫無用戶資訊',
+    // Geo location
+    ipAddress: 'IP地址',
+    location: '地理位置',
+    isp: '運營商',
+    country: '國家',
+    region: '省份/地區',
+    city: '城市',
     // Status terms
     pending: '待處理',
     refunding: '退款中',

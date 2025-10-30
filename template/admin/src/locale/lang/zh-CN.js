@@ -139,6 +139,13 @@ export default {
     label: '标签',
     remark: '备注',
     noUserInfo: '暂无用户信息',
+    // Geo location
+    ipAddress: 'IP地址',
+    location: '地理位置',
+    isp: '运营商',
+    country: '国家',
+    region: '省份/地区',
+    city: '城市',
     // Status terms
     unpaid: '未支付',
     unshipped: '未发货',

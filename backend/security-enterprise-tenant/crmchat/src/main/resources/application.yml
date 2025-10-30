@@ -117,3 +117,10 @@ file:
   storage:
     # 存储类型: local, oss, cos, qiniu
     type: ${FILE_STORAGE_TYPE:local}
+
+kefu_path: ${KEFU_DOMAIN:http://lxd.vv-xj.com}
+
+# Geo Location Configuration
+geo:
+  # 是否启用本地IP模拟数据（开发环境建议开启，生产环境建议关闭）
+  mock-local-ip: true

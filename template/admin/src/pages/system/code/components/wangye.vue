@@ -2,7 +2,7 @@
   <div class="content">
     <p class="font-w">使用简介</p>
     <p class="text-i">网页内快速接入客服，让网页拥有客服窗口，请把一下代码复制到网页最底部。</p>
-    <p class="text-i">体验客服：http://lxd.vv-xj.com/admin/#/kefu    kefu1 xjlidong123</p>
+    <p class="text-i">体验客服：{{siteUrl}}/#/kefu    kefu1 xjlidong123</p>
 
     <Divider />
     <p class="typetitle">获取代码</p>
@@ -63,7 +63,7 @@ export default {
   },
   methods: {
       jiazai(){
-          window.open(`${location.origin}/admin/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1`)
+          window.open(`${location.origin}/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1`)
       },
     getCopy(id) {
       this.$emit('cgetCopy', id);

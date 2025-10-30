@@ -40,5 +40,5 @@ module.exports = {
     // devServer: {
     //   proxy: 'localhost:3000'
     // }
-    publicPath: env === 'development' ? '/tenant/' : '/tenant/'
+    publicPath: env === 'development' ? '/' : '/'
 }

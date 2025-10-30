@@ -27,6 +27,13 @@ public class JwtUtils {
     @Value("${crmchat.jwt.expire:7200}")
     private long expire;
 
+    @Value("${kefu_path:''}")
+    private String kefuPath;
+
+    public String getKefuPath() {
+        return kefuPath;
+    }
+
     /**
      * 生成JWT Token
      *
