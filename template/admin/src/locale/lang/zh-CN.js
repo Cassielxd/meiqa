@@ -225,6 +225,8 @@ export default {
     website: '网址',
     browser: '浏览器',
     deleteRecord: '删除反馈',
+    referer: '来源',
+    directAccess: '直接访问',
     // QR Code page
     qrcodeSearch: '二维码搜索',
     qrcodeNamePlaceholder: '请输入二维码名称搜索',

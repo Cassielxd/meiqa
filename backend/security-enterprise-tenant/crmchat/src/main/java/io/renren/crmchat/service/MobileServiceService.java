@@ -1248,6 +1248,58 @@ public class MobileServiceService {
             }
         }
 
+        // ✅ 新增：获取并更新 Referer 信息
+        // 获取条件：
+        // 1. 是游客（is_tourist = 1）
+        // 2. Referer 为空 OR Referer 发生变化
+        if (chatUser.getIsTourist() != null && chatUser.getIsTourist() == 1 && request != null) {
+            try {
+                // 从 HTTP 请求头中获取 Referer
+                String currentReferer = request.getHeader("Referer");
+                if (currentReferer == null || currentReferer.trim().isEmpty()) {
+                    currentReferer = request.getHeader("referer"); // 尝试小写
+                }
+
+                // 如果 Referer 存在且有效
+                if (currentReferer != null && !currentReferer.trim().isEmpty()) {
+                    currentReferer = currentReferer.trim();
+                    String lastReferer = chatUser.getReferer();
+
+                    // 判断是否需要更新 Referer
+                    boolean needUpdateReferer = false;
+                    String refererUpdateReason = "";
+
+                    if (lastReferer == null || lastReferer.isEmpty()) {
+                        // 首次发送消息，没有 Referer 记录
+                        needUpdateReferer = true;
+                        refererUpdateReason = "首次记录 Referer";
+                    } else if (!currentReferer.equals(lastReferer)) {
+                        // Referer 发生变化
+                        needUpdateReferer = true;
+                        refererUpdateReason = "Referer 变化: " + lastReferer + " -> " + currentReferer;
+                    }
+
+                    if (needUpdateReferer) {
+                        log.info("🔗 [REFERER] Visitor referer changed, updating: userId={}, reason={}", userId, refererUpdateReason);
+
+                        // 更新用户 Referer 信息
+                        chatUser.setReferer(currentReferer);
+                        chatUser.setRefererUpdatedTime((int) (System.currentTimeMillis() / 1000));
+                        chatUserMapper.updateById(chatUser);
+
+                        log.info("✅ [REFERER] Successfully updated referer: userId={}, referer={}", userId, currentReferer);
+                    } else {
+                        log.debug("ℹ️ [REFERER] Visitor referer unchanged, skipping update: userId={}, referer={}", userId, currentReferer);
+                    }
+                } else {
+                    log.debug("ℹ️ [REFERER] No referer in request headers: userId={}", userId);
+                }
+            } catch (Exception e) {
+                // Referer 获取失败不影响主流程
+                log.error("❌ [REFERER] Error updating referer: userId={}, error={}", userId, e.getMessage(), e);
+            }
+        }
+
         // 如果toUserId为0，自动分配客服（优先在线客服，如果没有则找历史客服）
         if (toUserId <= 0) {
             List<ChatServiceEntity> onlineServices = chatCacheService.getOnlineServices(appid);

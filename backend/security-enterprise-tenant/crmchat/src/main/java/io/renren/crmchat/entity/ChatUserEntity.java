@@ -148,6 +148,18 @@ public class ChatUserEntity implements Serializable {
     private Integer geoUpdatedTime;
 
     /**
+     * 来源页面（HTTP Referer）
+     */
+    @TableField("referer")
+    private String referer;
+
+    /**
+     * Referer 更新时间（Unix时间戳）
+     */
+    @TableField("referer_updated_time")
+    private Integer refererUpdatedTime;
+
+    /**
      * 创建时间
      */
     @TableField("create_time")

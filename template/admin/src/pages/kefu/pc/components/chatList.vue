@@ -8,6 +8,7 @@
     </div>
     <div class="scroll-box">
 
+
       <vue-scroll :ops="ops" @handle-scroll="handleScroll" v-if="userList.length>0">
         <div class="chat-item" v-for="(item,index) in userList" :key="index" :class="{active:curId == item.user_id}" @click="selectUser(item,index)">
           <div class="avatar">
@@ -31,6 +32,10 @@
               <Badge :count="item.mssage_num">
                 <a href="#" class="demo-badge"></a>
               </Badge>
+            </div>
+            <!-- ⭐ 客服名称显示 -->
+            <div class="kefu-name" v-if="item.service_nickname">
+              {{ item.service_nickname }}
             </div>
           </div>
         </div>
@@ -178,6 +183,14 @@ export default {
       if(!value) return ''
       return dayjs.unix(value).format('MM-DD HH:mm')
 
+    }
+  },
+  computed: {
+    // ⭐ 获取当前选中用户的 referer
+    currentReferer() {
+      if (!this.curId) return '';
+      const currentUser = this.userList.find(user => user.user_id === this.curId);
+      return currentUser ? currentUser.referer : '';
     }
   },
   created() {
@@ -681,6 +694,20 @@ export default {
           line-height: 18px;
           padding: 0 5px;
         }
+      }
+
+      /* ⭐ 客服名称样式 */
+      .kefu-name {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #6B7280;
+        background: rgba(79, 70, 229, 0.08);
+        padding: 2px 6px;
+        border-radius: 3px;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }

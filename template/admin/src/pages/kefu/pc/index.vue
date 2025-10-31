@@ -5,10 +5,18 @@
       <div class="container">
         <chatList ref="chatList" @setDataId="setDataId" @search="bindSearch" @changeType="changeType" :isShow="isShow" :userOnline="userOnline" :newRecored="newRecored" :searchData="searchData"></chatList>
         <div class="chat-content">
+          <!-- ⭐ Referer 来源显示区域 -->
+          <div class="referer-bar" v-if="userActive">
+            <span class="referer-label">{{$t('kefu.referer')}}:</span>
+            <span class="referer-value" :title="userActive.referer || $t('kefu.directAccess')">
+              {{ userActive.referer || $t('kefu.directAccess') }}
+            </span>
+          </div>
+
           <div class="chat-body">
 
             <happy-scroll size="5" resize hide-horizontal :scroll-top="scrollTop" @vertical-start="scrollHandler">
-              <div style="width: 600px; padding:20px;" id="chat_scroll" ref="scrollBox">
+              <div style="width: 570px; padding:20px;" id="chat_scroll" ref="scrollBox">
                 <Spin v-show="isLoad">
                   <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
                   <div>{{$t('kefu.loading')}}</div>
@@ -19,53 +27,78 @@
                     <div class="avatar">
                       <img v-lazy="item.avatar" alt="">
                     </div>
-                    <div class="msg-wrapper">
-                      <!-- ⭐ 新增：显示其他客服的昵称 -->
-                      <div class="sender-name" v-if="isOtherKefu(item)">
+                    <div class="msg-content-wrapper">
+                      <!-- ⭐ 客服名称显示在右下角 -->
+                      <div class="kefu-name-tag" v-if="isKefuMessage(item)">
                         {{ item.nickname || '客服' }}
                       </div>
-                      <!-- 文档 -->
-                      <template v-if="item.msn_type<=2">
-                        <div class="txt-wrapper pad16" v-html="item.msn"></div>
-                      </template>
-                      <!-- 图片 -->
-                      <template v-if="item.msn_type==3">
-                        <div class="img-wraper" v-viewer>
-                          <img v-lazy="item.msn" alt="">
+                      <div class="msg-wrapper">
+                        <!-- ⭐ 新增：显示其他客服的昵称 -->
+                        <div class="sender-name" v-if="isOtherKefu(item)">
+                          {{ item.nickname || '客服' }}
                         </div>
-                      </template>
-                      <!-- 商品 -->
-
-                      <template v-if="item.msn_type==5">
-                        <div class="order-wrapper pad16">
-                          <div class="img-box"><img :src="item.other.image" alt=""></div>
-                          <div class="order-info">
-                            <div class="name line1">{{item.other.store_name}}</div>
-                            <div class="sku">{{$t('kefu.inventory')}}：{{item.other.stock}} {{$t('kefu.sales')}}：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
-                            <div class="price-box">
-                              <div class="num">¥ {{item.other.price}}</div>
-                              <!-- <a herf="javascript:;" class="more" @click.stop="lookGoods(item)">View goods ></a> -->
-                            </div>
+                        <!-- 文档 -->
+                        <template v-if="item.msn_type<=2">
+                          <div class="txt-wrapper pad16" :class="{'has-translate': !isKefuMessage(item)}" v-html="item.msn"></div>
+                          <!-- ⭐ 翻译按钮 - 只对游客消息显示，绝对定位在消息右上角 -->
+                          <button
+                            v-if="!isKefuMessage(item)"
+                            class="translate-btn-icon"
+                            @click.stop="handleTranslate(item)"
+                            :disabled="item.translating"
+                            :title="item.translated ? (item.showTranslation ? '显示原文' : '显示译文') : '翻译'"
+                          >
+                            <Icon v-if="item.translating" type="ios-loading" class="translate-loading-icon" />
+                            <span v-else-if="item.translated && item.showTranslation">🔄</span>
+                            <span v-else>🌐</span>
+                          </button>
+                        </template>
+                        <!-- 图片 -->
+                        <template v-if="item.msn_type==3">
+                          <div class="img-wraper" v-viewer>
+                            <img v-lazy="item.msn" alt="">
                           </div>
+                        </template>
+                        <!-- 商品 -->
 
-                        </div>
-                      </template>
-                      <!-- 订单 -->
-                      <template v-if="item.msn_type==6 && (item.orderInfo.length>0||item.orderInfo.id)">
-                        <div class="order-wrapper pad16">
-                          <div class="img-box"><img :src="item.orderInfo.cartInfo[0].productInfo.image" alt=""></div>
-                          <div class="order-info">
-                            <div class="name line1">{{item.orderInfo.order_id}}</div>
-                            <div class="sku">{{$t('kefu.goodsQuantity')}}：{{item.orderInfo.total_num}}</div>
-                            <div class="price-box">
-                              <div class="num">¥ {{item.orderInfo.pay_price}}</div>
-                              <a href="javascript:;" class="more" @click.stop="lookOrder(item)">{{$t('kefu.viewOrder')}} ></a>
+                        <template v-if="item.msn_type==5">
+                          <div class="order-wrapper pad16">
+                            <div class="img-box"><img :src="item.other.image" alt=""></div>
+                            <div class="order-info">
+                              <div class="name line1">{{item.other.store_name}}</div>
+                              <div class="sku">{{$t('kefu.inventory')}}：{{item.other.stock}} {{$t('kefu.sales')}}：{{parseInt(item.other.sales) + parseInt(item.other.ficti?item.other.ficti:0)}}</div>
+                              <div class="price-box">
+                                <div class="num">¥ {{item.other.price}}</div>
+                                <!-- <a herf="javascript:;" class="more" @click.stop="lookGoods(item)">View goods ></a> -->
+                              </div>
                             </div>
+
                           </div>
+                        </template>
+                        <!-- 订单 -->
+                        <template v-if="item.msn_type==6 && (item.orderInfo.length>0||item.orderInfo.id)">
+                          <div class="order-wrapper pad16">
+                            <div class="img-box"><img :src="item.orderInfo.cartInfo[0].productInfo.image" alt=""></div>
+                            <div class="order-info">
+                              <div class="name line1">{{item.orderInfo.order_id}}</div>
+                              <div class="sku">{{$t('kefu.goodsQuantity')}}：{{item.orderInfo.total_num}}</div>
+                              <div class="price-box">
+                                <div class="num">¥ {{item.orderInfo.pay_price}}</div>
+                                <a href="javascript:;" class="more" @click.stop="lookOrder(item)">{{$t('kefu.viewOrder')}} ></a>
+                              </div>
+                            </div>
 
+                          </div>
+                        </template>
+
+                      </div>
+
+                      <!-- ⭐ 翻译结果显示区域 - 只对游客消息显示 -->
+                      <transition name="translate-fade">
+                        <div class="translate-result" v-if="!isKefuMessage(item) && item.translated && item.showTranslation">
+                          <div class="translate-result-content" v-html="item.translatedText"></div>
                         </div>
-                      </template>
-
+                      </transition>
                     </div>
 
                   </div>
@@ -254,6 +287,16 @@ export default {
         } else {
           item.show = true;
         }
+
+        // ⭐ 初始化翻译相关属性
+        if (!item.hasOwnProperty('translated')) {
+          this.$set(item, 'translated', false);
+          this.$set(item, 'translating', false);
+          this.$set(item, 'translatedText', '');
+          this.$set(item, 'showTranslation', false);
+          this.$set(item, 'targetLang', 'zh'); // 默认翻译为中文
+        }
+
         return item;
       });
     },
@@ -769,6 +812,110 @@ export default {
     isOtherKefu(item) {
       // 不是当前客服，但是客服
       return item.is_kefu === 1 && (!this.kefuInfo.user_ids || this.kefuInfo.user_ids.indexOf(item.user_id) === -1);
+    },
+
+    // ⭐ 翻译功能：处理翻译请求
+    handleTranslate(item) {
+      if (item.translating) return;
+
+      // 如果已经翻译过，直接显示
+      if (item.translated) {
+        this.$set(item, 'showTranslation', !item.showTranslation);
+        return;
+      }
+
+      // 开始翻译
+      this.$set(item, 'translating', true);
+
+      // 模拟翻译API调用（这里先用setTimeout模拟，后续替换为真实API）
+      setTimeout(() => {
+        // 模拟翻译结果
+        const mockTranslation = this.getMockTranslation(item.msn, item.targetLang);
+
+        this.$set(item, 'translatedText', mockTranslation);
+        this.$set(item, 'translated', true);
+        this.$set(item, 'translating', false);
+        this.$set(item, 'showTranslation', true);
+
+        this.$Message.success('翻译完成');
+      }, 1000);
+
+      // TODO: 后续替换为真实的翻译API调用
+      // this.callTranslateAPI(item);
+    },
+
+    // ⭐ 翻译功能：切换显示原文/译文
+    toggleTranslation(item) {
+      this.$set(item, 'showTranslation', !item.showTranslation);
+    },
+
+    // ⭐ 翻译功能：获取语言名称
+    getLanguageName(langCode) {
+      const langMap = {
+        'zh': '中文',
+        'en': 'English',
+        'ja': '日本語',
+        'ko': '한국어',
+        'es': 'Español',
+        'fr': 'Français',
+        'de': 'Deutsch',
+        'ru': 'Русский',
+        'ar': 'العربية',
+        'pt': 'Português'
+      };
+      return langMap[langCode] || langCode;
+    },
+
+    // ⭐ 翻译功能：模拟翻译（临时使用，后续替换为真实API）
+    getMockTranslation(text, targetLang) {
+      // 移除HTML标签获取纯文本
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = text;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
+
+      // 模拟翻译结果
+      const mockTranslations = {
+        'zh': `[中文翻译] ${plainText}`,
+        'en': `[English Translation] ${plainText}`,
+        'ja': `[日本語翻訳] ${plainText}`,
+        'ko': `[한국어 번역] ${plainText}`,
+        'es': `[Traducción al español] ${plainText}`,
+        'fr': `[Traduction française] ${plainText}`
+      };
+
+      return mockTranslations[targetLang] || `[Translation to ${targetLang}] ${plainText}`;
+    },
+
+    // ⭐ 翻译功能：调用真实翻译API（预留接口）
+    async callTranslateAPI(item) {
+      try {
+        this.$set(item, 'translating', true);
+
+        // 移除HTML标签获取纯文本
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = item.msn;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+
+        // TODO: 调用真实的翻译API
+        // const response = await translateAPI({
+        //   text: plainText,
+        //   targetLang: item.targetLang || 'zh',
+        //   sourceLang: 'auto' // 自动检测源语言
+        // });
+
+        // 模拟API响应
+        const translatedText = `翻译结果: ${plainText}`;
+
+        this.$set(item, 'translatedText', translatedText);
+        this.$set(item, 'translated', true);
+        this.$set(item, 'showTranslation', true);
+
+        this.$Message.success('翻译完成');
+      } catch (error) {
+        this.$Message.error('翻译失败: ' + (error.message || '未知错误'));
+      } finally {
+        this.$set(item, 'translating', false);
+      }
     }
 
 
@@ -796,7 +943,7 @@ textarea.ivu-input {
   display: flex;
   flex-direction: column;
   width: 1200px;
-  height: 820px;
+  height: 850px;
   margin: 0 auto;
   background: #fff;
   border-radius: 16px;
@@ -814,6 +961,30 @@ textarea.ivu-input {
       display: flex;
       flex-direction: column;
       background: #FAFBFC;
+
+      /* ⭐ Referer 来源显示区域 */
+      .referer-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        font-size: 12px;
+        color: #6B7280;
+        border-bottom: 1px solid #E5E7EB;
+
+        .referer-label {
+          font-weight: 500;
+          margin-right: 6px;
+          white-space: nowrap;
+        }
+
+        .referer-value {
+          max-width: 400px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
 
       .chat-body {
         max-height: 530px;
@@ -877,6 +1048,25 @@ textarea.ivu-input {
             }
           }
 
+          .msg-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+            position: relative;
+          }
+
+          /* ⭐ 客服名称标签 - 显示在右下角 */
+          .kefu-name-tag {
+            align-self: flex-end;
+            margin-top: 4px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #9CA3AF;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 4px;
+            white-space: nowrap;
+          }
+
           .msg-wrapper {
             max-width: 360px;
             background: #F5F6F8;
@@ -904,10 +1094,104 @@ textarea.ivu-input {
 
             .txt-wrapper {
               word-break: break-all;
+
+              /* ⭐ 有翻译按钮的消息，右侧留出空间 */
+              &.has-translate {
+                padding-right: 32px !important;
+              }
             }
 
             .pad16 {
               padding: 12px 14px;
+            }
+
+            /* ⭐ 翻译按钮 - 绝对定位在消息右上角 */
+            .translate-btn-icon {
+              position: absolute;
+              top: 4px;
+              right: 4px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 22px;
+              height: 22px;
+              padding: 0;
+              font-size: 13px;
+              background: rgba(255, 255, 255, 0.9);
+              border: none;
+              border-radius: 50%;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              outline: none;
+              opacity: 0.5;
+              z-index: 10;
+
+              &:hover:not(:disabled) {
+                opacity: 1;
+                background: rgba(79, 70, 229, 0.15);
+                transform: scale(1.2);
+              }
+
+              &:active:not(:disabled) {
+                transform: scale(0.9);
+              }
+
+              &:disabled {
+                cursor: not-allowed;
+                opacity: 0.3;
+              }
+
+              .translate-loading-icon {
+                animation: rotate 1s linear infinite;
+                font-size: 12px;
+              }
+
+              span {
+                line-height: 1;
+                display: inline-block;
+              }
+            }
+
+            /* ⭐ 翻译结果样式 */
+            .translate-result {
+              margin-top: 6px;
+              padding: 8px 12px;
+              background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+              border-left: 3px solid #F59E0B;
+              border-radius: 6px;
+              font-size: 13px;
+              color: #78350F;
+              line-height: 1.6;
+              word-break: break-word;
+            }
+
+            .translate-result-content {
+              font-size: 13px;
+              color: #78350F;
+              line-height: 1.6;
+              word-break: break-word;
+            }
+
+            /* 翻译结果展开/收起动画 */
+            .translate-fade-enter-active,
+            .translate-fade-leave-active {
+              transition: all 0.3s ease;
+            }
+
+            .translate-fade-enter,
+            .translate-fade-leave-to {
+              opacity: 0;
+              transform: translateY(-8px);
+            }
+
+            /* 旋转动画 */
+            @keyframes rotate {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
             }
 
             .img-wraper img {

@@ -137,6 +137,31 @@ public class KefuUserService {
         List<ChatUserEntity> users = chatUserMapper.selectList(userWrapper);
         System.out.println("Found " + users.size() + " users with chat records (excluding kefu)");
 
+        // ✅ 性能优化：批量查询所有客服信息，避免 N+1 查询问题
+        // 1. 先收集所有需要查询的客服ID
+        Set<Integer> kefuUserIds = new HashSet<>();
+        for (ChatUserEntity user : users) {
+            QueryWrapper<ChatServiceRecordEntity> tempWrapper = new QueryWrapper<>();
+            tempWrapper.eq("appid", appid);
+            tempWrapper.eq("user_id", user.getId());
+            tempWrapper.eq("to_user_id", kefuUserId);
+            ChatServiceRecordEntity tempRecord = chatServiceRecordMapper.selectOne(tempWrapper);
+            if (tempRecord != null && tempRecord.getToUserId() != null) {
+                kefuUserIds.add(tempRecord.getToUserId());
+            }
+        }
+
+        // 2. 批量查询所有客服信息，构建 Map 缓存
+        Map<Integer, String> kefuNicknameMap = new HashMap<>();
+        if (!kefuUserIds.isEmpty()) {
+            QueryWrapper<ChatUserEntity> kefuWrapper = new QueryWrapper<>();
+            kefuWrapper.in("id", kefuUserIds);
+            List<ChatUserEntity> kefuUsers = chatUserMapper.selectList(kefuWrapper);
+            for (ChatUserEntity kefuUser : kefuUsers) {
+                kefuNicknameMap.put(kefuUser.getId(), kefuUser.getNickname());
+            }
+        }
+
         // 为每个用户构建会话摘要
         List<Map<String, Object>> result = users.stream().map(user -> {
             Map<String, Object> map = new HashMap<>();
@@ -185,13 +210,20 @@ public class KefuUserService {
 
             // ✅ 添加 id 字段（如果存在 chat_service_record 记录）
             // ✅ 添加 is_my_customer 字段（标识是否属于当前客服）
+            // ✅ 添加 service_nickname 字段（该用户对应的客服昵称）
             if (recordEntity != null) {
                 map.put("id", recordEntity.getId());
                 map.put("is_my_customer", 1);  // 有记录 = 属于当前客服
+
+                // ✅ 从缓存 Map 中获取客服昵称（性能优化）
+                Integer serviceUserId = recordEntity.getToUserId();
+                String serviceNickname = kefuNicknameMap.getOrDefault(serviceUserId, "");
+                map.put("service_nickname", serviceNickname);
             } else {
                 // 如果没有记录，使用游客ID作为临时ID（前端需要一个唯一标识）
                 map.put("id", user.getId());
                 map.put("is_my_customer", 0);  // 没有记录 = 不属于当前客服
+                map.put("service_nickname", "");  // 没有分配客服
             }
 
             return map;

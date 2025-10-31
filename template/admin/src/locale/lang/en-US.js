@@ -230,6 +230,8 @@ export default {
     qrcodeName: 'QR Code Name',
     qrcodeImage: 'QR Code Image',
     operation: 'Operation',
+    referer: 'Referer',
+    directAccess: 'Direct Access',
     // Technical support
     techSupport: 'Technical Support',
     openSourceSystem: 'CRMChat Open Source Customer Service System',

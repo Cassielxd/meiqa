@@ -299,6 +299,8 @@ export default {
     personalLibrary: '個人話術庫',
     publicLibrary: '公共話術庫',
     all: '全部',
+    referer: '來源',
+    directAccess: '直接訪問',
     groupName: '分組名稱：',
     groupNamePlaceholder: '分組名稱',
     groupSort: '分組排序：',
