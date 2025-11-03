@@ -18,8 +18,8 @@ export default {
    * @description api请求基础路径
    */
   baseUrl: {
-    dev: 'http://47.129.251.102:20108',
-    pro: 'http://47.129.251.102:20108'
+    dev: '',
+    pro: ''
   },
   /**
    * @description 默认打开的首页的路由name值，默认为home

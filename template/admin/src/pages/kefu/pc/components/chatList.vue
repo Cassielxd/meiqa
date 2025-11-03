@@ -279,14 +279,20 @@ export default {
       this.bus.$emit('change', { nickname: e.target.value })
     },
     deleteUserList(item){
-      this.userList.forEach((el, index, arr) => {
-        // ✅ 修改：用 user_id 判断是否同一用户
-        if(el.user_id == item.user_id){
-          this.userList.splice(index,1)
+      // ⭐ 修复：从后往前遍历，避免索引错乱
+      for(let i = this.userList.length - 1; i >= 0; i--){
+        if(this.userList[i].user_id == item.user_id){
+          this.userList.splice(i, 1)
+          break; // 找到后立即退出，避免重复删除
         }
-      })
+      }
+
+      // 如果还有用户，选中第一个
       if(this.userList.length){
-        this.selectUser(this.userList[0],0)
+        this.selectUser(this.userList[0], 0)
+      } else {
+        // 如果没有用户了，通知父组件清空选中状态
+        this.$emit('setDataId', {})
       }
     },
     /**

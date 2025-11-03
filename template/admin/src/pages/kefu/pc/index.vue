@@ -8,8 +8,16 @@
           <!-- ⭐ Referer 来源显示区域 -->
           <div class="referer-bar" v-if="userActive">
             <span class="referer-label">{{$t('kefu.referer')}}:</span>
-            <span class="referer-value" :title="userActive.referer || $t('kefu.directAccess')">
-              {{ userActive.referer || $t('kefu.directAccess') }}
+            <span class="referer-value" :title="userActive.referer">
+              {{ userActive.referer }}
+            </span>
+          </div>
+
+          <!-- ⭐ Request URL 显示区域 -->
+          <div class="referer-bar" v-if="userActive">
+            <span class="referer-label">{{$t('kefu.requestUrl')}}:</span>
+            <span class="referer-value" :title="userActive.request_url">
+              {{ userActive.request_url}}
             </span>
           </div>
 
@@ -118,6 +126,10 @@
                 </div>
                 <div class="icon-item" @click.stop.stop="isMsg = true"><span class="iconfont iconliaotian"></span></div>
                 <div class="icon-item" @click.stop.stop="authMsg = true"><Icon style="font-weight: bold" size="22" color="#515a6e" type="ios-chatboxes-outline" /></div>
+                <!-- ⭐ 翻译设置按钮 -->
+                <div class="icon-item translate-setting-btn" @click.stop="isTranslateSetting = !isTranslateSetting" :title="$t('kefu.translateSetting')">
+                  <Icon type="ios-globe" size="22" color="#515a6e" />
+                </div>
               </div>
               <div class="right-wrapper">
                 <div class="icon-item" @click.stop="isTransfer = !isTransfer">
@@ -135,6 +147,38 @@
                   <i class="em" :class="emoji" @click.stop="select(emoji)"></i>
                 </div>
               </div>
+              <!-- ⭐ 翻译设置弹窗 -->
+              <div class="translate-setting-box" v-show="isTranslateSetting" @click.stop>
+                <div class="translate-setting-header">
+                  <span>{{$t('kefu.translateSetting')}}</span>
+                </div>
+                <div class="translate-setting-content">
+                  <div class="setting-item">
+                    <label>{{$t('kefu.sourceLanguage')}}:</label>
+                    <Select v-model="translateConfig.sourceLang" style="width: 150px" size="small" @click.stop>
+                      <Option value="auto">{{$t('kefu.autoDetect')}}</Option>
+                      <Option value="en-US">{{$t('kefu.english')}}</Option>
+                      <Option value="zh-CN">{{$t('kefu.chineseSimplified')}}</Option>
+                      <Option value="zh-TW">{{$t('kefu.chineseTraditional')}}</Option>
+                      <Option value="ja-JP">{{$t('kefu.japanese')}}</Option>
+                      <Option value="ko-KR">{{$t('kefu.korean')}}</Option>
+                    </Select>
+                  </div>
+                  <div class="setting-item">
+                    <label>{{$t('kefu.targetLanguage')}}:</label>
+                    <Select v-model="translateConfig.targetLang" style="width: 150px" size="small" @click.stop>
+                      <Option value="zh-CN">{{$t('kefu.chineseSimplified')}}</Option>
+                      <Option value="en-US">{{$t('kefu.english')}}</Option>
+                      <Option value="zh-TW">{{$t('kefu.chineseTraditional')}}</Option>
+                      <Option value="ja-JP">{{$t('kefu.japanese')}}</Option>
+                      <Option value="ko-KR">{{$t('kefu.korean')}}</Option>
+                    </Select>
+                  </div>
+                  <div class="setting-item">
+                    <Button type="primary" size="small" @click.stop="saveTranslateSetting">{{$t('kefu.save')}}</Button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="textarea-box" style="position:relative;">
               <!-- <Input v-model="chatCon" type="textarea" :rows="4" @keydown.enter="sendText" placeholder="Please enter text content" @on-enter="sendText" style="font-size:14px" /> -->
@@ -147,9 +191,9 @@
         </div>
         <div class="right_menu">
           <rightMenu :isTourist="tourist" :uid="userActive.user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
-          <div class="crmchat_link" @click="tolink">
+<!--          <div class="crmchat_link" @click="tolink">
             <span>{{$t('kefu.openSourceCustomerService')}}</span>
-          </div>
+          </div>-->
         </div>
       </div>
       <!-- 用户标签 -->
@@ -230,6 +274,12 @@ export default {
       kefuInfo: {}, //客服信息
       isMsg: false,
       isTransfer: false,
+      // ⭐ 翻译设置
+      isTranslateSetting: false, // 是否显示翻译设置弹窗
+      translateConfig: {
+        sourceLang: 'en-US', // 源语言，默认英文
+        targetLang: 'zh-CN'  // 目标语言，默认中文简体
+      },
       activeMsg: '', // 选中的话术
       chatList: [],
       text: '',
@@ -332,11 +382,15 @@ export default {
     let self = this
     window.addEventListener('click', function() {
       self.isEmoji = false
+      self.isTranslateSetting = false
     });
     this.bus.pageWs = Socket(true, getCookies('kefu_token'));
     this.wsAgain();
     this.header['Authori-zation'] = 'Bearer ' + getCookies('kefu_token');
     this.text = this.replace_em('[em-smiling_imp]');
+
+    // ⭐ 从 cookie 读取翻译配置
+    this.loadTranslateSetting();
 
     console.log(this.$route);
 
@@ -604,7 +658,12 @@ export default {
       this.isTransfer = false
     },
     transferSuccess(e){
-      this.$refs.chatList.deleteUserList(this.userActive)
+      // ⭐ 转接成功后不删除用户（所有客服共享游客列表）
+      // 只需要关闭转接弹窗即可，用户仍然在列表中
+      this.isTransfer = false;
+      this.$Message.success('转接成功');
+
+      // WebSocket 会自动推送用户信息更新，无需手动刷新
     },
     msgWinClose() {
       this.isMsg = false
@@ -814,6 +873,44 @@ export default {
       return item.is_kefu === 1 && (!this.kefuInfo.user_ids || this.kefuInfo.user_ids.indexOf(item.user_id) === -1);
     },
 
+    // ⭐ 翻译设置：保存配置到 cookie
+    saveTranslateSetting() {
+      try {
+        const config = JSON.stringify(this.translateConfig);
+        document.cookie = `translate_config=${config}; path=/; max-age=31536000`; // 保存1年
+        this.$Message.success(this.$t('kefu.translateSettingSaved'));
+        this.isTranslateSetting = false;
+      } catch (error) {
+        console.error('保存翻译配置失败:', error);
+        this.$Message.error('保存失败');
+      }
+    },
+
+    // ⭐ 翻译设置：从 cookie 加载配置
+    loadTranslateSetting() {
+      try {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'translate_config') {
+            const config = JSON.parse(decodeURIComponent(value));
+            this.translateConfig = {
+              sourceLang: config.sourceLang || 'en-US',
+              targetLang: config.targetLang || 'zh-CN'
+            };
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('加载翻译配置失败:', error);
+        // 使用默认配置
+        this.translateConfig = {
+          sourceLang: 'en-US',
+          targetLang: 'zh-CN'
+        };
+      }
+    },
+
     // ⭐ 翻译功能：处理翻译请求
     async handleTranslate(item) {
       if (item.translating) return;
@@ -828,6 +925,9 @@ export default {
       this.$set(item, 'translating', true);
 
       try {
+        // 使用配置的目标语言
+        this.$set(item, 'targetLang', this.translateConfig.targetLang);
+
         // 调用真实的翻译API
         await this.callTranslateAPI(item);
         this.$Message.success('翻译完成');
@@ -1438,6 +1538,52 @@ textarea.ivu-input {
 
               &:nth-child(10n) {
                 margin-right: 0;
+              }
+            }
+          }
+
+          /* ⭐ 翻译设置弹窗样式 */
+          .translate-setting-box {
+            position: absolute;
+            left: 200px;
+            bottom: 60px;
+            width: 320px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+
+            .translate-setting-header {
+              padding: 12px 16px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: #fff;
+              font-size: 14px;
+              font-weight: 600;
+            }
+
+            .translate-setting-content {
+              padding: 16px;
+
+              .setting-item {
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                &:last-child {
+                  margin-bottom: 0;
+                  justify-content: flex-end;
+                }
+
+                label {
+                  font-size: 13px;
+                  color: #374151;
+                  font-weight: 500;
+                  white-space: nowrap;
+                  margin-right: 12px;
+                }
               }
             }
           }

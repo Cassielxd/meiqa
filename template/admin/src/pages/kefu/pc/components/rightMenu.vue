@@ -8,20 +8,6 @@
             <span v-if="editUserNameModel == false" @click="editUserNameModel= true">{{activeUserInfo.remark_nickname?activeUserInfo.remark_nickname: activeUserInfo.nickname}}</span>
             <Input v-if="editUserNameModel" v-model="activeUserInfo.nickname" :placeholder="$t('kefu.nickname')" @on-blur="editUserData('editUserNameModel')"></Input>
           </div>
-          <div class="label">
-           <!--  <template v-if="webType == 2">
-              <span class="label routine">小程序</span>
-            </template>
-            <template v-if="webType == 3">
-              <span class="label H5">H5</span>
-            </template>
-            <template v-if="webType == 1">
-              <span class="label wechat">公众号</span>
-            </template> -->
-            <template >
-              <span class="label pc">{{$t('kefu.customerInfo')}}</span>
-            </template>
-          </div>
         </div>
         <div class="user-info">
           <div class="item">
@@ -85,31 +71,6 @@
           </div>
 
         </div>
-        <!-- <div class="user-info">
-          <div class="item">
-            <span>用户等级</span>
-            {{activeUserInfo.level_name}}
-          </div>
-          <div class="item">
-            <span>推荐人</span>
-            {{activeUserInfo.spread_name}}
-          </div>
-          <div class="item">
-            <span>用户类型</span>
-            {{activeUserInfo.user_type | typeFilters}}
-          </div>
-          <div class="item">
-            <span>余额</span>
-            {{activeUserInfo.now_money}}
-          </div>
-          <div class="item">
-            <span>推广员</span>{{activeUserInfo.is_promoter?'是':'否'}}
-          </div>
-          <div class="item">
-            <span>生日</span>
-            {{activeUserInfo.birthday | getDay}}
-          </div>
-        </div> -->
       </div>
       <empty v-else status="2" :msg="$t('kefu.noUserInfo')"></empty>
 

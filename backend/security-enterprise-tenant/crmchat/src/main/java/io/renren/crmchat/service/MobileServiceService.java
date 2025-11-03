@@ -1248,55 +1248,76 @@ public class MobileServiceService {
             }
         }
 
-        // ✅ 新增：获取并更新 Referer 信息
+        // ✅ 新增：获取并更新 Referer 和 Request URL 信息
         // 获取条件：
         // 1. 是游客（is_tourist = 1）
-        // 2. Referer 为空 OR Referer 发生变化
+        // 2. Referer/URL 为空 OR 发生变化
         if (chatUser.getIsTourist() != null && chatUser.getIsTourist() == 1 && request != null) {
             try {
-                // 从 HTTP 请求头中获取 Referer
+                boolean needUpdate = false;
+
+                // ========== 1. 处理 HTTP Referer 头 ==========
                 String currentReferer = request.getHeader("Referer");
                 if (currentReferer == null || currentReferer.trim().isEmpty()) {
                     currentReferer = request.getHeader("referer"); // 尝试小写
                 }
 
-                // 如果 Referer 存在且有效
                 if (currentReferer != null && !currentReferer.trim().isEmpty()) {
                     currentReferer = currentReferer.trim();
                     String lastReferer = chatUser.getReferer();
 
                     // 判断是否需要更新 Referer
-                    boolean needUpdateReferer = false;
-                    String refererUpdateReason = "";
-
                     if (lastReferer == null || lastReferer.isEmpty()) {
-                        // 首次发送消息，没有 Referer 记录
-                        needUpdateReferer = true;
-                        refererUpdateReason = "首次记录 Referer";
-                    } else if (!currentReferer.equals(lastReferer)) {
-                        // Referer 发生变化
-                        needUpdateReferer = true;
-                        refererUpdateReason = "Referer 变化: " + lastReferer + " -> " + currentReferer;
-                    }
-
-                    if (needUpdateReferer) {
-                        log.info("🔗 [REFERER] Visitor referer changed, updating: userId={}, reason={}", userId, refererUpdateReason);
-
-                        // 更新用户 Referer 信息
+                        // 首次记录 Referer
                         chatUser.setReferer(currentReferer);
                         chatUser.setRefererUpdatedTime((int) (System.currentTimeMillis() / 1000));
-                        chatUserMapper.updateById(chatUser);
-
-                        log.info("✅ [REFERER] Successfully updated referer: userId={}, referer={}", userId, currentReferer);
-                    } else {
-                        log.debug("ℹ️ [REFERER] Visitor referer unchanged, skipping update: userId={}, referer={}", userId, currentReferer);
+                        needUpdate = true;
+                        log.info("🔗 [REFERER] First time recording referer: userId={}, referer={}", userId, currentReferer);
+                    } else if (!currentReferer.equals(lastReferer)) {
+                        // Referer 发生变化
+                        chatUser.setReferer(currentReferer);
+                        chatUser.setRefererUpdatedTime((int) (System.currentTimeMillis() / 1000));
+                        needUpdate = true;
+                        log.info("🔗 [REFERER] Referer changed: userId={}, old={}, new={}", userId, lastReferer, currentReferer);
                     }
                 } else {
-                    log.debug("ℹ️ [REFERER] No referer in request headers: userId={}", userId);
+                    log.debug("ℹ️ [REFERER] No HTTP Referer header found: userId={}", userId);
+                }
+
+                // ========== 2. 处理当前请求 URL（包含参数） ==========
+                String currentUrl = request.getRequestURL().toString();
+                String queryString = request.getQueryString();
+
+                // 如果有查询参数，拼接到URL后面
+                if (queryString != null && !queryString.trim().isEmpty()) {
+                    currentUrl = currentUrl + "?" + queryString;
+                }
+
+                String lastRequestUrl = chatUser.getRequestUrl();
+
+                // 判断是否需要更新 Request URL
+                if (lastRequestUrl == null || lastRequestUrl.isEmpty()) {
+                    // 首次记录 Request URL
+                    chatUser.setRequestUrl(currentUrl);
+                    chatUser.setRequestUrlUpdatedTime((int) (System.currentTimeMillis() / 1000));
+                    needUpdate = true;
+                    log.info("🌐 [REQUEST_URL] First time recording request URL: userId={}, url={}", userId, currentUrl);
+                } else if (!currentUrl.equals(lastRequestUrl)) {
+                    // Request URL 发生变化
+                    chatUser.setRequestUrl(currentUrl);
+                    chatUser.setRequestUrlUpdatedTime((int) (System.currentTimeMillis() / 1000));
+                    needUpdate = true;
+                    log.info("🌐 [REQUEST_URL] Request URL changed: userId={}, old={}, new={}", userId, lastRequestUrl, currentUrl);
+                }
+
+                // ========== 3. 统一更新数据库 ==========
+                if (needUpdate) {
+                    chatUserMapper.updateById(chatUser);
+                    log.info("✅ [URL_TRACKING] Successfully updated URL tracking info: userId={}", userId);
                 }
             } catch (Exception e) {
-                // Referer 获取失败不影响主流程
-                log.error("❌ [REFERER] Error updating referer: userId={}, error={}", userId, e.getMessage(), e);
+                // URL 跟踪失败不影响主流程
+                log.error("❌ [URL_TRACKING] Error updating URL tracking info: userId={}, error={}", userId, e.getMessage(), e);
             }
         }
 

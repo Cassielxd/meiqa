@@ -178,6 +178,12 @@ public class KefuUserService {
             map.put("is_kefu", user.getIsKefu() != null ? user.getIsKefu() : 0);
             map.put("online", user.getOnline() != null ? user.getOnline() : 0);
 
+            // ✅ 添加游客来源信息（referer 和 request_url）
+            map.put("referer", user.getReferer() != null ? user.getReferer() : "");
+            map.put("referer_updated_time", user.getRefererUpdatedTime() != null ? user.getRefererUpdatedTime() : 0);
+            map.put("request_url", user.getRequestUrl() != null ? user.getRequestUrl() : "");
+            map.put("request_url_updated_time", user.getRequestUrlUpdatedTime() != null ? user.getRequestUrlUpdatedTime() : 0);
+
             // 查询最新消息
             QueryWrapper<ChatServiceDialogueRecordEntity> msgWrapper = new QueryWrapper<>();
             msgWrapper.eq("appid", appid);
