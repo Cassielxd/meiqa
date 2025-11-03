@@ -815,10 +815,10 @@ export default {
     },
 
     // ⭐ 翻译功能：处理翻译请求
-    handleTranslate(item) {
+    async handleTranslate(item) {
       if (item.translating) return;
 
-      // 如果已经翻译过，直接显示
+      // 如果已经翻译过，直接切换显示
       if (item.translated) {
         this.$set(item, 'showTranslation', !item.showTranslation);
         return;
@@ -827,21 +827,15 @@ export default {
       // 开始翻译
       this.$set(item, 'translating', true);
 
-      // 模拟翻译API调用（这里先用setTimeout模拟，后续替换为真实API）
-      setTimeout(() => {
-        // 模拟翻译结果
-        const mockTranslation = this.getMockTranslation(item.msn, item.targetLang);
-
-        this.$set(item, 'translatedText', mockTranslation);
-        this.$set(item, 'translated', true);
-        this.$set(item, 'translating', false);
-        this.$set(item, 'showTranslation', true);
-
+      try {
+        // 调用真实的翻译API
+        await this.callTranslateAPI(item);
         this.$Message.success('翻译完成');
-      }, 1000);
-
-      // TODO: 后续替换为真实的翻译API调用
-      // this.callTranslateAPI(item);
+      } catch (error) {
+        console.error('翻译失败:', error);
+        this.$Message.error('翻译失败，请稍后重试');
+        this.$set(item, 'translating', false);
+      }
     },
 
     // ⭐ 翻译功能：切换显示原文/译文
@@ -886,33 +880,41 @@ export default {
       return mockTranslations[targetLang] || `[Translation to ${targetLang}] ${plainText}`;
     },
 
-    // ⭐ 翻译功能：调用真实翻译API（预留接口）
+    // ⭐ 翻译功能：调用真实翻译API
     async callTranslateAPI(item) {
       try {
         this.$set(item, 'translating', true);
 
+        // 动态导入翻译工具
+        const { translateText, stripHtmlTags } = await import('@/utils/zhipuTranslator.js');
+
         // 移除HTML标签获取纯文本
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = item.msn;
-        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        const plainText = stripHtmlTags(item.msn);
 
-        // TODO: 调用真实的翻译API
-        // const response = await translateAPI({
-        //   text: plainText,
-        //   targetLang: item.targetLang || 'zh',
-        //   sourceLang: 'auto' // 自动检测源语言
-        // });
+        if (!plainText || plainText.trim() === '') {
+          this.$Message.warning('消息内容为空，无需翻译');
+          return;
+        }
 
-        // 模拟API响应
-        const translatedText = `翻译结果: ${plainText}`;
+        // 获取目标语言（默认中文简体）
+        const targetLang = item.targetLang || 'zh-CN';
 
+        // 调用智谱AI翻译API
+        const translatedText = await translateText(plainText, targetLang);
+
+        if (!translatedText || translatedText.trim() === '') {
+          this.$Message.warning('翻译结果为空');
+          return;
+        }
+
+        // 设置翻译结果
         this.$set(item, 'translatedText', translatedText);
         this.$set(item, 'translated', true);
         this.$set(item, 'showTranslation', true);
-
-        this.$Message.success('翻译完成');
       } catch (error) {
+        console.error('翻译API调用失败:', error);
         this.$Message.error('翻译失败: ' + (error.message || '未知错误'));
+        throw error;
       } finally {
         this.$set(item, 'translating', false);
       }
