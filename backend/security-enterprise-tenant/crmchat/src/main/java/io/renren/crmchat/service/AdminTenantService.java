@@ -184,13 +184,7 @@ public class AdminTenantService {
 
         // 13. 如果状态为启用(1)，自动创建应用数据到application表
         if (tenant.getStatus() == 1) {
-            try {
-                adminApplicationService.createTenantApplication(tenant.getTenantName(), appInfo);
-            } catch (Exception e) {
-                // 应用创建失败不影响租户创建，只记录错误
-                // TODO: 添加日志记录
-                System.err.println("Failed to create tenant application: " + e.getMessage());
-            }
+            ensureTenantApplication(tenant, appInfo);
         }
 
         // 14. 返回创建的租户信息
@@ -320,37 +314,10 @@ public class AdminTenantService {
             throw new CrmChatException("Failed to update tenant");
         }
 
-        // 15. 如果状态从非启用变为启用(1)，检查并创建应用
-        // PHP Reference: TenantServices.php::updateTenant() -> checkAndCreateApplication()
+        // 15. 如果状态为启用(1)，自动创建应用数据到application表（与createTenant逻辑一致）
         int newStatus = tenant.getStatus();
-        if (newStatus == 1 && oldStatus != 1) {
-            // 状态变更为启用，需要检查appid对应的应用是否存在
-            String appid = tenant.getAppid();
-            if (appid == null || appid.trim().isEmpty()) {
-                // 如果租户没有appid，先生成一个
-                Map<String, Object> appInfo = adminApplicationService.generateAppInfo();
-                appid = (String) appInfo.get("appid");
-
-                // 更新租户的appid
-                tenant.setAppid(appid);
-                tenantsMapper.updateById(tenant);
-
-                // 创建应用
-                try {
-                    adminApplicationService.createTenantApplication(tenant.getTenantName(), appInfo);
-                } catch (Exception e) {
-                    System.err.println("Failed to create application while updating tenant: " + e.getMessage());
-                }
-            } else {
-                // 租户有appid，createTenantApplication内部会检查应用是否存在，不存在则创建
-                try {
-                    // 生成新的appInfo(如果应用已存在，createTenantApplication会直接返回true)
-                    Map<String, Object> newAppInfo = adminApplicationService.generateAppInfo();
-                    adminApplicationService.createTenantApplication(tenant.getTenantName(), newAppInfo);
-                } catch (Exception e) {
-                    System.err.println("Failed to create application while updating tenant: " + e.getMessage());
-                }
-            }
+        if (newStatus == 1) {
+            ensureTenantApplication(tenant, null);
         }
     }
 
@@ -387,7 +354,12 @@ public class AdminTenantService {
             throw new CrmChatException("Failed to update status");
         }
 
-        // 5. 【安全增强】如果租户状态变为非批准状态（待审核/已拒绝/已禁用），清除其所有缓存
+        // 5. 当状态变为启用(1)时，自动创建应用数据到application表（与createTenant逻辑一致）
+        if (status == 1) {
+            ensureTenantApplication(tenant, null);
+        }
+
+        // 6. 【安全增强】如果租户状态变为非批准状态（待审核/已拒绝/已禁用），清除其所有缓存
         // 这样可以确保状态变更立即生效，非批准租户无法通过缓存继续访问
         // status: 0=待审核, 1=已批准, 2=已拒绝, 3=已禁用
         if (status != 1 && appid != null && !appid.isBlank()) {
@@ -784,6 +756,60 @@ public class AdminTenantService {
         int result = tenantsMapper.updateById(tenant);
         if (result <= 0) {
             throw new CrmChatException("Failed to reset password");
+        }
+    }
+
+    /**
+     * 确保租户的 application 记录已创建（公共方法）
+     * 用于：createTenant、updateTenant、updateTenantStatus
+     *
+     * 逻辑：
+     * 1. 如果租户有 appid，检查应用是否存在
+     *    - 存在：使用现有的 appInfo 调用 createTenantApplication
+     *    - 不存在：生成新的 appInfo，更新租户的 appid，然后创建应用
+     * 2. 如果租户没有 appid：生成新的 appInfo，设置 appid，创建应用
+     *
+     * @param tenant 租户实体（必须已保存到数据库）
+     * @param appInfo 可选的应用信息（如果提供且有效，直接使用；否则会生成或查询）
+     */
+    private void ensureTenantApplication(TenantsEntity tenant, Map<String, Object> appInfo) {
+        try {
+            String appid = tenant.getAppid();
+            Map<String, Object> finalAppInfo;
+            
+            // 如果提供了 appInfo 且有效，直接使用（创建租户时的场景）
+            if (appInfo != null && appInfo.containsKey("appid") && appInfo.get("appid") != null) {
+                finalAppInfo = appInfo;
+            } else if (appid == null || appid.trim().isEmpty()) {
+                // 如果没有 appid，生成新的 appInfo 并更新租户的 appid
+                finalAppInfo = adminApplicationService.generateAppInfo();
+                appid = (String) finalAppInfo.get("appid");
+                tenant.setAppid(appid);
+                tenantsMapper.updateById(tenant);
+            } else {
+                // 如果有 appid，检查应用是否存在
+                Map<String, Object> existingApp = adminApplicationService.getApplicationByAppid(appid);
+                if (existingApp != null) {
+                    // 应用已存在，构建 appInfo（createTenantApplication 内部会检查并直接返回）
+                    finalAppInfo = new HashMap<>();
+                    finalAppInfo.put("appid", existingApp.get("appid"));
+                    finalAppInfo.put("app_secret", existingApp.get("app_secret"));
+                    finalAppInfo.put("rand", existingApp.get("rand"));
+                    finalAppInfo.put("timestamp", existingApp.get("timestamp"));
+                } else {
+                    // 应用不存在，生成新的 appInfo 并更新租户的 appid
+                    finalAppInfo = adminApplicationService.generateAppInfo();
+                    appid = (String) finalAppInfo.get("appid");
+                    tenant.setAppid(appid);
+                    tenantsMapper.updateById(tenant);
+                }
+            }
+            
+            // 调用 createTenantApplication（与 createTenant 逻辑一致）
+            adminApplicationService.createTenantApplication(tenant.getTenantName(), finalAppInfo);
+        } catch (Exception e) {
+            // 应用创建失败不影响租户操作，只记录错误
+            System.err.println("Failed to ensure tenant application: tenant=" + tenant.getTenantName() + ", error=" + e.getMessage());
         }
     }
 
