@@ -41,10 +41,10 @@ spring:
 
   # Mail配置
   mail:
-    host: smtp.163.com
+    host: smtp.hostinger.com
     port: 465
-    username: 
-    password: 
+    username: team@talkomamail.com
+    password: zE}gh#1v#^taf
     properties:
       mail:
         smtp:
@@ -61,6 +61,7 @@ spring:
           connectiontimeout: 30000
           timeout: 30000
           writetimeout: 30000
+
 
 # MyBatis Plus配置
 mybatis-plus:

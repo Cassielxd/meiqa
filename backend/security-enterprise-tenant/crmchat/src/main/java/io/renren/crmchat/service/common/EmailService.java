@@ -44,6 +44,11 @@ public class EmailService {
      */
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
+            // 清理邮箱地址：去除前后空格和不可见字符
+            if (to == null || (to = to.trim()).isEmpty()) {
+                throw new IllegalArgumentException("Email address cannot be empty");
+            }
+
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -73,6 +78,10 @@ public class EmailService {
      */
     public void sendTextEmail(String to, String subject, String textContent) {
         try {
+            // 清理邮箱地址：去除前后空格和不可见字符
+            if (to == null || (to = to.trim()).isEmpty()) {
+                throw new IllegalArgumentException("Email address cannot be empty");
+            }
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

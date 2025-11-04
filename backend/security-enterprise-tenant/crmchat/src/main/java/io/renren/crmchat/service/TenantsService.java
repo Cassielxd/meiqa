@@ -246,6 +246,9 @@ public class TenantsService {
     }
 
     public Map<String, Object> sendRegisterCaptcha(String email) {
+        if (email != null) {
+            email = email.trim();
+        }
         validationService.validateEmail(email);
 
         QueryWrapper<TenantsEntity> wrapper = new QueryWrapper<>();

@@ -93,7 +93,7 @@ public class TenantAuthController {
     public ApiResult<String> sendCaptcha(@RequestBody Map<String, String> request) {
         String email = request.get("email");
 
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || (email = email.trim()).isEmpty()) {
             return ApiResult.fail("Please enter email address");
         }
 

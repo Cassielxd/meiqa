@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
-
+import org.springframework.beans.factory.annotation.Value;
 /**
  * 验证码服务 - 邮箱/短信验证码
  *
@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
-@AllArgsConstructor
 public class CaptchaService {
 
     private final StringRedisTemplate redisTemplate;
@@ -54,12 +53,21 @@ public class CaptchaService {
     /**
      * 验证码有效期（秒）
      */
-    private static final long CAPTCHA_EXPIRE_SECONDS = 600; // 10分钟
+    @Value("${crmchat.captcha.expire-seconds:600}")
+    private long captchaExpireSeconds;
 
     /**
      * 发送频率限制（秒）- 同一邮箱60秒内只能发送一次
      */
-    private static final long RATE_LIMIT_SECONDS = 60;
+    @Value("${crmchat.captcha.rate-limit-seconds:30}")
+    private long rateLimitSeconds;
+    public CaptchaService(StringRedisTemplate redisTemplate,
+                          EmailService emailService,
+                          EmailTemplateService emailTemplateService) {
+        this.redisTemplate = redisTemplate;
+        this.emailService = emailService;
+        this.emailTemplateService = emailTemplateService;
+    }
 
     /**
      * 发送验证码（生成验证码、存入Redis、并通过邮件发送）
@@ -70,7 +78,7 @@ public class CaptchaService {
      */
     public String sendCaptcha(String email) {
         // 1. 验证邮箱格式
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || (email = email.trim()).isEmpty()) {
             throw new IllegalArgumentException("Email address cannot be empty");
         }
         if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
@@ -85,13 +93,13 @@ public class CaptchaService {
         if (limitFlag != null) {
             // 获取剩余时间
             Long ttl = redisTemplate.getExpire(rateLimitKey, TimeUnit.SECONDS);
-            String message = String.format("Verification code has been sent, please try again in %d seconds", ttl != null ? ttl : RATE_LIMIT_SECONDS);
+            String message = String.format("Verification code has been sent, please try again in %d seconds", ttl != null ? ttl : rateLimitSeconds);
             log.warn("Rate limit exceeded for email: {}, remaining: {}s", email, ttl);
             throw new io.renren.crmchat.exception.CrmChatException(message);
         }
 
         // 3. 使用 SETNX 原子操作设置频率限制（防止并发请求）
-        Boolean rateLimitSet = redisTemplate.opsForValue().setIfAbsent(rateLimitKey, "1", RATE_LIMIT_SECONDS, TimeUnit.SECONDS);
+        Boolean rateLimitSet = redisTemplate.opsForValue().setIfAbsent(rateLimitKey, "1", rateLimitSeconds, TimeUnit.SECONDS);
         if (Boolean.FALSE.equals(rateLimitSet)) {
             // 并发情况下，另一个请求已经设置了频率限制
             log.warn("Concurrent request detected for email: {}, rate limit already set", email);
@@ -106,10 +114,10 @@ public class CaptchaService {
             String captcha = generateCaptcha();
 
             // 6. 存入Redis，10分钟有效
-            redisTemplate.opsForValue().set(cacheKey, captcha, CAPTCHA_EXPIRE_SECONDS, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(cacheKey, captcha, captchaExpireSeconds, TimeUnit.SECONDS);
 
             // 7. 构建邮件内容（委托给EmailTemplateService）
-            int expireMinutes = (int) (CAPTCHA_EXPIRE_SECONDS / 60);
+            int expireMinutes = (int) (captchaExpireSeconds  / 60);
             String emailContent = emailTemplateService.buildRegisterCaptchaEmail(email, captcha, expireMinutes);
 
             // 8. 发送邮件（委托给EmailService）

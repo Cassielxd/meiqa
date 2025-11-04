@@ -66,7 +66,8 @@ public class ValidationService {
         if (email == null || email.trim().isEmpty()) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Email cannot be empty");
         }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
+        String trimmedEmail = email.trim();
+        if (!EMAIL_PATTERN.matcher(trimmedEmail).matches()) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Invalid email format");
         }
     }
@@ -91,7 +92,8 @@ public class ValidationService {
         if (phone == null || phone.trim().isEmpty()) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Phone number cannot be empty");
         }
-        if (!PHONE_PATTERN.matcher(phone).matches()) {
+        String trimmedPhone = phone.trim();
+        if (!PHONE_PATTERN.matcher(trimmedPhone).matches()) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Invalid phone number format");
         }
     }
