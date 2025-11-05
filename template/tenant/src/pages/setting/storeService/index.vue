@@ -598,7 +598,16 @@ export default {
     },
     // 编辑
     edit(row) {
-      this.$modalForm(kefuEditApi(row.id)).then(() => this.getList())
+      this.$modalForm(kefuEditApi(row.id)).then(() => {
+        // 重置分页到第一页
+        this.tableFrom.page = 1;
+        // 使用 $nextTick 确保在模态框关闭后再刷新
+        this.$nextTick(() => {
+          this.getList();
+        });
+      }).catch(() => {
+        // 取消操作不刷新
+      })
     },
     // 添加
     add() {
@@ -606,8 +615,14 @@ export default {
       // this.formValidate.data = '';
       // this.getListService();
       this.$modalForm(kefuaddApi()).then(() => {
-        this.getList();
-        console.log(1223);
+        // 重置分页到第一页
+        this.tableFrom.page = 1;
+        // 使用 $nextTick 确保在模态框关闭后再刷新
+        this.$nextTick(() => {
+          this.getList();
+        });
+      }).catch(() => {
+        // 取消操作不刷新
       })
     },
     // 全选

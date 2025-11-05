@@ -119,7 +119,10 @@ export default {
         newArray[index] = now
         if(newArray[index].children && now.children) {
           newArray[index].children = now.children.filter((item) => {
-            return !item.auth
+            // 过滤掉有auth的菜单项，同时过滤掉客服二维码菜单（通过路径或auth标识）
+            const isQrcodeMenu = item.path && item.path.includes('qrcode')
+            const isQrcodeAuth = item.auth && (Array.isArray(item.auth) ? item.auth.includes('admin-kefu-qrcode') : item.auth === 'admin-kefu-qrcode')
+            return !item.auth && !isQrcodeMenu && !isQrcodeAuth
           })
         }
       })

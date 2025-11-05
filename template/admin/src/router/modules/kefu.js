@@ -7,22 +7,23 @@ export default {
     name: 'kefu',
     header: 'kefu',
     redirect: {
-        name: `${pre}qrcode`
+        name: `${pre}record`
       },
     meta: {
         auth: ['setting-store-service']
     },
     component: BasicLayout,
     children: [
-        {
-            path: 'qrcode',
-            name: `${pre}qrcode`,
-            meta: {
-                auth: ['admin-kefu-qrcode'],
-                title: 'kefu.qrcode'
-            },
-            component: () => import('@/pages/kefu/qrcode')
-        },
+        // 客服二维码菜单已注释
+        // {
+        //     path: 'qrcode',
+        //     name: `${pre}qrcode`,
+        //     meta: {
+        //         auth: ['admin-kefu-qrcode'],
+        //         title: 'kefu.qrcode'
+        //     },
+        //     component: () => import('@/pages/kefu/qrcode')
+        // },
         {
             path: 'record',
             name: `${pre}record`,
