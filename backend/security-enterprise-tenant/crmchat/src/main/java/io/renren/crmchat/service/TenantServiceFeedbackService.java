@@ -11,7 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +44,17 @@ import java.util.Map;
 public class TenantServiceFeedbackService {
 
     private final ChatServiceFeedbackMapper chatServiceFeedbackMapper;
+
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter[] RANGE_DATE_TIME_FORMATTERS = new DateTimeFormatter[] {
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    };
+    private static final DateTimeFormatter[] RANGE_DATE_FORMATTERS = new DateTimeFormatter[] {
+            DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    };
 
     /**
      * 获取留言列表
@@ -64,32 +83,17 @@ public class TenantServiceFeedbackService {
         // 关键：必须按appid过滤，确保租户数据隔离
         wrapper.eq("appid", appid);
 
-        // 前端传来的title参数，实际搜索content、rela_name、phone字段
-        if (filters.containsKey("title") && filters.get("title") != null && !filters.get("title").toString().isEmpty()) {
-            String searchKey = filters.get("title").toString();
-            wrapper.and(w -> w.like("content", searchKey)
-                    .or().like("rela_name", searchKey)
-                    .or().like("phone", searchKey));
+        // 前端传来的title参数，实际搜索rela_name、phone、content、user_id字段
+        if (filters.containsKey("title") && filters.get("title") != null && !filters.get("title").toString().trim().isEmpty()) {
+            String searchKey = filters.get("title").toString().trim();
+            wrapper.and(w -> w.like("rela_name", searchKey)
+                    .or().like("phone", searchKey)
+                    .or().like("content", searchKey)
+                    .or().like("user_id", searchKey));
         }
 
         if (filters.containsKey("time") && filters.get("time") != null && !filters.get("time").toString().trim().isEmpty()) {
-            String timeRange = filters.get("time").toString().trim();
-            String[] parts = timeRange.split("-");
-            if (parts.length >= 2) {
-                String start = parts[0].trim();
-                String end = parts[parts.length - 1].trim();
-                if (start.equals(end)) {
-                    end = end + " 23:59:59";
-                }
-                if (!start.contains(":")) {
-                    start = start + " 00:00:00";
-                }
-                if (!end.contains(":")) {
-                    end = end + " 23:59:59";
-                }
-                wrapper.ge("create_time", start);
-                wrapper.le("create_time", end);
-            }
+            applyTimeFilter(wrapper, filters.get("time").toString().trim());
         }
 
         wrapper.orderByDesc("id");
@@ -101,8 +105,13 @@ public class TenantServiceFeedbackService {
         Page<ChatServiceFeedbackEntity> pageObj = new Page<>(page, limit);
         Page<ChatServiceFeedbackEntity> pageResult = chatServiceFeedbackMapper.selectPage(pageObj, wrapper);
 
+        List<Map<String, Object>> formattedList = new ArrayList<>();
+        for (ChatServiceFeedbackEntity entity : pageResult.getRecords()) {
+            formattedList.add(formatFeedbackRecord(entity));
+        }
+
         Map<String, Object> result = new HashMap<>();
-        result.put("data", pageResult.getRecords());
+        result.put("data", formattedList);
         result.put("count", (int) pageResult.getTotal());
 
         return result;
@@ -130,6 +139,61 @@ public class TenantServiceFeedbackService {
         TenantGuard.ensureOwnedByCurrentTenant(feedback.getAppid(), "Feedback does not exist");
 
         return feedback;
+    }
+
+    /**
+     * 获取反馈处理表单配置
+     * GET /api/tenant/chat/feedback/{id}/edit
+     */
+    public Map<String, Object> getEditForm(Integer id) {
+        ChatServiceFeedbackEntity feedback = getFeedbackDetail(id);
+
+        List<Map<String, Object>> rules = new ArrayList<>();
+
+        Map<String, Object> makeRule = new HashMap<>();
+        makeRule.put("type", "textarea");
+        makeRule.put("field", "make");
+        makeRule.put("title", "备注");
+        makeRule.put("value", feedback.getMake() != null ? feedback.getMake() : "");
+        Map<String, Object> makeProps = new HashMap<>();
+        Map<String, Object> autosize = new HashMap<>();
+        autosize.put("minRows", 3);
+        autosize.put("maxRows", 6);
+        makeProps.put("autosize", autosize);
+        makeRule.put("props", makeProps);
+        rules.add(makeRule);
+
+        Integer status = feedback.getStatus();
+        if (status == null || status == 0) {
+            Map<String, Object> statusRule = new HashMap<>();
+            statusRule.put("type", "radio");
+            statusRule.put("field", "status");
+            statusRule.put("title", "状态");
+            statusRule.put("value", status != null ? status : 0);
+
+            List<Map<String, Object>> options = new ArrayList<>();
+            Map<String, Object> processed = new HashMap<>();
+            processed.put("label", "已处理");
+            processed.put("value", 1);
+            Map<String, Object> unprocessed = new HashMap<>();
+            unprocessed.put("label", "未处理");
+            unprocessed.put("value", 0);
+            options.add(processed);
+            options.add(unprocessed);
+            statusRule.put("options", options);
+
+            rules.add(statusRule);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("rules", rules);
+        result.put("title", (status != null && status == 1) ? "备注" : "处理");
+        result.put("action", "/chat/feedback/" + feedback.getId());
+        result.put("method", "PUT");
+        result.put("info", "");
+        result.put("status", true);
+
+        return result;
     }
 
     /**
@@ -166,7 +230,11 @@ public class TenantServiceFeedbackService {
 
         // 3. PHP: if ($data['status']) { $feedInfo->status = $data['status']; }
         if (data.containsKey("status") && data.get("status") != null) {
-            feedback.setStatus(Integer.parseInt(data.get("status").toString()));
+            try {
+                feedback.setStatus(Integer.parseInt(data.get("status").toString()));
+            } catch (NumberFormatException ex) {
+                log.warn("Invalid status value: {}", data.get("status"));
+            }
         }
 
         // PHP: $feedInfo->save();
@@ -202,5 +270,133 @@ public class TenantServiceFeedbackService {
         if (result <= 0) {
             throw new io.renren.crmchat.exception.CrmChatException("Failed to delete");
         }
+    }
+
+    private void applyTimeFilter(QueryWrapper<ChatServiceFeedbackEntity> wrapper, String time) {
+        long start = 0L;
+        long end = 0L;
+        LocalDate today = LocalDate.now();
+        switch (time) {
+            case "today" -> {
+                start = toEpochSeconds(today.atStartOfDay());
+                end = toEpochSeconds(today.atTime(23, 59, 59));
+            }
+            case "yesterday" -> {
+                LocalDate date = today.minusDays(1);
+                start = toEpochSeconds(date.atStartOfDay());
+                end = toEpochSeconds(date.atTime(23, 59, 59));
+            }
+            case "lately7" -> {
+                LocalDate date = today.minusDays(6);
+                start = toEpochSeconds(date.atStartOfDay());
+                end = toEpochSeconds(today.atTime(23, 59, 59));
+            }
+            case "lately30" -> {
+                LocalDate date = today.minusDays(29);
+                start = toEpochSeconds(date.atStartOfDay());
+                end = toEpochSeconds(today.atTime(23, 59, 59));
+            }
+            case "month" -> {
+                LocalDate firstDay = today.withDayOfMonth(1);
+                start = toEpochSeconds(firstDay.atStartOfDay());
+                end = toEpochSeconds(today.atTime(23, 59, 59));
+            }
+            case "year" -> {
+                LocalDate firstDay = today.withDayOfYear(1);
+                start = toEpochSeconds(firstDay.atStartOfDay());
+                end = toEpochSeconds(today.atTime(23, 59, 59));
+            }
+            default -> {
+                long[] range = parseCustomTimeRange(time);
+                start = range[0];
+                end = range[1];
+            }
+        }
+
+        if (start > 0) {
+            wrapper.ge("add_time", start);
+        }
+        if (end > 0) {
+            wrapper.le("add_time", end);
+        }
+    }
+
+    private long[] parseCustomTimeRange(String timeRange) {
+        long[] range = new long[]{0L, 0L};
+        if (timeRange == null || timeRange.isEmpty()) {
+            return range;
+        }
+
+        String normalized = timeRange.replace(" to ", "-");
+        String[] parts = normalized.split("\\s*-\\s*");
+        if (parts.length < 2) {
+            return range;
+        }
+
+        long start = parseDateTime(parts[0].trim(), false);
+        long end = parseDateTime(parts[parts.length - 1].trim(), true);
+        if (end > 0 && start > end) {
+            long tmp = start;
+            start = end;
+            end = tmp;
+        }
+        range[0] = start;
+        range[1] = end;
+        return range;
+    }
+
+    private long parseDateTime(String value, boolean endOfDay) {
+        if (value == null || value.isEmpty()) {
+            return 0L;
+        }
+
+        for (DateTimeFormatter formatter : RANGE_DATE_TIME_FORMATTERS) {
+            try {
+                LocalDateTime dt = LocalDateTime.parse(value, formatter);
+                return toEpochSeconds(dt);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        for (DateTimeFormatter formatter : RANGE_DATE_FORMATTERS) {
+            try {
+                LocalDate date = LocalDate.parse(value, formatter);
+                LocalDateTime dt = endOfDay ? date.atTime(23, 59, 59) : date.atStartOfDay();
+                return toEpochSeconds(dt);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        log.warn("Unable to parse time range value: {}", value);
+        return 0L;
+    }
+
+    private long toEpochSeconds(LocalDateTime dateTime) {
+        return dateTime.atZone(ZONE_ID).toEpochSecond();
+    }
+
+    private Map<String, Object> formatFeedbackRecord(ChatServiceFeedbackEntity entity) {
+        Map<String, Object> map = new HashMap<>();
+        if (entity == null) {
+            return map;
+        }
+
+        map.put("id", entity.getId());
+        map.put("user_id", entity.getUserId());
+        map.put("rela_name", entity.getRelaName() == null ? "" : entity.getRelaName());
+        map.put("phone", entity.getPhone() == null ? "" : entity.getPhone());
+        map.put("content", entity.getContent() == null ? "" : entity.getContent());
+        map.put("make", entity.getMake() == null ? "" : entity.getMake());
+        map.put("status", entity.getStatus() == null ? 0 : entity.getStatus());
+
+        Integer addTime = entity.getAddTime();
+        if (addTime != null && addTime > 0) {
+            String formatted = DATE_TIME_FORMATTER.format(Instant.ofEpochSecond(addTime).atZone(ZONE_ID));
+            map.put("add_time", formatted);
+        } else {
+            map.put("add_time", "");
+        }
+
+        return map;
     }
 }

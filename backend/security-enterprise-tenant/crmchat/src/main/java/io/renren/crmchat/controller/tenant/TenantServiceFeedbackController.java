@@ -48,6 +48,19 @@ public class TenantServiceFeedbackController {
         return ApiResult.ok(list);
     }
 
+    @GetMapping("/{id}/edit")
+    @Operation(summary = "Rating Edit Form")
+    public ApiResult<Map<String, Object>> getFeedbackEditForm(@PathVariable Integer id) {
+
+        if (id == null || id <= 0) {
+            return ApiResult.fail("Missing parameters");
+        }
+
+        requireAppid();
+        Map<String, Object> form = tenantServiceFeedbackService.getEditForm(id);
+        return ApiResult.ok(form);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Rating Details")
     public ApiResult<ChatServiceFeedbackEntity> getFeedbackDetail(@PathVariable Integer id) {
