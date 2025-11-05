@@ -163,6 +163,35 @@ export default {
     }
   },
   data() {
+    const validateGlobalPhone = (rule, value, callback) => {
+      const phone = (value || '').trim()
+
+      if (!phone) {
+        callback()
+        return
+      }
+
+      const allowedChars = /^[+0-9\s\-()]{4,25}$/
+      if (!allowedChars.test(phone)) {
+        callback(new Error('请输入正确的手机号码'))
+        return
+      }
+
+      const plusMatches = phone.match(/\+/g)
+      if ((plusMatches && plusMatches.length > 1) || (phone.includes('+') && phone.indexOf('+') !== 0)) {
+        callback(new Error('请输入正确的手机号码'))
+        return
+      }
+
+      const digits = phone.replace(/[^\d]/g, '')
+      if (digits.length < 4 || digits.length > 20) {
+        callback(new Error('请输入正确的手机号码'))
+        return
+      }
+
+      callback()
+    }
+
     return {
       form: {
         account: '',
@@ -192,7 +221,7 @@ export default {
           { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
         ],
         contact_phone: [
-          { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+          { validator: validateGlobalPhone, trigger: 'blur' }
         ],
         pwd: [
           { required: !this.isEdit, message: '请输入初始密码', trigger: 'blur' },

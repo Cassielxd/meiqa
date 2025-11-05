@@ -183,6 +183,34 @@ export default {
       }
     };
 
+    const validateGlobalPhone = (rule, value, callback) => {
+      const phone = (value || '').trim();
+      if (!phone) {
+        callback(new Error('Please enter your phone number'));
+        return;
+      }
+
+      const allowedChars = /^[+0-9\s\-()]{4,25}$/;
+      if (!allowedChars.test(phone)) {
+        callback(new Error('Please enter a valid phone number'));
+        return;
+      }
+
+      const plusMatches = phone.match(/\+/g);
+      if ((plusMatches && plusMatches.length > 1) || (phone.includes('+') && phone.indexOf('+') !== 0)) {
+        callback(new Error('Please enter a valid phone number'));
+        return;
+      }
+
+      const digits = phone.replace(/[^\d]/g, '');
+      if (digits.length < 4 || digits.length > 20) {
+        callback(new Error('Please enter a valid phone number'));
+        return;
+      }
+
+      callback();
+    };
+
     return {
       logo: require('@/assets/images/logo.png'),
       loading: false,
@@ -216,7 +244,7 @@ export default {
         ],
         contactPhone: [
           { required: true, message: 'Please enter your phone number', trigger: 'blur' },
-          { pattern: /^1[3-9]\d{9}$/, message: 'Please enter a valid phone number', trigger: 'blur' }
+          { validator: validateGlobalPhone, trigger: 'blur' }
         ],
         pwd: [
           { required: true, message: 'Please enter your password', trigger: 'blur' },

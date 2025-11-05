@@ -12,6 +12,7 @@ import io.renren.crmchat.entity.TenantsEntity;
 import io.renren.crmchat.security.TenantGuard;
 import io.renren.crmchat.security.TenantSecurityUtils;
 import io.renren.crmchat.service.common.PasswordService;
+import io.renren.crmchat.service.common.ValidationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,6 @@ public class TenantKefuService {
 
     private static final Pattern ACCOUNT_PATTERN = Pattern.compile("^[a-zA-Z0-9]{4,30}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[0-9a-z_$]{6,20}$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^1[3-9]\\d{9}$");
 
     private final ChatServiceMapper chatServiceMapper;
     private final ChatServiceGroupMapper chatServiceGroupMapper;
@@ -55,6 +55,7 @@ public class TenantKefuService {
     private final TenantsMapper tenantsMapper;
     private final io.renren.crmchat.service.common.TokenService tokenService;
     private final io.renren.crmchat.formbuilder.FormBuilder formBuilder;
+    private final ValidationService validationService;
 
     /**
      * 更新客服
@@ -114,7 +115,7 @@ public class TenantKefuService {
         if (data.containsKey("phone")) {
             String phone = stringValue(data.get("phone"));
             if (!phone.isEmpty()) {
-                validatePhone(phone);
+                validationService.validatePhone(phone);
                 ensurePhoneUniqueForTenant(appid, phone, id);
                 kefu.setPhone(phone);
             }
@@ -871,14 +872,8 @@ public class TenantKefuService {
         if (phone.isEmpty()) {
             throw new io.renren.crmchat.exception.CrmChatException("Please enter a valid phone number");
         }
-        validatePhone(phone);
+        validationService.validatePhone(phone);
         data.put("phone", phone);
-    }
-
-    private void validatePhone(String phone) {
-        if (!PHONE_PATTERN.matcher(phone).matches()) {
-            throw new io.renren.crmchat.exception.CrmChatException("Please enter a valid phone number");
-        }
     }
 
     private void ensurePhoneUniqueForTenant(String appid, String phone, Integer excludeId) {

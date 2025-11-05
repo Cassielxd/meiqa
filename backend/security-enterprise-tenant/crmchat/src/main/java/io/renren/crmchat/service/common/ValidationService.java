@@ -23,9 +23,9 @@ public class ValidationService {
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
 
-    // 中国手机号正则表达式（支持 1开头的11位数字）
-    private static final Pattern PHONE_PATTERN = Pattern.compile(
-            "^1[3-9]\\d{9}$"
+    // 全球手机号允许的字符（可包含前导+、空格、连字符、括号）
+    private static final Pattern PHONE_ALLOWED_CHARS_PATTERN = Pattern.compile(
+            "^[+0-9\\s\\-()]{4,25}$"
     );
 
     /**
@@ -82,7 +82,7 @@ public class ValidationService {
     }
 
     /**
-     * 验证手机号格式（中国手机号）
+     * 验证手机号格式（支持全球号码）
      *
      * @param phone    手机号
      * @param errorMsg 错误消息
@@ -92,8 +92,24 @@ public class ValidationService {
         if (phone == null || phone.trim().isEmpty()) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Phone number cannot be empty");
         }
+
         String trimmedPhone = phone.trim();
-        if (!PHONE_PATTERN.matcher(trimmedPhone).matches()) {
+
+        if (!PHONE_ALLOWED_CHARS_PATTERN.matcher(trimmedPhone).matches()) {
+            throw new CrmChatException(errorMsg != null ? errorMsg : "Invalid phone number format");
+        }
+
+        long plusCount = trimmedPhone.chars().filter(ch -> ch == '+').count();
+        if (plusCount > 1 || (plusCount == 1 && trimmedPhone.indexOf('+') != 0)) {
+            throw new CrmChatException(errorMsg != null ? errorMsg : "Invalid phone number format");
+        }
+
+        String normalized = trimmedPhone.replaceAll("[\\s\\-()]", "");
+        if (normalized.startsWith("+")) {
+            normalized = normalized.substring(1);
+        }
+
+        if (!normalized.matches("\\d{4,20}")) {
             throw new CrmChatException(errorMsg != null ? errorMsg : "Invalid phone number format");
         }
     }

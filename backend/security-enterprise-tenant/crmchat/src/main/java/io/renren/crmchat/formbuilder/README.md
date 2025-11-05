@@ -375,7 +375,7 @@ public class ChatServiceService {
                 (String) formData.getOrDefault("phone", ""))
             .col(24)
             .required()
-            .addValidate("pattern", "^1[3-9]\\d{9}$", "请输入正确的手机号"));
+            .addValidate("pattern", "^[+0-9\\s\\-()]{4,25}$", "请输入正确的手机号（支持国际号码格式）"));
 
         // 登录账号和密码
         if (!formData.isEmpty()) {
