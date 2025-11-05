@@ -1056,6 +1056,12 @@ textarea.ivu-input {
     flex: 1;
     min-height: 0; /* 允许flex子元素缩小 */
     display: flex;
+    overflow: hidden; /* 防止内容溢出 */
+
+    /deep/ .chatList {
+      height: 100%;
+      flex-shrink: 0; /* 防止chatList被压缩 */
+    }
 
     .chat-content {
       width: 600px;

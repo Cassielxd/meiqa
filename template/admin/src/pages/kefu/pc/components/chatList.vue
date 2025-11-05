@@ -592,6 +592,13 @@ export default {
     min-height: 0;
     overflow: hidden;
     background: #FAFBFC; /* 确保背景色延伸到容器底部 */
+    display: flex;
+    flex-direction: column;
+
+    /deep/ .vue-scroll {
+      flex: 1;
+      min-height: 0;
+    }
   }
 
   .chat-item {
@@ -726,6 +733,7 @@ export default {
 }
 
 .search_box {
+  flex-shrink: 0; /* 防止搜索框被压缩 */
   margin: 12px 12px 8px 12px;
 
   /deep/ .ivu-input-wrapper {
