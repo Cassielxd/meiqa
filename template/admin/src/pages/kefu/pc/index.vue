@@ -6,7 +6,7 @@
         <chatList ref="chatList" @setDataId="setDataId" @search="bindSearch" @changeType="changeType" :isShow="isShow" :userOnline="userOnline" :newRecored="newRecored" :searchData="searchData"></chatList>
         <div class="chat-content">
           <!-- ⭐ Referer 来源显示区域 -->
-          <div class="referer-bar" v-if="userActive">
+          <div class="referer-bar" v-if="userActive && userActive.referer">
             <span class="referer-label">{{$t('kefu.referer')}}:</span>
             <span class="referer-value" :title="userActive.referer">
               {{ userActive.referer }}
@@ -14,7 +14,7 @@
           </div>
 
           <!-- ⭐ Request URL 显示区域 -->
-          <div class="referer-bar" v-if="userActive">
+          <div class="referer-bar" v-if="userActive && userActive.request_url">
             <span class="referer-label">{{$t('kefu.requestUrl')}}:</span>
             <span class="referer-value" :title="userActive.request_url">
               {{ userActive.request_url}}
@@ -1054,15 +1054,18 @@ textarea.ivu-input {
 
   .container {
     flex: 1;
+    min-height: 0; /* 允许flex子元素缩小 */
     display: flex;
 
     .chat-content {
       width: 600px;
       height: 100%;
+      min-height: 0;
       border-right: 1px solid #E5E7EB;
       display: flex;
       flex-direction: column;
       background: #FAFBFC;
+      overflow: hidden; /* 防止内容溢出 */
 
       /* ⭐ Referer 来源显示区域 */
       .referer-bar {
@@ -1073,6 +1076,7 @@ textarea.ivu-input {
         font-size: 12px;
         color: #6B7280;
         border-bottom: 1px solid #E5E7EB;
+        flex-shrink: 0; /* 防止被压缩 */
 
         .referer-label {
           font-weight: 500;
@@ -1089,10 +1093,18 @@ textarea.ivu-input {
       }
 
       .chat-body {
-        max-height: 530px;
         flex: 1;
+        min-height: 0; /* 允许flex子元素缩小 */
         background: #F3F4F6;
         padding: 16px;
+        overflow: hidden; /* 防止内容溢出 */
+        display: flex;
+        flex-direction: column;
+
+        /deep/ .happy-scroll {
+          flex: 1;
+          min-height: 0;
+        }
 
         .chat-item {
           margin-bottom: 16px;
@@ -1415,10 +1427,12 @@ textarea.ivu-input {
       .chat-textarea {
           display: flex;
           flex-direction: column;
-        height: 214px;
-        border-top: none;
-        background: #F9FAFB;
-        border-radius: 0 0 16px 0;
+          flex-shrink: 0; /* 防止被压缩，保持固定高度 */
+          height: 214px;
+          min-height: 214px; /* 确保最小高度 */
+          border-top: none;
+          background: #F9FAFB;
+          border-radius: 0 0 16px 0;
 
         .chat-btn-wrapper {
           position: relative;

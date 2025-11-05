@@ -533,7 +533,8 @@ export default {
   display: flex;
   flex-direction: column;
   width: 320px;
-  height: 742px;
+  height: 100%;
+  min-height: 0;
   border-right: 1px solid #E5E7EB;
   background: #FAFBFC;
 
@@ -588,8 +589,9 @@ export default {
 
   .scroll-box {
     flex: 1;
-    height: 500px;
+    min-height: 0;
     overflow: hidden;
+    background: #FAFBFC; /* 确保背景色延伸到容器底部 */
   }
 
   .chat-item {
