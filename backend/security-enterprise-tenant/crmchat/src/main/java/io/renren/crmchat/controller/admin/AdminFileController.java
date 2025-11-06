@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,33 +53,36 @@ public class AdminFileController {
         return ApiResult.ok(result);
     }
 
+    @PostMapping("/upload")
+    @Operation(summary = "Upload Image (Default Type)")
+    public ApiResult<Map<String, Object>> uploadDefault(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "pid", required = false, defaultValue = "0") Integer pid) {
+
+        return uploadWithType(0, file, pid);
+    }
+
     /**
-     * 7.2 上传图片
-     * POST /api/admin/file/upload/:upload_type?
+     * 上传图片（带 upload_type 参数）
+     * POST /api/tenant/file/upload/:upload_type
      *
-     * PHP Reference: Attachment.php::upload($upload_type, $type)
+     * PHP Reference: Attachment.php::upload()
      *
      * Form Data:
-     * - file: 文件字段
+     * - file: 文件字段（必填）
      * - pid: 分类ID（可选，默认0）
      *
      * Response:
      * {
-     *   "att_id": 1,
-     *   "name": "image.jpg",
-     *   "att_dir": "/uploads/20250101/image.jpg",
-     *   "satt_dir": "/uploads/20250101/thumb_image.jpg",
-     *   "att_size": "102400",
-     *   "att_type": "image/jpeg",
-     *   "image_type": 1
+     *   "src": "/uploads/20250101/image.jpg"
      * }
      */
     @PostMapping("/upload/{upload_type}")
-    @Operation(summary = "Upload Image")
-    public ApiResult<Map<String, Object>> upload(
-            @Parameter(description = "Upload Type: 0-Auto, 1-Local, 2-OSS") @PathVariable(value = "upload_type", required = false) Integer uploadType,
+    @Operation(summary = "Upload Image (Specific Type)")
+    public ApiResult<Map<String, Object>> uploadWithType(
+            @Parameter(description = "Upload Type: 0-Auto, 1-Local, 2-OSS") @PathVariable("upload_type") Integer uploadType,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "pid", required = false) Integer pid) {
+            @RequestParam(value = "pid", required = false, defaultValue = "0") Integer pid) {
 
         if (file == null || file.isEmpty()) {
             return ApiResult.fail("Please select a file to upload");
@@ -88,12 +92,15 @@ public class AdminFileController {
             uploadType = 0; // 默认自动选择
         }
 
-        if (pid == null) {
-            pid = 0; // 默认分类
-        }
-
+        // PHP: $res = $this->service->upload((int)$pid, $file, $upload_type, $type);
+        // PHP: return $this->success('上传成功', ['src' => $res]);
         Map<String, Object> result = adminFileService.uploadFile(file, pid, uploadType);
-        return ApiResult.ok("Uploaded successfully", result);
+
+        // PHP 只返回 src 字段
+        Map<String, Object> response = new HashMap<>();
+        response.put("src", result.get("att_dir")); // PHP 返回的是文件路径
+
+        return ApiResult.ok("Uploaded successfully", response);
     }
 
     /**
