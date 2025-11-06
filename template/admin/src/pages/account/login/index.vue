@@ -1,9 +1,9 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <div class="login-logo">
+<!--      <div class="login-logo">
         <img :src="login_logo" alt="logo" />
-      </div>
+      </div>-->
       <div class="login-title">{{ $t('login.title') }}</div>
       <Form ref="formInline" :model="formInline" :rules="ruleInline" @keyup.enter="handleSubmit('formInline')">
         <FormItem prop="username">

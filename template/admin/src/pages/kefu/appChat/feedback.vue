@@ -63,10 +63,6 @@
                     ],
                     content: [
                         { required: true, message: '请输入留言内容', trigger: 'blur' }
-                    ],
-                    phone: [
-                        { required: true, message: '请填写手机号码', trigger: 'change' },
-                        { pattern: /^1[3456789]\d{9}$/, message: "手机号码格式不正确", trigger: "blur" }
                     ]
                 }
             }

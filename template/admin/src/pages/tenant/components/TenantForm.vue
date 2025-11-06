@@ -193,9 +193,6 @@ export default {
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
         ],
-        contact_phone: [
-          { validator: validateGlobalPhone, trigger: 'blur', message: this.$t('kefu.phoneFormatError') }
-        ],
         pwd: [
           { required: !this.isEdit, message: '请输入初始密码', trigger: 'blur' },
           { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' },

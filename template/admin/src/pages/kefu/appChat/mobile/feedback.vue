@@ -49,9 +49,9 @@
 				if(!this.name){
 					return this.$Message.error('请填写姓名')
 				}
-				if(!this.phone || !(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.phone))){
+				/*if(!this.phone || !(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.phone))){
 					return this.$Message.error('请填写正确的手机号码')
-				}
+				}*/
 				if(!this.con){
 					return this.$Message.error('请填写内容')
 				}

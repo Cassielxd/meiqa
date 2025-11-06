@@ -138,10 +138,6 @@ export default {
           { required: true, message: this.$t('login.email'), trigger: 'blur' },
           { type: 'email', message: this.$t('login.emailFormatError'), trigger: 'blur' }
         ],
-        contact_phone: [
-          { required: true, message: this.$t('login.phone'), trigger: 'blur' },
-          { validator: validateGlobalPhone, trigger: 'blur', message: this.$t('login.phoneFormatError') }
-        ],
         password: [
           { required: true, message: this.$t('login.password'), trigger: 'blur' },
           { min: 6, message: this.$t('login.passwordMinLength'), trigger: 'blur' }
