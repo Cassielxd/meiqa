@@ -598,8 +598,8 @@ export default {
       // this.formValidate.data = '';
       // this.getListService();
       this.$modalForm(kefuaddApi()).then(() => {
+        this.tableFrom.page = 1;
         this.getList();
-        console.log(1223);
       })
     },
     // 全选
