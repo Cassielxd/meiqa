@@ -27,7 +27,7 @@ public class TenantRegisterDTO implements Serializable {
     @Schema(description = "Contact Name", example = "John Doe")
     private String contactName;
 
-    @Schema(description = "Contact Phone", example = "13800138000")
+    //@Schema(description = "Contact Phone", example = "13800138000")
     @Size(max = 20, message = "Contact phone length cannot exceed 20 characters")
     private String contactPhone;
 

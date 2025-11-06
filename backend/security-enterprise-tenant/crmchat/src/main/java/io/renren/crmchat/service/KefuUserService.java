@@ -498,9 +498,9 @@ public class KefuUserService {
         String phone = (String) data.get("phone");
         if (phone != null && !phone.trim().isEmpty()) {
             // 手机号验证
-            if (!phone.matches("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$")) {
+            /*if (!phone.matches("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$")) {
                 throw new CrmChatException("Please enter a valid phone number");
-            }
+            }*/
             user.setPhone(phone);
             user.setIsTourist(0);  // 有手机号不是游客
 
