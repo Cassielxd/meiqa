@@ -1134,6 +1134,10 @@ textarea.ivu-input {
           min-height: 0;
         }
 
+        /deep/ #chat_scroll {
+          padding-bottom: 80px !important; /* 预留底部空间，避免消息被挡住 */
+        }
+
         .chat-item {
           margin-bottom: 16px;
           animation: message-slide-in 0.3s ease-out;
