@@ -117,6 +117,7 @@
     seconds: '秒',
     sendCaptcha: '发送验证码',
     emailFormatError: '请输入正确的邮箱格式',
+    phoneFormatError: '请输入正确的手机号码',
     passwordMinLength: '密码长度不能少于6位',
     confirmPasswordRequired: '请确认密码',
     passwordMismatch: '两次输入的密码不一致',

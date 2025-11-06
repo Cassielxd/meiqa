@@ -117,6 +117,7 @@ export default {
     seconds: 's',
     sendCaptcha: 'Send Code',
     emailFormatError: 'Please enter a valid email address',
+    phoneFormatError: 'Please enter a valid phone number',
     passwordMinLength: 'Password length cannot be less than 6 characters',
     confirmPasswordRequired: 'Please confirm password',
     passwordMismatch: 'The passwords entered do not match',

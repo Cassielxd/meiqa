@@ -88,6 +88,7 @@ import Setting from '@/setting';
 import { setCookies } from '@/libs/util';
 import '../../../assets/js/canvas-nest.min';
 import Verify from "@/components/verifition/Verify";
+import { validateGlobalPhone } from '@/utils/validate';
 
 export default {
   components: {
@@ -139,6 +140,7 @@ export default {
         ],
         contact_phone: [
           { required: true, message: this.$t('login.phone'), trigger: 'blur' },
+          { validator: validateGlobalPhone, trigger: 'blur', message: this.$t('login.phoneFormatError') }
         ],
         password: [
           { required: true, message: this.$t('login.password'), trigger: 'blur' },
@@ -293,7 +295,7 @@ export default {
         account: this.registerForm.email,
         pwd: this.registerForm.password,
         confirm_pwd: this.registerForm.confirm_pwd,
-        contact_phone: this.registerForm.contact_phone,
+        contact_phone: this.registerForm.contact_phone ? this.registerForm.contact_phone.trim() : '',
         captcha: this.registerForm.captcha,
         imgcode: this.registerForm.code,
         key: this.registerForm.key,

@@ -135,6 +135,47 @@ export function isArray(arg) {
   return Array.isArray(arg)
 }
 
+const PHONE_ALLOWED_CHARS_PATTERN = /^[+0-9\s\-()]{4,25}$/;
+
+export function isValidGlobalPhone(value) {
+  const phone = value === undefined || value === null ? '' : value.toString().trim();
+  if (!phone) {
+    return true;
+  }
+
+  if (!PHONE_ALLOWED_CHARS_PATTERN.test(phone)) {
+    return false;
+  }
+
+  const plusMatches = phone.match(/\+/g) || [];
+  if (plusMatches.length > 1 || (plusMatches.length === 1 && phone.indexOf('+') !== 0)) {
+    return false;
+  }
+
+  const digits = phone.replace(/[^\d]/g, '');
+  if (digits.length < 4 || digits.length > 20) {
+    return false;
+  }
+
+  return true;
+}
+
+export function validateGlobalPhone(rule, value, callback) {
+  const phone = value === undefined || value === null ? '' : value.toString().trim();
+
+  if (rule.required && !phone) {
+    callback(new Error(rule.message || 'Phone number cannot be empty'));
+    return;
+  }
+
+  if (!isValidGlobalPhone(phone)) {
+    callback(new Error(rule.message || 'Invalid phone number format'));
+    return;
+  }
+
+  callback();
+}
+
 const bindMessage = (fn, message) => {
   fn.message = field => message.replace("%s", field || "");
 };

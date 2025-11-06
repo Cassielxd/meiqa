@@ -169,6 +169,7 @@
 
 <script>
 import { AccountRegister, sendRegisterCaptcha, getSimpleCaptcha } from '@/api/account';
+import { validateGlobalPhone } from '@/utils/validate';
 
 export default {
   name: 'TenantRegister',
@@ -181,34 +182,6 @@ export default {
       } else {
         callback();
       }
-    };
-
-    const validateGlobalPhone = (rule, value, callback) => {
-      const phone = (value || '').trim();
-      if (!phone) {
-        callback(new Error('Please enter your phone number'));
-        return;
-      }
-
-      const allowedChars = /^[+0-9\s\-()]{4,25}$/;
-      if (!allowedChars.test(phone)) {
-        callback(new Error('Please enter a valid phone number'));
-        return;
-      }
-
-      const plusMatches = phone.match(/\+/g);
-      if ((plusMatches && plusMatches.length > 1) || (phone.includes('+') && phone.indexOf('+') !== 0)) {
-        callback(new Error('Please enter a valid phone number'));
-        return;
-      }
-
-      const digits = phone.replace(/[^\d]/g, '');
-      if (digits.length < 4 || digits.length > 20) {
-        callback(new Error('Please enter a valid phone number'));
-        return;
-      }
-
-      callback();
     };
 
     return {
@@ -243,8 +216,8 @@ export default {
           { len: 4, message: 'Image captcha must be 4 characters', trigger: 'blur' }
         ],
         contactPhone: [
-          { required: true, message: 'Please enter your phone number', trigger: 'blur' },
-          { validator: validateGlobalPhone, trigger: 'blur' }
+          { required: true, message: this.$t('login.phone'), trigger: 'blur' },
+          { validator: validateGlobalPhone, trigger: 'blur', message: this.$t('login.phoneFormatError') }
         ],
         pwd: [
           { required: true, message: 'Please enter your password', trigger: 'blur' },
@@ -353,7 +326,7 @@ export default {
             account: this.formData.account,
             tenant_name: this.formData.tenantName,
             contact_name: this.formData.contactName,
-            contact_phone: this.formData.contactPhone,
+            contact_phone: this.formData.contactPhone ? this.formData.contactPhone.trim() : '',
             pwd: this.formData.pwd,
             confirm_pwd: this.formData.confirmPwd,
             captcha: this.formData.captcha,
