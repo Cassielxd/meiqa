@@ -58,17 +58,7 @@
       >
         <!-- 状态列 -->
         <template slot-scope="{ row }" slot="status">
-          <Select
-            :value="row.status"
-            @on-change="handleStatusChange(row, $event)"
-            size="small"
-            style="width: 110px"
-          >
-            <Option :value="0">⚠️ 待审核</Option>
-            <Option :value="1">✅ 已批准</Option>
-            <Option :value="2">❌ 已拒绝</Option>
-            <Option :value="3">🚫 已禁用</Option>
-          </Select>
+          <Tag :color="getStatusTag(row.status).color">{{ getStatusTag(row.status).label }}</Tag>
         </template>
 
         <!-- 到期时间列 -->
@@ -338,6 +328,16 @@ export default {
       this.getList()
     },
 
+    getStatusTag(status) {
+      const statusMap = {
+        0: { label: '待审核', color: 'warning' },
+        1: { label: '已批准', color: 'success' },
+        2: { label: '已拒绝', color: 'error' },
+        3: { label: '已禁用', color: 'default' }
+      }
+      return statusMap[status] || { label: '未知', color: 'default' }
+    },
+
     // 审核通过
     async approveTenant(row) {
       this.$Modal.confirm({
@@ -402,36 +402,6 @@ export default {
           } catch (error) {
             this.$Message.error('操作失败')
           }
-        }
-      })
-    },
-
-    // 状态变更
-    handleStatusChange(row, newStatus) {
-      const statusMap = {
-        0: '待审核',
-        1: '已批准',
-        2: '已拒绝',
-        3: '已禁用'
-      }
-
-      this.$Modal.confirm({
-        title: '确认修改状态',
-        content: `确定要将租户 ${row.account} 的状态修改为 "${statusMap[newStatus]}" 吗？`,
-        onOk: async () => {
-          try {
-            await tenantUpdateStatusApi(row.id, newStatus)
-            this.$Message.success('状态修改成功')
-            this.getList()
-          } catch (error) {
-            this.$Message.error('状态修改失败')
-            // 失败时恢复原状态
-            this.getList()
-          }
-        },
-        onCancel: () => {
-          // 取消时恢复原状态
-          this.getList()
         }
       })
     },

@@ -60,11 +60,8 @@
                 <img v-lazy="row.avatar">
               </div>
             </template>
-            <template slot-scope="{ row, index }" slot="status">
-              <i-switch v-model="row.status" :value="row.status" :true-value="1" :false-value="0" @on-change="onchangeIsShow(row)" size="large">
-                <span slot="open">开启</span>
-                <span slot="close">关闭</span>
-              </i-switch>
+            <template slot-scope="{ row }" slot="status">
+              <Tag :color="row.status ? 'success' : 'default'">{{ row.status ? '启用' : '禁用' }}</Tag>
             </template>
             <template slot-scope="{ row, index }" slot="online">
               <Tag color="success" v-if="row.online">在线</Tag>
@@ -117,7 +114,7 @@ import { mapState } from 'vuex'
 import { setCookies } from '@/libs/util'
 import {
   kefuListApi, kefucreateApi, kefuaddApi, kefuAddApi,
-  kefusetStatusApi, kefuEditApi, kefuRecordApi, kefuChatlistApi,
+  kefuEditApi, kefuRecordApi, kefuChatlistApi,
   kefuLogin,kefuGroupListApi,kefuCreateGroupApi
 } from '@/api/setting'
 import { adminAppCustomer } from '@/api/kefu';
@@ -686,19 +683,6 @@ export default {
     pageChange(index) {
       this.tableFrom.page = index
       this.getList()
-    },
-    // 修改是否显示
-    onchangeIsShow(row) {
-      let data = {
-        id: row.id,
-        status: row.status
-      }
-      kefusetStatusApi(data).then(async res => {
-        this.$Message.success(res.msg);
-        this.getList();
-      }).catch(res => {
-        this.$Message.error(res.msg)
-      })
     },
     // 添加客服
     putRemark() {
