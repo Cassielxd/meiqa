@@ -179,10 +179,7 @@
                     sendName: [
                         { required: true, message: this.$t('kefu.fillSenderName'), trigger: 'change' }
                     ],
-                    sendPhone: [
-                        { required: true, message: this.$t('kefu.fillSenderPhone'), trigger: 'change' },
-                        { pattern: /^1[3456789]\d{9}$/, message: this.$t('kefu.phoneFormatError'), trigger: "blur" }
-                    ],
+                    sendPhone: [],
                     sendAddress: [
                         { required: true, message: this.$t('kefu.fillSenderAddress'), trigger: 'change' }
                     ],

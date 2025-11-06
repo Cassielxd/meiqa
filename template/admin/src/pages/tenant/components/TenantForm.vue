@@ -150,8 +150,6 @@
 </template>
 
 <script>
-import { validateGlobalPhone } from '@/utils/validate'
-
 export default {
   name: 'TenantForm',
   props: {

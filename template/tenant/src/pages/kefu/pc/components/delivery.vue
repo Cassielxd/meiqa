@@ -151,10 +151,7 @@
                     sendName:[
                         { required: true, message: '请填写寄件人姓名', trigger: 'change' }
                     ],
-                    sendPhone:[
-                        { required: true, message: '请填写寄件人手机', trigger: 'change' },
-                        { pattern: /^1[3456789]\d{9}$/, message: "手机号码格式不正确", trigger: "blur" }
-                    ],
+                    sendPhone:[],
                     sendAddress:[
                         { required: true, message: '请填写寄件人地址', trigger: 'change' }
                     ],

@@ -135,19 +135,13 @@ export function isArray(arg) {
   return Array.isArray(arg)
 }
 
-const PHONE_ALLOWED_CHARS_PATTERN = /^[+0-9\s\-()]{4,25}$/;
-
 export function isValidGlobalPhone(value) {
-
-
+  // Phone validation disabled; always return true during testing.
   return true;
 }
 
 export function validateGlobalPhone(rule, value, callback) {
-  const phone = value === undefined || value === null ? '' : value.toString().trim();
-
-
-
+  // Phone validation disabled; always pass validation during testing.
   callback();
 }
 

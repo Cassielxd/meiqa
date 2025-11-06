@@ -88,7 +88,6 @@ import Setting from '@/setting';
 import { setCookies } from '@/libs/util';
 import '../../../assets/js/canvas-nest.min';
 import Verify from "@/components/verifition/Verify";
-import { validateGlobalPhone } from '@/utils/validate';
 
 export default {
   components: {

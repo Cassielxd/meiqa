@@ -309,7 +309,7 @@ export default {
         return;
       }
       updateUserData(this.activeUserInfo.id, { remarks: this.remarkValue }).then(res => {
-        this.$Message.success('修改成功');
+        this.$Message.success(this.$t('kefu.modifySuccess'));
         this.getUserInfo();
         this.remarkValue = '';
         this.isEditRemark = false
@@ -526,8 +526,15 @@ export default {
       });
     },
     putUserData(callback) {
-      updateUserData(this.activeUserInfo.id, { ...this.activeUserInfo, remark_nickname: this.activeUserInfo.nickname }).then(res => {
-        this.$Message.success('修改成功');
+      const payload = { ...this.activeUserInfo, remark_nickname: this.activeUserInfo.nickname };
+      if (payload.phone) {
+        payload.phone = payload.phone.toString().trim();
+      } else {
+        payload.phone = '';
+      }
+
+      updateUserData(this.activeUserInfo.id, payload).then(res => {
+        this.$Message.success(this.$t('kefu.modifySuccess'));
         this.getUserInfo();
         this.remarkValue = '';
         this.isEditRemark = false;

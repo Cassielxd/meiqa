@@ -169,7 +169,6 @@
 
 <script>
 import { AccountRegister, sendRegisterCaptcha, getSimpleCaptcha } from '@/api/account';
-import { validateGlobalPhone } from '@/utils/validate';
 
 export default {
   name: 'TenantRegister',
@@ -215,10 +214,7 @@ export default {
           { required: true, message: 'Please enter image captcha', trigger: 'blur' },
           { len: 4, message: 'Image captcha must be 4 characters', trigger: 'blur' }
         ],
-        contactPhone: [
-          { required: true, message: this.$t('login.phone'), trigger: 'blur' },
-          { validator: validateGlobalPhone, trigger: 'blur', message: this.$t('login.phoneFormatError') }
-        ],
+        contactPhone: [],
         pwd: [
           { required: true, message: 'Please enter your password', trigger: 'blur' },
           { min: 6, max: 32, message: 'Password must be 6-32 characters', trigger: 'blur' }
