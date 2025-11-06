@@ -728,6 +728,7 @@ export default {
       kefuAddApi(this.addFrom).then(async res => {
         this.$Message.success(res.msg)
         this.modals = false
+        this.tableFrom.page = 1
         this.getList()
       }).catch(res => {
         this.loading = false
