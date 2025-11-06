@@ -364,9 +364,31 @@ export default {
     //     deep:true
     // }
   },
-   created() {
+  created() {
+    const baseUrl = Setting.apiBaseURL || '';
+    let uploadBase = baseUrl;
 
-    this.upload = Setting.apiBaseURL.replace('admin', 'kefu') + '/upload'
+    try {
+      const parsed = new URL(baseUrl, window.location.origin);
+      if (parsed.pathname.includes('adminapi')) {
+        parsed.pathname = parsed.pathname.replace('adminapi', 'kefuapi');
+      } else if (parsed.pathname.includes('/api/admin')) {
+        parsed.pathname = parsed.pathname.replace('/api/admin', '/api/kefu');
+      } else if (parsed.pathname.endsWith('/admin')) {
+        parsed.pathname = parsed.pathname.replace(/\/admin$/, '/kefu');
+      }
+      uploadBase = parsed.origin + parsed.pathname;
+    } catch (error) {
+      if (uploadBase.includes('adminapi')) {
+        uploadBase = uploadBase.replace('adminapi', 'kefuapi');
+      } else if (uploadBase.includes('/api/admin')) {
+        uploadBase = uploadBase.replace('/api/admin', '/api/kefu');
+      } else if (uploadBase.endsWith('/admin')) {
+        uploadBase = uploadBase.replace(/admin$/, 'kefu');
+      }
+    }
+
+    this.upload = uploadBase.replace(/\/$/, '') + '/upload';
     console.log(Setting.apiBaseURL, this.upload);
     serviceInfo().then(res => {
       this.kefuInfo = res.data;
