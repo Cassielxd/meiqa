@@ -190,7 +190,7 @@
           </div>
         </div>
         <div class="right_menu">
-          <rightMenu :isTourist="tourist" :uid="userActive.user_id" :webType="userActive.type" @bindPush="bindPush"></rightMenu>
+          <rightMenu :isTourist="tourist" :uid="userActive.user_id" :webType="userActive.type" @changeUser="changeUser" @bindPush="bindPush"></rightMenu>
 <!--          <div class="crmchat_link" @click="tolink">
             <span>{{$t('kefu.openSourceCustomerService')}}</span>
           </div>-->
@@ -835,6 +835,10 @@ export default {
         this.scrollTop = this.$refs.scrollBox.offsetHeight - this.oldHeight
       }, 300)
 
+    },
+    changeUser(user){
+      this.userActive.request_url = user.requestUrl;
+      this.userActive.referer =user.referer;
     },
     // 商品推送
     bindPush(data) {

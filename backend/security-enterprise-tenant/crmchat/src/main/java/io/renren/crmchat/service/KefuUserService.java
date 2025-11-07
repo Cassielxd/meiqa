@@ -295,6 +295,9 @@ public class KefuUserService {
         result.put("city", user.getCity() != null ? user.getCity() : "");
         result.put("isp", user.getIsp() != null ? user.getIsp() : "");
 
+        result.put("referer", user.getReferer() != null ? user.getReferer() : "");
+        result.put("requestUrl", user.getRequestUrl() != null ? user.getRequestUrl() : "");
+
         // 组合地理位置文本
         StringBuilder locationBuilder = new StringBuilder();
         if (user.getCountry() != null && !user.getCountry().isEmpty()) {

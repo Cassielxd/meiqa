@@ -360,6 +360,7 @@ export default {
       userInfo(this.uid).then(res => {
         this.activeUserInfo = res.data;
         this.copyGroupId = this.activeUserInfo.group_id;
+        this.$emit('changeUser', res.data)
       }).catch(error => {
         this.activeUserInfo = ''
       })
