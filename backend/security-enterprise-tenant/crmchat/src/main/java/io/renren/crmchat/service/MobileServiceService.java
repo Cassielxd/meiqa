@@ -1165,6 +1165,19 @@ public class MobileServiceService {
 
         int toUserId = parseInt(data.get("to_user_id"), 0);
 
+        String refererHeader = null;
+        if (request != null) {
+            refererHeader = request.getHeader("Referer");
+            if (refererHeader == null || refererHeader.trim().isEmpty()) {
+                refererHeader = request.getHeader("referer");
+            }
+        }
+
+        if (refererHeader == null || refererHeader.trim().isEmpty()) {
+            log.warn("🚫 [SECURITY] Missing referer header, deny message send: appid={}, userId={}", appid, userId);
+            throw new CrmChatException("Access denied");
+        }
+
         ChatUserEntity chatUser = chatUserMapper.selectOne(
                 new QueryWrapper<ChatUserEntity>().eq("appid", appid).eq("id", userId)
         );
