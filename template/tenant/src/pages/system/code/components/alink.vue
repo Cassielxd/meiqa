@@ -69,13 +69,13 @@ export default{
     },
     computed: {
         linkUrl1() {
-            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
+            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1`;
         },
         linkUrl2() {
-            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1&deviceType=Mobile`;
+            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1&deviceType=Mobile`;
         },
         linkUrl3() {
-            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.token_md5}&noCanClose=1`;
+            return `${this.tokeninfo.path}/#/chat/index?token=${this.tokeninfo.tokenMd5}&noCanClose=1`;
         }
     },
     mounted() {

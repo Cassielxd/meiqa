@@ -142,7 +142,7 @@ function initCustomerServer(option) {
     this.openChat = false;//是否需要打开聊天窗口
     this.settingObj = settingObj;
     this.baseUrl = option.openUrl || location.origin;
-    this.settingObj.openUrl = `${this.baseUrl}/chat/index`; //服务器地址加路由, 若不传入则自动获取引入应用所在服务器的域名
+    this.settingObj.openUrl = `${this.baseUrl}/#/chat/index`; //服务器地址加路由, 若不传入则自动获取引入应用所在服务器的域名
     this.settingObj.domId = option.customerServerTip || 'customerServerTip'; //浮动客服dom
     this.settingObj.insertDomNode = option.insertDomNode || 'body' // 插入的标签
     this.settingObj.authInit = option.authInit || false; // 是否启用访客自动登录
