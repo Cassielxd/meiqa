@@ -662,13 +662,8 @@ public class TenantKefuService {
             .closeStr("关闭")
             .size("large"));
 
-        // PHP: $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
-        field.add(formBuilder.switches("status", "客服状态", 0)
-            .falseValue(0)
-            .trueValue(1)
-            .openStr("打开")
-            .closeStr("关闭")
-            .size("large"));
+        field.add(formBuilder.select("status", "客服状态", 0)
+            .options(getStatusOptions()));
 
         // PHP: return create_form('添加客服', $this->createServiceFormForTent(), $this->url('/chat/kefu'), 'POST');
         return io.renren.crmchat.formbuilder.FormHelper.createForm(
@@ -750,13 +745,8 @@ public class TenantKefuService {
             .closeStr("关闭")
             .size("large"));
 
-        // PHP: $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
-        field.add(formBuilder.switches("status", "客服状态", kefu.getStatus() != null ? kefu.getStatus() : 0)
-            .falseValue(0)
-            .trueValue(1)
-            .openStr("打开")
-            .closeStr("关闭")
-            .size("large"));
+        field.add(formBuilder.select("status", "客服状态", kefu.getStatus() != null ? kefu.getStatus() : 0)
+            .options(getStatusOptions()));
 
         // PHP: return create_form('编辑客服', $this->createServiceForm($serviceInfo->toArray()), $this->url('/chat/kefu/' . $id), 'PUT');
         return io.renren.crmchat.formbuilder.FormHelper.createForm(
@@ -1014,6 +1004,18 @@ public class TenantKefuService {
             ));
         }
 
+        return options;
+    }
+
+    /**
+     * 获取客服状态选项
+     *
+     * @return 客服状态选项列表
+     */
+    private List<io.renren.crmchat.formbuilder.components.OptionComponent> getStatusOptions() {
+        List<io.renren.crmchat.formbuilder.components.OptionComponent> options = new java.util.ArrayList<>();
+        options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(1, "启用", false));
+        options.add(new io.renren.crmchat.formbuilder.components.OptionComponent(0, "禁用", false));
         return options;
     }
 
