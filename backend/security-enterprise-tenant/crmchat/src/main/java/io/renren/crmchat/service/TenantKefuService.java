@@ -663,7 +663,7 @@ public class TenantKefuService {
             .size("large"));
 
         // PHP: $field[] = $this->builder->switches('status', '客服状态', (int)($formData['status'] ?? 0))->falseValue(0)->trueValue(1)->openStr('打开')->closeStr('关闭')->size('large');
-        field.add(formBuilder.switches("status", "客服状态", kefu.getStatus() != null ? kefu.getStatus() : 0)
+        field.add(formBuilder.switches("status", "客服状态", 0)
             .falseValue(0)
             .trueValue(1)
             .openStr("打开")
