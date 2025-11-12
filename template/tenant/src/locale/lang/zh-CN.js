@@ -455,7 +455,7 @@
     webEmbed: '网页内嵌',
     hyperlink: '超链接',
     customDevelopment: '定制开发',
-    resetToken: '重置token',
+    resetToken: '重置token', resetDomain: '重置 域名',
     prompt: '提示',
     tokenResetWarning: 'token重置后，数据将全部更新，历史数据将会失效，请问是否确定？',
     copySuccess: '已成功复制到粘贴板',

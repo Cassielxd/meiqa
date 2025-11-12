@@ -12,7 +12,7 @@
           <kaifa :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy'></kaifa>
         </TabPane>
         <TabPane :label="$t('system.resetToken')" name="name4">
-          <setting :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy' @cresetToken="resetToken"></setting>
+          <setting :tokeninfo="token" :siteUrl="siteUrl" @cgetCopy='getCopy' @cresetToken="resetToken" @confirmeDomain="confirmeDomain"></setting>
         </TabPane>
       </Tabs>
     </div>
@@ -30,7 +30,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { adminAppCustomer, appReset,kefuPath } from '@/api/kefu';
+import { adminAppCustomer, appReset,kefuPath,resetDomain } from '@/api/kefu';
 import alink from './components/alink';
 import wangye from './components/wangye';
 import kaifa from './components/kaifa';
@@ -84,8 +84,7 @@ export default {
       if(res.status == 200) {
         if(res.data) {
          let data = res.data;
-          let k =await kefuPath();
-          data.path = k.data;
+          data.path = data.domain;
           this.token = data;
         }
       }
@@ -95,11 +94,25 @@ export default {
     resetToken() {
       this.canfrime = true;
     },
+    //确定重置domain
+    confirmeDomain(domain) {
+      resetDomain({domain}).then(res => {
+        if(res.status == 200) {
+          let data = res.data;
+          data.path = data.domain;
+          this.token =data
+
+        }
+      })
+    },
     // 确定重置token
     confirme() {
       appReset(this.token.id).then(res => {
         if(res.status == 200) {
-          this.token = res.data
+          let data = res.data;
+          data.path = data.domain;
+          this.token =data
+
         }
       })
     },

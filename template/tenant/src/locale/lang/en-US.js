@@ -456,6 +456,7 @@ export default {
     hyperlink: 'Hyperlink',
     customDevelopment: 'Custom Development',
     resetToken: 'Reset Token',
+    resetDomain: 'Reset Domain',
     prompt: 'Prompt',
     tokenResetWarning: 'After token reset, all data will be updated and historical data will be invalid. Are you sure?',
     copySuccess: 'Successfully copied to clipboard',

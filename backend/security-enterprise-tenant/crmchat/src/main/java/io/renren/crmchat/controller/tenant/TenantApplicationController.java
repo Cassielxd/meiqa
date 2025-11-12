@@ -32,13 +32,23 @@ public class TenantApplicationController {
     public ApiResult<ApplicationEntity> getApplication() {
         String resolvedAppid = requireAppid();
         ApplicationEntity application = tenantApplicationService.getApplication(resolvedAppid);
-
+        if(application.getDomain()==null||application.getDomain().isEmpty()){
+            application.setDomain(jwtUtils.getKefuPath());
+        }
         return ApiResult.ok("Query successful", application);
     }
+    @PostMapping("/resetDomain")
+    @Operation(summary = "Get Application Information")
+    public ApiResult<String> resetDomain(@RequestBody Map<String, String> data) {
+        String resolvedAppid = requireAppid();
+        String domain = data.get("domain");
+        tenantApplicationService.updateDomain(resolvedAppid,domain);
+        return ApiResult.ok("update successful");
+    }
+
     @GetMapping("path/kefu")
     @Operation(summary = "Get Application Information")
     public ApiResult<String> getpath() {
-
         return ApiResult.ok("Query successful", jwtUtils.getKefuPath());
     }
 

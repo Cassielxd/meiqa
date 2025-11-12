@@ -150,7 +150,15 @@ public class TenantApplicationService {
 
         return application;
     }
-
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDomain(String id, String domain) {
+        ApplicationEntity application = this.getApplication(id);
+        application.setDomain(domain);
+        int result = applicationMapper.updateById(application);
+        if (result <= 0) {
+            throw new io.renren.crmchat.exception.CrmChatException("Failed to save");
+        }
+    }
     /**
      * 鏇存柊搴旂敤
      * PUT /api/tenant/app/:id

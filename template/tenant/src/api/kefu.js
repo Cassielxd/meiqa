@@ -699,6 +699,13 @@ export function appReset(id) {
         method: 'put'
     })
 }
+export function resetDomain(data) {
+    return request({
+        url: `/app/resetDomain`,
+        method: 'post',
+        data
+    })
+}
 
 /*
   获取客服广告

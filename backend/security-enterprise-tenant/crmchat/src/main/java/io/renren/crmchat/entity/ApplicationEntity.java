@@ -69,4 +69,9 @@ public class ApplicationEntity implements Serializable {
      * 是否删除：0-未删除，1-已删除
      */
     private Integer isDelete;
+
+    /*
+    * 应用域名
+    */
+    private String domain;
 }
