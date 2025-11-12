@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,30 @@ public class JwtUtils {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             return verifier.verify(token);
+        } catch (JWTVerificationException e) {
+            log.error("JWT验证失败: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 验证Token（允许过期，用于刷新）
+     */
+    public DecodedJWT verifyTokenAllowExpired(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWTVerifier verifier = JWT.require(algorithm).build();
+            return verifier.verify(token);
+        } catch (TokenExpiredException expiredException) {
+            try {
+                DecodedJWT decodedJWT = JWT.decode(token);
+                Algorithm algorithm = Algorithm.HMAC256(secret);
+                algorithm.verify(decodedJWT);
+                return decodedJWT;
+            } catch (Exception inner) {
+                log.error("JWT验证失败(过期): {}", inner.getMessage());
+                return null;
+            }
         } catch (JWTVerificationException e) {
             log.error("JWT验证失败: {}", e.getMessage());
             return null;

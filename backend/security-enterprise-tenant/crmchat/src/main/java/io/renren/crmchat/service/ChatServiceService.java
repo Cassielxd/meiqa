@@ -37,31 +37,8 @@ public class ChatServiceService {
         ChatServiceEntity kefuInfo = verifyLogin(account, password);
 
         // 2. 生成 JWT Token（使用 TokenService，传入客服所属租户的 appid）
-        String token = tokenService.generateKefuToken(
-                Long.valueOf(kefuInfo.getId()),
-                kefuInfo.getAccount(),
-                kefuInfo.getAppid()  // 使用客服所属租户的 appid
-        );
-
-        // 3. 返回登录信息
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-
-        Map<String, Object> kefuInfoMap = new HashMap<>();
-        kefuInfoMap.put("id", kefuInfo.getId());
-        kefuInfoMap.put("uid", kefuInfo.getUserId());
-        kefuInfoMap.put("appid", kefuInfo.getAppid());
-        kefuInfoMap.put("group_id", kefuInfo.getGroupId());
-        kefuInfoMap.put("nickname", kefuInfo.getNickname());
-        kefuInfoMap.put("account", kefuInfo.getAccount());
-        kefuInfoMap.put("phone", kefuInfo.getPhone());
-        kefuInfoMap.put("avatar", kefuInfo.getAvatar());
-        kefuInfoMap.put("welcome_words", kefuInfo.getWelcomeWords());
-        kefuInfoMap.put("auto_reply", kefuInfo.getAutoReply());
-        kefuInfoMap.put("status", kefuInfo.getStatus());
-        result.put("kefu_info", kefuInfoMap);
-
-        return result;
+        String token = generateTokenForKefu(kefuInfo);
+        return buildLoginResponse(kefuInfo, token);
     }
 
     /**
@@ -85,30 +62,8 @@ public class ChatServiceService {
         kefuInfo.setOnline(1);
         chatServiceMapper.updateById(kefuInfo);
 
-        String token = tokenService.generateKefuToken(
-                Long.valueOf(kefuInfo.getId()),
-                kefuInfo.getAccount(),
-                kefuInfo.getAppid()
-        );
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-
-        Map<String, Object> kefuInfoMap = new HashMap<>();
-        kefuInfoMap.put("id", kefuInfo.getId());
-        kefuInfoMap.put("uid", kefuInfo.getUserId());
-        kefuInfoMap.put("appid", kefuInfo.getAppid());
-        kefuInfoMap.put("group_id", kefuInfo.getGroupId());
-        kefuInfoMap.put("nickname", kefuInfo.getNickname());
-        kefuInfoMap.put("account", kefuInfo.getAccount());
-        kefuInfoMap.put("phone", kefuInfo.getPhone());
-        kefuInfoMap.put("avatar", kefuInfo.getAvatar());
-        kefuInfoMap.put("welcome_words", kefuInfo.getWelcomeWords());
-        kefuInfoMap.put("auto_reply", kefuInfo.getAutoReply());
-        kefuInfoMap.put("status", kefuInfo.getStatus());
-        result.put("kefu_info", kefuInfoMap);
-
-        return result;
+        String token = generateTokenForKefu(kefuInfo);
+        return buildLoginResponse(kefuInfo, token);
     }
 
     /**
@@ -178,26 +133,81 @@ public class ChatServiceService {
             throw new CrmChatException("Customer service agent does not exist");
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("id", kefu.getId());
-        result.put("uid", kefu.getUserId());
-        result.put("appid", kefu.getAppid());
-        result.put("group_id", kefu.getGroupId());
-        result.put("nickname", kefu.getNickname());
-        result.put("account", kefu.getAccount());
-        result.put("phone", kefu.getPhone());
-        result.put("avatar", kefu.getAvatar());
-        result.put("welcome_words", kefu.getWelcomeWords());
-        result.put("auto_reply", kefu.getAutoReply());
-        result.put("status", kefu.getStatus());
-        result.put("online", kefu.getOnline());
-        result.put("password", "******");  // 密码脱敏
-        result.put("site_title", "CRMChat");  // TODO: 从系统配置获取
-
-        // TODO: 获取当前appid下所有客服的user_id列表
-        // result.put("user_ids", services.getColumn(['appid' => kefuInfo['appid']], 'user_id'));
-
+        Map<String, Object> result = buildKefuInfoMap(kefu);
+        result.put("password", "******");
+        result.put("site_title", "CRMChat");
         return result;
+    }
+
+    /**
+     * 刷新客服Token
+     */
+    public Map<String, Object> refreshKefuToken(Integer kefuId, String appid) {
+        if (kefuId == null) {
+            throw new CrmChatException("Missing customer service ID");
+        }
+        if (appid == null || appid.trim().isEmpty()) {
+            throw new CrmChatException("Tenant information is missing");
+        }
+
+        ChatServiceEntity kefuInfo = chatServiceMapper.selectById(kefuId);
+        if (kefuInfo == null) {
+            throw new CrmChatException("Customer service agent does not exist");
+        }
+        if (kefuInfo.getStatus() == 0) {
+            throw new CrmChatException("Customer service account has been disabled");
+        }
+        if (!appid.equals(kefuInfo.getAppid())) {
+            throw new CrmChatException("Tenant does not match");
+        }
+
+        kefuInfo.setUpdateTime((int) (System.currentTimeMillis() / 1000));
+        chatServiceMapper.updateById(kefuInfo);
+
+        String token = generateTokenForKefu(kefuInfo);
+        return buildLoginResponse(kefuInfo, token);
+    }
+
+    private Map<String, Object> buildLoginResponse(ChatServiceEntity kefuInfo, String token) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+
+        Long expireAt = tokenService.getTokenExpireAt(token);
+        if (expireAt != null) {
+            result.put("exp_time", expireAt);
+            result.put("expires_time", expireAt);
+        }
+
+        Map<String, Object> info = buildKefuInfoMap(kefuInfo);
+        result.put("kefu_info", info);
+        result.put("kefuInfo", info);
+        return result;
+    }
+
+    private Map<String, Object> buildKefuInfoMap(ChatServiceEntity kefuInfo) {
+        Map<String, Object> kefuInfoMap = new HashMap<>();
+        kefuInfoMap.put("id", kefuInfo.getId());
+        kefuInfoMap.put("uid", kefuInfo.getUserId());
+        kefuInfoMap.put("user_id", kefuInfo.getUserId());
+        kefuInfoMap.put("appid", kefuInfo.getAppid());
+        kefuInfoMap.put("group_id", kefuInfo.getGroupId());
+        kefuInfoMap.put("nickname", kefuInfo.getNickname());
+        kefuInfoMap.put("account", kefuInfo.getAccount());
+        kefuInfoMap.put("phone", kefuInfo.getPhone());
+        kefuInfoMap.put("avatar", kefuInfo.getAvatar());
+        kefuInfoMap.put("welcome_words", kefuInfo.getWelcomeWords());
+        kefuInfoMap.put("auto_reply", kefuInfo.getAutoReply());
+        kefuInfoMap.put("status", kefuInfo.getStatus());
+        kefuInfoMap.put("online", kefuInfo.getOnline());
+        return kefuInfoMap;
+    }
+
+    private String generateTokenForKefu(ChatServiceEntity kefuInfo) {
+        return tokenService.generateKefuToken(
+                Long.valueOf(kefuInfo.getId()),
+                kefuInfo.getAccount(),
+                kefuInfo.getAppid()
+        );
     }
 
     /**

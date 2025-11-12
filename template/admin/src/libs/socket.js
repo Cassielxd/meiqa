@@ -1,5 +1,5 @@
 
-import {wss} from '@/libs/util';
+import {wss, getCookies} from '@/libs/util';
 import {netWorkPing} from '@/api/kefu';
 import Setting from '@/setting';
 import Vue from 'vue';
@@ -9,6 +9,7 @@ let reconneTimer = {};
 let reconneCount = {};
 let connectGuid = {};
 let NetWork = null;
+const socketRegistry = {};
 
 class wsSocket {
     constructor(opt) {
@@ -18,15 +19,73 @@ class wsSocket {
         this.networkStatus = true;
         this.reconneMax = 100;
         this.connectLing = false;
+        this.destroyed = false;
+        this.boundTimeoutHandler = this.timeoutEvent.bind(this);
         reconneTimer[this.opt.key] = null;
         reconneCount[this.opt.key] = 0;
         this.init(opt);
         this.networkWath();
         this.defaultEvenv();
+        this.handleTokenUpdate = this.handleTokenUpdate.bind(this);
+        window.addEventListener('kefu-token-updated', this.handleTokenUpdate);
     }
 
     defaultEvenv() {
-        this.vm.$on('timeout', this.timeoutEvent.bind(this));
+        this.vm.$on('timeout', this.boundTimeoutHandler);
+    }
+
+    handleTokenUpdate(event) {
+        if (this.destroyed || !this.opt || this.opt.key !== 2) return;
+        const newToken = event && event.detail ? event.detail.token : null;
+        if (!newToken || newToken === this.opt.token) return;
+        this.opt.token = newToken;
+
+        if (this.socketStatus && this.ws) {
+            this.socketStatus = false;
+            this.connectLing = false;
+            try {
+                this.ws.close();
+            } catch (e) {
+                console.warn('[WebSocket] Failed to close during token refresh:', e);
+            }
+            setTimeout(() => {
+                if (!this.destroyed) {
+                    this.init(this.opt);
+                }
+            }, 0);
+            return;
+        }
+
+        if (!this.socketStatus && !this.connectLing) {
+            this.init(this.opt);
+        }
+    }
+
+    destroy(forceClose = true) {
+        if (this.destroyed) return;
+        this.destroyed = true;
+        this.vm.$off('timeout', this.boundTimeoutHandler);
+        window.removeEventListener('kefu-token-updated', this.handleTokenUpdate);
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        if (reconneTimer[this.opt.key]) {
+            clearInterval(reconneTimer[this.opt.key]);
+            reconneTimer[this.opt.key] = null;
+        }
+        reconneCount[this.opt.key] = 0;
+        this.socketStatus = false;
+        this.connectLing = false;
+        if (forceClose && this.ws) {
+            try {
+                this.ws.close();
+            } catch (e) {
+                console.warn('[WebSocket] Error while closing connection:', e);
+            }
+        }
+        this.ws = null;
+        this.opt.onDestroy && this.opt.onDestroy();
     }
 
     timeoutEvent() {
@@ -147,7 +206,7 @@ class wsSocket {
         hostUrl = hostUrl + '/ws';
 
         if (opt.key == 1) {
-            wsUrl = hostUrl + '?type=admin' + '&token=' + util.cookies.get("token")
+            wsUrl = hostUrl + '?type=admin' + '&token=' + (getCookies("token") || "")
         }
         if (opt.key == 2) {
             wsUrl = hostUrl + `?type=kefu` + '&token=' + `${opt.token}`;
@@ -197,6 +256,9 @@ class wsSocket {
     }
 
     onClose() {
+        if (this.destroyed) {
+            return;
+        }
         this.connectLing = false;
         this.timer && clearInterval(this.timer);
         this.timer = null;
@@ -206,6 +268,9 @@ class wsSocket {
     }
 
     onError(e) {
+        if (this.destroyed) {
+            return;
+        }
         this.connectLing = false;
         this.timer && clearInterval(this.timer);
         this.timer = null;
@@ -226,7 +291,13 @@ class wsSocket {
 let promises = {};
 
 function createSocket(key, flag, token, tourist_uid, type, form) {
-    if (flag) promises[key] = null;
+    if (flag) {
+        if (socketRegistry[key]) {
+            socketRegistry[key].destroy(true);
+            delete socketRegistry[key];
+        }
+        promises[key] = null;
+    }
     if (!promises[key])
         promises[key] = new Promise((resolve, reject) => {
             const ws = new wsSocket({
@@ -247,8 +318,15 @@ function createSocket(key, flag, token, tourist_uid, type, form) {
                 },
                 close(e) {
                     ws.vm.$emit('close', e);
+                },
+                onDestroy() {
+                    if (socketRegistry[key] === ws) {
+                        delete socketRegistry[key];
+                        promises[key] = null;
+                    }
                 }
             })
+            socketRegistry[key] = ws;
         });
 
     return promises[key];
