@@ -1,11 +1,15 @@
 package io.renren.crmchat.controller.kefu;
 
+import io.renren.crmchat.common.constant.ApiConstants;
 import io.renren.crmchat.common.result.ApiResult;
+import io.renren.crmchat.exception.CrmChatException;
 import io.renren.crmchat.security.UserContext;
 import io.renren.crmchat.service.ChatServiceService;
 import io.renren.crmchat.service.KefuLoginCodeManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -201,5 +205,31 @@ public class KefuAuthController {
 
         chatServiceService.updateKefuPassword(userId.intValue(), oldPassword, newPassword);
         return ApiResult.ok("Updated successfully", "success");
+    }
+
+    /**
+     * 刷新客服Token
+     */
+    @PostMapping("/token/refresh")
+    @Operation(summary = "Refresh agent token")
+    public ResponseEntity<ApiResult<Map<String, Object>>> refreshToken() {
+        Long userId = UserContext.getUserId();
+        String appid = UserContext.getAppid();
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResult.fail(401, "Not logged in or session expired"));
+        }
+        if (appid == null || appid.isBlank() || ApiConstants.DEFAULT_APPID.equals(appid)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResult.fail(401, "Permission denied"));
+        }
+
+        try {
+            Map<String, Object> result = chatServiceService.refreshKefuToken(userId.intValue(), appid);
+            return ResponseEntity.ok(ApiResult.ok(result));
+        } catch (CrmChatException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResult.fail(401, ex.getMessage()));
+        }
     }
 }

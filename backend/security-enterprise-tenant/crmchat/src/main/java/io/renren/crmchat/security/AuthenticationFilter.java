@@ -23,6 +23,7 @@ import org.springframework.util.AntPathMatcher;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -91,6 +92,7 @@ public class AuthenticationFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         String uri = httpRequest.getRequestURI();
+        boolean isKefuTokenRefresh = uri != null && uri.endsWith("/api/kefu/token/refresh");
 
         // 跳过OPTIONS请求(CORS预检请求)
         if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
@@ -125,14 +127,16 @@ public class AuthenticationFilter implements Filter {
             UserContext.setUser(user);
         }else {
             // 验证Token
-            DecodedJWT jwt = jwtUtils.verifyToken(token);
+            DecodedJWT jwt = isKefuTokenRefresh
+                    ? jwtUtils.verifyTokenAllowExpired(token)
+                    : jwtUtils.verifyToken(token);
             if (jwt == null) {
                 returnUnauthorized(httpResponse, "Invalid or expired token.");
                 return;
             }
 
             // 检查Token是否过期
-            if (jwtUtils.isTokenExpired(token)) {
+            if (!isKefuTokenRefresh && isJwtExpired(jwt)) {
                 returnUnauthorized(httpResponse, "Token has expired.");
                 return;
             }
@@ -255,5 +259,13 @@ public class AuthenticationFilter implements Filter {
             return false; // null 表示永久有效
         }
         return System.currentTimeMillis() >= expireAt.getTime();
+    }
+
+    private boolean isJwtExpired(DecodedJWT jwt) {
+        Date expiresAt = jwt.getExpiresAt();
+        if (expiresAt == null) {
+            return false;
+        }
+        return expiresAt.before(new Date());
     }
 }
