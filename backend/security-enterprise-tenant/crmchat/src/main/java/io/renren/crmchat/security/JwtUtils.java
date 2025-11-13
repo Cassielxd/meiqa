@@ -2,6 +2,7 @@ package io.renren.crmchat.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -44,17 +45,20 @@ public class JwtUtils {
      */
     public String generateToken(Long userId, String username, String appid) {
         Date now = new Date();
-        Date expireDate = new Date(now.getTime() + expire * 1000);
-
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
-        return JWT.create()
+        JWTCreator.Builder builder = JWT.create()
                 .withClaim("user_id", userId)
                 .withClaim("username", username)
                 .withClaim("appid", appid)
-                .withIssuedAt(now)
-                .withExpiresAt(expireDate)
-                .sign(algorithm);
+                .withIssuedAt(now);
+
+        if (expire > 0) {
+            Date expireDate = new Date(now.getTime() + expire * 1000);
+            builder.withExpiresAt(expireDate);
+        }
+
+        return builder.sign(algorithm);
     }
 
     /**

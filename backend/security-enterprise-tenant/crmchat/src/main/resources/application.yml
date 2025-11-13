@@ -98,8 +98,8 @@ crmchat:
     secret: ${CRMCHAT_JWT_SECRET:change-me-in-production}
     # Token过期时间(秒)
     # 原始值: 7200秒（2小时）
-    # 修改为: 86400秒（24小时） - 客服长期在线需求
-    expire: ${CRMCHAT_JWT_EXPIRE:86400}
+    # 修改为: 86400秒（24小时） - 客服长期在线需求 0代表不过期
+    expire: ${CRMCHAT_JWT_EXPIRE:864000}
   # 验证码配置
   captcha:
     # 验证码有效期（秒）
