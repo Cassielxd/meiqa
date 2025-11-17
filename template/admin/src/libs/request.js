@@ -54,7 +54,7 @@ service.interceptors.response.use(
             case 410001:
             case 410002:
                 clearAdminAuth()
-                router.replace({ path: '/admin/login' })
+                router.replace('/admin/login')
                 return Promise.reject({ msg: 'Token过期，请重新登录' })
             case 410003:
                 if (isKefuRequest(response.config) && !isRefreshRequest(response.config)) {

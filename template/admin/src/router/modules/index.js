@@ -41,7 +41,7 @@ export default {
   component: BasicLayout,
   children: [
     {
-      path: 'admin/home/',
+      path: 'admin/home',
       name: `${pre}index`,
       header: 'home',
       meta: {

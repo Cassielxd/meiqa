@@ -111,7 +111,7 @@ export default {
           msg();
           let data = res.data;
           let expires = this.getExpiresTime(data.expires_time);
-
+          console.log(expires);
           setCookies('uuid', data.user_info.id, expires);
           setCookies('token', data.token, expires);
           setCookies('expires_time', data.expires_time, expires);
@@ -128,7 +128,7 @@ export default {
           this.$store.commit('userInfo/version', data.version);
           this.$store.commit('userInfo/newOrderAudioLink', data.newOrderAudioLink);
 
-          this.$router.replace({ path: '/admin/home/' }).catch(err => {
+          this.$router.replace({ path: '/admin/home' }).catch(err => {
             if (err.name !== 'NavigationDuplicated') {
               console.error('Navigation error:', err);
             }
@@ -145,6 +145,7 @@ export default {
       }, 1000);
     },
     getExpiresTime(expiresTime) {
+      if(!expiresTime) return 9999;
       let nowTimeNum = Math.round(new Date() / 1000);
       let expiresTimeNum = expiresTime - nowTimeNum;
       return parseFloat(parseFloat(parseFloat(expiresTimeNum / 60) / 60) / 24);
